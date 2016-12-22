@@ -1,4 +1,4 @@
-#Mario.js (bookmarklet)
+#charjs (bookmarklet)
 
 Add the following code to your bookmark
 
