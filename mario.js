@@ -161,12 +161,12 @@
         elm.setAttribute("height", charSize.toString());
         elm.style.cssText = "z-index: 999; position: fixed; bottom: 0;";
 
-        writeCharactor(ctx, map, colors, size, reverse)
+        drawCharacter(ctx, map, colors, size, reverse)
 
         return elm;
     }
 
-    function writeCharactor(ctx,map,cp,size,reverse){
+    function drawCharacter(ctx,map,cp,size,reverse){
         for(var y = 0; y < map.length; y++){
             if(reverse)
                 map[y].reverse()
