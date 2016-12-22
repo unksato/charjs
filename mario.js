@@ -1,5 +1,4 @@
 (function(s) {
-
     var actions = [];
     var reverseActions = [];
     var actIndex = 0;
@@ -7,12 +6,12 @@
     var currentAction = null
     var x = 0;
     var size = s || 2;
-    var isReverse = false;
-    var isJumping = false;
-    var jumpVector = 23;
+    var jump = 23;
     var yVector = 0;
     var gravity = 4;
-
+    var isReverse = false;
+    var isJumping = false;
+    
     function drawAction(){
         var doc = document.body;
         
@@ -20,7 +19,6 @@
             doc.removeChild(currentAction);
             currentAction = null;
         }
-
 
         var next = 0;
         if(isJumping){
@@ -188,14 +186,14 @@
     document.addEventListener('keypress',function(e){
         if(e.keyCode==32 && isJumping == false){
             isJumping = true;
-            yVector = jumpVector;
+            yVector = jump;
         }
     });
 
     document.addEventListener('touchstart',function(){
         if(isJumping == false){
             isJumping = true;
-            yVector = jumpVector;
+            yVector = jump;
         }
     });
 
