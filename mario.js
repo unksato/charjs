@@ -8,6 +8,10 @@
     var x = 0;
     var size = s || 2;
     var isReverse = false;
+    var isJumping = false;
+    var jumpVector = 23;
+    var yVector = 0;
+    var gravity = 4;
 
     function drawAction(){
         var doc = document.body;
@@ -17,24 +21,28 @@
             currentAction = null;
         }
 
-        var next = 0;
-        switch(actIndex){
-            case 0:
-                next = 1;
-                break;
-            case 1:
-                if(0 == prevAct){
-                    next = 2;
-                }else{
-                    next = 0;
-                }
-                break;
-            case 2:
-                next = 1;
-            default:
-                next = 0;
-        }
 
+        var next = 0;
+        if(isJumping){
+            next = 3;
+        }else{
+            switch(actIndex){
+                case 0:
+                    next = 1;
+                    break;
+                case 1:
+                    if(0 == prevAct){
+                        next = 2;
+                    }else{
+                        next = 0;
+                    }
+                    break;
+                case 2:
+                    next = 1;
+                default:
+                    next = 0;
+            }
+        }
         prevAct = actIndex;
         actIndex = next;
         if(!isReverse){
@@ -43,6 +51,16 @@
             currentAction = reverseActions[next];
         }
         currentAction.style.left = x + 'px';
+
+        if(isJumping){
+            yVector -= gravity;
+            var tempVec = yVector * size;
+            if (tempVec <= 0){
+                isJumping = false;
+                yVector = 0;
+            }
+            currentAction.style.bottom = tempVec + 'px';
+        }
         doc.appendChild(currentAction);
 
         if(x > window.innerWidth - size * 16 && isReverse == false){
@@ -112,7 +130,24 @@
                 [0,3,0,0,0,0,3,3,3,0,0,0,0,0,0,0],
                 [0,0,0,0,0,0,3,3,3,3,0,0,0,0,0,0],
                 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-            ]];
+                ],[
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2],
+                [0,0,0,0,0,0,1,1,1,1,1,0,0,2,2,2],
+                [0,0,0,0,0,1,1,1,1,1,1,1,1,1,2,2],
+                [0,0,0,0,0,3,3,3,2,2,3,2,0,3,3,3],
+                [0,0,0,0,3,2,3,2,2,2,3,2,2,2,3,3],
+                [0,0,0,0,3,2,3,3,2,2,2,3,2,2,2,0],
+                [0,0,0,0,3,3,2,2,2,2,3,3,3,3,3,0],
+                [0,0,0,0,0,0,2,2,2,2,2,2,2,3,0,0],
+                [0,0,3,3,3,3,3,1,3,3,3,1,3,0,0,0],
+                [0,3,3,3,3,3,3,3,1,3,3,3,1,0,0,3],
+                [2,2,3,3,3,3,3,3,1,3,3,3,1,0,0,3],
+                [2,2,2,0,1,1,3,1,1,2,1,1,2,1,3,3],
+                [0,2,0,3,1,1,1,1,1,1,1,1,1,1,3,3],
+                [0,3,3,3,1,1,1,1,1,1,1,1,1,1,3,3],
+                [0,3,3,3,1,1,1,1,1,1,1,0,0,0,0,0],
+                [0,3,0,0,0,1,1,1,0,0,0,0,0,0,0,0]
+                ]];
 
         for(var i = 0; i < map.length; i++){
             actions.push(createAction(map[i],colors,size,false))
@@ -150,6 +185,19 @@
         }
     }
 
+    document.addEventListener('keypress',function(e){
+        if(e.keyCode==32 && isJumping == false){
+            isJumping = true;
+            yVector = jumpVector;
+        }
+    });
+
+    document.addEventListener('touchstart',function(){
+        if(isJumping == false){
+            isJumping = true;
+            yVector = jumpVector;
+        }
+    });
 
     createMario();
     setInterval(function(){
