@@ -2,12 +2,13 @@
 
 Add the following code to your bookmark
 
-for non CSP setting site
+- for non CSP setting site
 ```javascript
 javascript:(function(){var s=document.createElement("script");s.charset="UTF-8";s.src="https://unksato.github.io/charjs/mario.min.js";document.body.appendChild(s)})(); 
 ```
 or
 
+- for all site (include v0.0.1 code)
 ```javascript
 javascript:(function(t){function n(c,b,k,g){var a=document.createElement("canvas"),f=a.getContext("2d"),e=16*k;a.setAttribute("width",e.toString());a.setAttribute("height",e.toString());a.style.cssText="z-index: 999; position: fixed; bottom: 0;";for(e=0;e<c.length;e++){g&&c[e].reverse();for(var d=0;d<c[e].length;d++)0!=c[e][d]&&(f.beginPath(),f.rect(d*k,e*k,k,k),f.fillStyle=b[c[e][d]],f.fill());g&&c[e].reverse()}return a}var p=[],q=[],m=0,r=0,g=null,f=0,d=t||2,h=!1,a=!1,l=0;document.addEventListener("keypress",
 function(c){32==c.keyCode&&0==a&&(a=!0,l=23)});document.addEventListener("touchstart",function(){0==a&&(a=!0,l=23)});(function(){for(var c=["#000000","#dc2900","#fea53b","#8b7300"],b=[[[0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0],[0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,0,0,3,3,3,2,2,3,2,0,0,0,0,0],[0,0,0,3,2,3,2,2,2,3,2,2,2,0,0,0],[0,0,0,3,2,3,3,2,2,2,3,2,2,2,0,0],[0,0,0,3,3,2,2,2,2,3,3,3,3,0,0,0],[0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0],[0,0,3,3,3,3,1,1,3,3,0,0,0,0,0,0],[2,2,3,3,3,3,1,1,1,3,3,3,2,2,2,0],[2,2,2,0,3,
