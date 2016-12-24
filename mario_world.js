@@ -4,7 +4,7 @@
     var actIndex = 0;
     var prevAct = 0;
     var currentAction = null
-    var x = start || 100;
+    var x = start || 0;
     var size = pixSize || 2;
     var isReverse = false;
     var isJumping = false;
@@ -176,4 +176,4 @@
         drawAction();
     },50);
 
-})();
+})(100);
