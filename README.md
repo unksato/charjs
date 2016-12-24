@@ -1,5 +1,10 @@
 #charjs (bookmarklet)
 
+# Sample
+https://unksato.github.io/charjs/
+
+# How to use
+
 Add the following code to your bookmark
 
 ## Super Mario
