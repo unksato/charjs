@@ -1,11 +1,11 @@
-(function(s) {
+(function(start, pixSize) {
     var actions = [];
     var reverseActions = [];
     var actIndex = 0;
     var prevAct = 0;
     var currentAction = null
-    var x = 0;
-    var size = s || 2;
+    var x = start || 100;
+    var size = pixSize || 2;
     var isReverse = false;
     var isJumping = false;
     var step = 1;
