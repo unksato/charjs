@@ -54,9 +54,9 @@
         }
 
         if(!isReverse){
-            x+=size*2;
+            x+=size;
         }else{
-            x-=size*2;
+            x-=size;
         }
     }
 
