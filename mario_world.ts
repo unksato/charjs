@@ -197,7 +197,7 @@ namespace Charactor {
             this._currentAction.style.left = this.positionX + 'px';
 
             this.targetDom.appendChild(this._currentAction);
-            if (this.positionX > this.targetDom.clientWidth - this.pixSize * 17 && this._isReverse == false) {
+            if (this.positionX > this.targetDom.clientWidth - this.pixSize * 16 && this._isReverse == false) {
                 this._isReverse = true;
             }
             if (this.positionX < 0 && this._isReverse == true) {
@@ -228,14 +228,17 @@ namespace Charactor {
                     this.jump();
                 }
                 if (e.keyCode == 66) {
-                    this._sppedUpTimer = setInterval(() => {
-                        if (this._speed < 10) {
-                            this._speed++;
-                        } else {
-                            clearInterval(this._sppedUpTimer);
-                        }
-                    }, 30);
-                    this._step = 1;
+                    if (!this._sppedUpTimer) {
+                        this._sppedUpTimer = setInterval(() => {
+                            if (this._speed < 10) {
+                                this._speed++;
+                            } else {
+                                clearInterval(this._sppedUpTimer);
+                                this._sppedUpTimer = null;
+                            }
+                        }, 30);
+                        this._step = 1;
+                    }
                 }
             });
             document.addEventListener('keyup', (e) => {
@@ -245,14 +248,17 @@ namespace Charactor {
                     }
                 }
                 if (e.keyCode == 66) {
-                    this._sppedDownTimer = setInterval(() => {
-                        if (this._speed > 2) {
-                            this._speed--;
-                        } else {
-                            this._step = Mario.STEP;
-                            clearInterval(this._sppedDownTimer);
-                        }
-                    }, 30);
+                    if (!this._sppedDownTimer) {
+                        this._sppedDownTimer = setInterval(() => {
+                            if (this._speed > 2) {
+                                this._speed--;
+                            } else {
+                                this._step = Mario.STEP;
+                                clearInterval(this._sppedDownTimer);
+                                this._sppedDownTimer = null;
+                            }
+                        }, 30);
+                    }
                 }
             });
         }
