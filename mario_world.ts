@@ -105,14 +105,17 @@ namespace Charactor {
         private _currentAction : HTMLCanvasElement = null;
         private _isReverse = false;
         private _isJumping = false;
+        private _step = Mario.STEP;
         private _currentStep = Mario.STEP;
         private _timer = null;
+        private _sppedUpTimer = null;
+        private _sppedDownTimer = null;
         private _cssText = Mario.DEFAULT_CSS_TXT;
         private _yVector = 0;
         private _jumpPower = 12;
         private _gravity = 2;
         private positionY = 0;
-
+        private _speed = 2;
 
         constructor(private targetDom, private positionX: number = 0, private pixSize: number = 2) {
             for (let charactor of Mario.MARIO_CHAR) {
@@ -162,7 +165,7 @@ namespace Charactor {
             let target = this.targetDom;
             this.removeCharactor();
 
-            if (this._currentStep < Mario.STEP) {
+            if (this._currentStep < this._step) {
                 this._currentStep++;
             } else {
                 this._currentStep = 0;
@@ -201,9 +204,9 @@ namespace Charactor {
                 this._isReverse = false;
             }
             if (!this._isReverse) {
-                this.positionX += this.pixSize * 2;
+                this.positionX += this.pixSize * this._speed;
             } else {
-                this.positionX -= this.pixSize * 2;            
+                this.positionX -= this.pixSize * this._speed;            
             }
         }
 
@@ -220,9 +223,36 @@ namespace Charactor {
         }
 
         public registerJump(): void {
-            document.addEventListener("keypress", (e) => {
-                if (e.keyCode == 32) {
+            document.addEventListener('keydown', (e) => {
+                if (e.keyCode == 65) {
                     this.jump();
+                }
+                if (e.keyCode == 66) {
+                    this._sppedUpTimer = setInterval(() => {
+                        if (this._speed < 10) {
+                            this._speed++;
+                        } else {
+                            clearInterval(this._sppedUpTimer);
+                        }
+                    }, 30);
+                    this._step = 1;
+                }
+            });
+            document.addEventListener('keyup', (e) => {
+                if (e.keyCode == 65) {
+                    if (this._yVector > 0) {
+                        this._yVector = 0;
+                    }
+                }
+                if (e.keyCode == 66) {
+                    this._sppedDownTimer = setInterval(() => {
+                        if (this._speed > 2) {
+                            this._speed--;
+                        } else {
+                            this._step = Mario.STEP;
+                            clearInterval(this._sppedDownTimer);
+                        }
+                    }, 30);
                 }
             });
         }
