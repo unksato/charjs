@@ -227,7 +227,7 @@ namespace Charactor {
                 if (e.keyCode == 65) {
                     this.jump();
                 }
-                if (e.keyCode == 66) {
+                if (e.keyCode == 66 && !this._isJumping) {
                     if (!this._sppedUpTimer) {
                         this._sppedUpTimer = setInterval(() => {
                             if (this._speed < 10) {
