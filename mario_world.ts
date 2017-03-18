@@ -9,11 +9,14 @@ namespace Character {
         abstract colors: string[];
         abstract drawAction(): void;        
         abstract registerActionCommand(): void;
-
+        
         protected cssTextTemplate = "z-index: 2147483647; position: absolute; bottom: 0;";
         protected currentAction: HTMLCanvasElement = null;
         protected _actions : HTMLCanvasElement[] = [];
         protected _reverseActions : HTMLCanvasElement[]  = [];
+
+        protected charWidth: number = null;
+        protected charHeight: number = null;
 
         private _isStarting = false;
         private _frameTimer: number = null;
@@ -31,10 +34,11 @@ namespace Character {
         private createCharacterAction(charactorMap: number[][], isReverse:boolean = false) : HTMLCanvasElement{
             let element = document.createElement("canvas");
             let ctx = element.getContext("2d");
-            let charWidth = this.pixSize * charactorMap[0].length;
-            let charHeight = this.pixSize * charactorMap.length;
-            element.setAttribute("width", charWidth.toString());
-            element.setAttribute("height", charHeight.toString());
+            this.charWidth = this.pixSize * charactorMap[0].length;
+            this.charHeight = this.pixSize * charactorMap.length;
+
+            element.setAttribute("width", this.charWidth.toString());
+            element.setAttribute("height", this.charHeight.toString());
             element.style.cssText = this.cssTextTemplate;
             AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse);
             return element;
@@ -111,6 +115,169 @@ namespace Character {
 
     export class Mario extends AbstractCharacter{
         private static STEP = 2;
+        private _runIndex = 0;
+        private _currentStep = Mario.STEP;
+
+        private _yVector = 0;
+        private _jumpPower = 18;
+        private _gravity = 2;
+        private _speed = 2;
+
+        private _sppedUpTimer = null;
+        private _sppedDownTimer = null;
+
+        private _isReverse = false;
+        private _isJumping = false;
+        private _isBraking = false;
+
+        drawAction(): void {
+            let actionIndex = this.executeRun();
+            actionIndex = this.executeJump() || actionIndex;
+            this.draw(actionIndex, null, this._isReverse, true);
+        }
+
+        private updateDirection(): boolean{
+            let currentDirection = this._isReverse;
+
+            if (this.position.x > this.targetDom.clientWidth - this.charWidth - (/*Magic offset*/ this.pixSize * 2) && this._isReverse == false) {
+                this._isReverse = true;
+            }
+            if (this.position.x < 0 && this._isReverse == true) {
+                this._isReverse = false;
+            }
+
+            return currentDirection != this._isReverse;
+        }
+
+        private executeJump(): number {
+            if (this._isJumping) {
+                this._yVector -= this._gravity * this.pixSize;
+                this.position.y = this.position.y + this._yVector;
+                if (this.position.y <= 0) {
+                    this._isJumping = false;
+                    this._yVector = 0;
+                    this.position.y = 0;
+                    return null;
+                } else {
+                    return this._yVector > 0 ? 2 : 3;
+                }
+            } else {
+                return null;
+            }   
+        }
+
+        private executeRun(): number {
+            let directionUpdated = this.updateDirection();
+            
+            if (!this._isReverse) {
+                this.position.x += this.pixSize * this._speed;
+            } else {
+                this.position.x -= this.pixSize * this._speed;            
+            }
+
+            let runIndex = this._runIndex;
+
+            if (this._currentStep < Mario.STEP) {
+                this._currentStep++;
+            } else {
+                this._currentStep = 0;
+                this._runIndex = this._runIndex ^ 1;
+            }
+
+            // Speed Up action
+            if (this._speed > 8) {
+                runIndex = this._runIndex == 0 ? 4 : 5;
+            } else {
+                runIndex = this._runIndex;
+            }
+
+            // Braking action
+            if (!this._isJumping) {
+                if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
+                    if ((this._isReverse && this.position.x < this.charWidth * 3) ||
+                        (!this._isReverse && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)
+                    ) {
+                        debugger;
+                        runIndex = 6;
+                        if (this._speed > 2)
+                            this._speed--;
+                        this._isBraking = true;
+                    }
+                } else {
+                    this._isBraking = false;
+                }
+            }
+            return runIndex;
+        }
+
+        private onJump(): void {
+            if (!this._isJumping) {
+                this._isJumping = true;
+                this._yVector = this._jumpPower * this.pixSize;
+            }
+        }
+
+        private onAbortJump(): void {
+            if (this._yVector > 0) {
+                this._yVector = 0;
+            }
+        }
+
+        private onSpeedUp(): void {
+            if (!this._sppedUpTimer) {
+                if (this._sppedDownTimer) {
+                    clearInterval(this._sppedDownTimer);
+                    this._sppedDownTimer = null;
+                }
+                this._sppedUpTimer = setInterval(() => {
+                    if (this._speed < 10) {
+                        if(!this._isBraking)
+                            this._speed++;
+                    } else {
+                        clearInterval(this._sppedUpTimer);
+                        this._sppedUpTimer = null;
+                    }
+                }, this.frameInterval);
+            }
+        }
+
+        private onAbortSpeedUp(): void {
+            if (!this._sppedDownTimer) {
+                this._sppedDownTimer = setInterval(() => {
+                    if (this._sppedUpTimer) {
+                        clearInterval(this._sppedUpTimer);
+                        this._sppedUpTimer = null;
+                    }
+                    if (this._speed > 2) {
+                        this._speed--;
+                    } else {
+                        clearInterval(this._sppedDownTimer);
+                        this._sppedDownTimer = null;
+                        this._isBraking = false;
+                    }
+                }, this.frameInterval);
+            }
+        }
+
+        registerActionCommand(): void {
+            document.addEventListener('keydown', (e) => {
+                if (e.keyCode == 65) {
+                    this.onJump();
+                }
+                if (e.keyCode == 66 && !this._isJumping) {
+                    this.onSpeedUp();
+                }
+            });
+            document.addEventListener('keyup', (e) => {
+                if (e.keyCode == 65) {
+                    this.onAbortJump();
+                }
+                if (e.keyCode == 66) {
+                    this.onAbortSpeedUp();
+                }
+            });
+        }
+
         colors = ['','#000000','#ffffff','#520000','#8c5a18','#21318c','#ff4273','#b52963','#ffde73','#dea539','#ffd6c6','#ff736b','#84dece','#42849c'];
         chars = [[
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -250,144 +417,30 @@ namespace Character {
             [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ], [
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 3, 6, 8, 6, 6, 6, 3, 3, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 3, 2, 8, 8, 7, 7, 7, 7, 3, 0, 0, 0],
+            [ 0, 0, 0, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 3, 0, 0],
+            [ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 3, 0],
+            [ 0, 0, 0, 0,11,11,11,11,11, 1, 1, 1, 1, 7, 3, 0],
+            [ 0, 0, 0, 0,10, 1,10, 1,10,11, 1, 1,10, 7, 7, 3],
+            [ 0, 0, 4, 4,10, 1,10, 1,10,10, 1,10, 4,10, 7, 3],
+            [ 0, 4,10,10,10,10,10,10,10, 1, 1,10, 4,11, 7, 3],
+            [ 0, 4,11,11,11,11,11, 1,10,10, 1,10,11, 1, 3, 0],
+            [ 0, 0, 1, 1, 1, 1, 1, 1, 4, 4, 4,11, 1, 1, 7, 3],
+            [ 0, 0, 0, 1, 1, 1, 1, 4, 2, 2, 4, 4, 1, 2, 7, 3],
+            [ 0, 0, 0, 0, 3, 7, 7, 2, 2, 2, 2, 4, 2, 2, 2, 4],
+            [ 0, 0, 0, 0, 5, 3, 3, 2, 2, 2, 2, 4, 2, 2, 2, 4],
+            [ 0, 0, 0, 0, 5,13, 3, 3, 3, 2, 4, 4, 4, 2, 4, 0],
+            [ 0, 0, 0, 0, 5,13, 4, 8, 4, 4,13, 2, 2, 4, 0, 0],
+            [ 0, 0, 0, 0, 0, 1, 4, 4, 1, 1,13,13,13, 5, 0, 0],
+            [ 0, 0, 0, 0, 0, 1, 4, 1, 1, 1, 5,13,13,13, 5, 0],
+            [ 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 4, 4, 1, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 8, 1],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]            
         ]];
-
-        private _runIndex = 0;
-        private _currentStep = Mario.STEP;
-
-        private _yVector = 0;
-        private _jumpPower = 18;
-        private _gravity = 2;
-        private _speed = 2;
-
-        private _sppedUpTimer = null;
-        private _sppedDownTimer = null;
-
-        private _isReverse = false;
-        private _isJumping = false;
-
-        drawAction(): void {
-            this.updateDirection();
-            let actionIndex = this.executeRun();
-            actionIndex = this.executeJump() || actionIndex;
-            this.draw(actionIndex, null, this._isReverse, true);
-        }
-
-        private updateDirection(): void{
-            if (this.position.x > this.targetDom.clientWidth - this.pixSize * 18 && this._isReverse == false) {
-                this._isReverse = true;
-            }
-            if (this.position.x < 0 && this._isReverse == true) {
-                this._isReverse = false;
-            }
-        }
-
-        private executeJump(): number {
-            if (this._isJumping) {
-                this._yVector -= this._gravity * this.pixSize;
-                this.position.y = this.position.y + this._yVector;
-                if (this.position.y <= 0) {
-                    this._isJumping = false;
-                    this._yVector = 0;
-                    this.position.y = 0;
-                    return null;
-                } else {
-                    return this._yVector > 0 ? 2 : 3;
-                }
-            } else {
-                return null;
-            }   
-        }
-
-        private executeRun():number {
-            if (!this._isReverse) {
-                this.position.x += this.pixSize * this._speed;
-            } else {
-                this.position.x -= this.pixSize * this._speed;            
-            }
-
-            let runIndex = this._runIndex;
-
-            if (this._currentStep < Mario.STEP) {
-                this._currentStep++;
-            } else {
-                this._currentStep = 0;
-                this._runIndex = this._runIndex ^ 1;
-            }
-
-            if (this._speed > 8) {
-                runIndex = this._runIndex == 0 ? 4 : 5;
-            } else {
-                runIndex = this._runIndex;
-            }
-            return runIndex;
-        }
-
-        private onJump(): void {
-            if (!this._isJumping) {
-                this._isJumping = true;
-                this._yVector = this._jumpPower * this.pixSize;
-            }
-        }
-
-        private onAbortJump(): void {
-            if (this._yVector > 0) {
-                this._yVector = 0;
-            }
-        }
-
-        private onSpeedUp(): void {
-            if (!this._sppedUpTimer) {
-                if (this._sppedDownTimer) {
-                    clearInterval(this._sppedDownTimer);
-                    this._sppedDownTimer = null;
-                }
-                this._sppedUpTimer = setInterval(() => {
-                    if (this._speed < 10) {
-                        this._speed++;
-                    } else {
-                        clearInterval(this._sppedUpTimer);
-                        this._sppedUpTimer = null;
-                    }
-                }, this.frameInterval);
-            }
-        }
-
-        private onAbortSpeedUp(): void {
-            if (!this._sppedDownTimer) {
-                this._sppedDownTimer = setInterval(() => {
-                    if (this._sppedUpTimer) {
-                        clearInterval(this._sppedUpTimer);
-                        this._sppedUpTimer = null;
-                    }
-                    if (this._speed > 2) {
-                        this._speed--;
-                    } else {
-                        clearInterval(this._sppedDownTimer);
-                        this._sppedDownTimer = null;
-                    }
-                }, this.frameInterval);
-            }
-        }
-
-        registerActionCommand(): void {
-            document.addEventListener('keydown', (e) => {
-                if (e.keyCode == 65) {
-                    this.onJump();
-                }
-                if (e.keyCode == 66 && !this._isJumping) {
-                    this.onSpeedUp();
-                }
-            });
-            document.addEventListener('keyup', (e) => {
-                if (e.keyCode == 65) {
-                    this.onAbortJump();
-                }
-                if (e.keyCode == 66) {
-                    this.onAbortSpeedUp();
-                }
-            });
-        }
 
     }
 }
@@ -395,4 +448,11 @@ namespace Character {
 var mario = new Character.Mario(document.body, 3)
 mario.init();
 mario.registerCommand();
-mario.draw();
+mario.draw()
+//mario.draw(0, {x:0, y:0});
+//mario.draw(1, {x:100, y:0});
+//mario.draw(2, {x:200, y:0});
+//mario.draw(3, {x:300, y:0});
+//mario.draw(4, {x:400, y:0});
+//mario.draw(5, {x:500, y:0});
+//mario.draw(6, {x:600, y:0});
