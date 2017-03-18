@@ -93,7 +93,53 @@ namespace Charactor {
             [ 0, 1, 4, 8, 5, 5,13,13,13,13,12, 5, 1, 4, 1, 1], 
             [ 0, 0, 1, 1, 0, 5, 5,13,13,13, 5, 0, 0, 1, 1, 0], 
             [ 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0], 
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]            
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ], [
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            [ 4, 4, 4, 4, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+            [ 4, 2, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+            [ 0, 4, 2, 2, 4, 7, 7,13,13,12,12, 5, 0, 0, 0, 0],
+            [ 0, 0, 4, 4, 7, 7,13,13, 2, 2,12, 2, 5, 0, 0, 0],
+            [ 0, 0, 0, 5,13,13,13,13, 2, 2,12, 2, 5, 0, 0, 0],
+            [ 0, 0, 0, 5,13,13,13,13,13,13,12,12, 5, 0, 0, 0],
+            [ 0, 0, 0, 5, 5,13,13,13,13, 5,13, 5, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 4, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+        ], [
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            [ 4, 4, 4, 4, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+            [ 4, 2, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+            [ 0, 4, 2, 2, 4, 7,13,13,13,12,12, 5, 0, 0, 0, 0],
+            [ 0, 0, 4, 4, 7, 7,13,13, 2, 2,12, 2, 5, 1, 1, 0],
+            [ 0, 1, 3, 3,13,13,13,13, 2, 2,12, 2, 1, 8, 1, 1],
+            [ 0, 1, 3, 3,13,13,13,13,13,13,12, 5, 1, 4, 1, 1],
+            [ 0, 1, 3, 1, 5, 5,13,13,13,13, 5, 1, 4, 1, 1, 0],
+            [ 0, 1, 3, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
+            [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]];
 
         private static DEFAULT_CSS_TXT = "z-index: 999; position: absolute; bottom: 0;";
@@ -101,7 +147,6 @@ namespace Charactor {
         private _actions : HTMLCanvasElement[] = [];
         private _reverseActions : HTMLCanvasElement[]  = [];
         private _actionIndex = 0;
-        private _prevActionIndex = 0;
         private _currentAction : HTMLCanvasElement = null;
         private _isReverse = false;
         private _isJumping = false;
@@ -112,10 +157,11 @@ namespace Charactor {
         private _sppedDownTimer = null;
         private _cssText = Mario.DEFAULT_CSS_TXT;
         private _yVector = 0;
-        private _jumpPower = 12;
+        private _jumpPower = 18;
         private _gravity = 2;
         private positionY = 0;
         private _speed = 2;
+        private _isStarting = false;
 
         constructor(private targetDom, private positionX: number = 0, private pixSize: number = 2) {
             for (let charactor of Mario.MARIO_CHAR) {
@@ -165,19 +211,26 @@ namespace Charactor {
             let target = this.targetDom;
             this.removeCharactor();
 
+            let runIndex = this._actionIndex;
+
             if (this._currentStep < this._step) {
                 this._currentStep++;
             } else {
                 this._currentStep = 0;
-                this._prevActionIndex = this._actionIndex;
                 this._actionIndex = this._actionIndex ^ 1;
             }
 
-            this._currentAction = !this._isReverse ? this._actions[this._actionIndex] : this._reverseActions[this._actionIndex]; 
+            if (this._speed > 8) {
+                runIndex = this._actionIndex == 0 ? 4 : 5;
+            } else {
+                runIndex = this._actionIndex;
+            }
+
+            this._currentAction = !this._isReverse ? this._actions[runIndex] : this._reverseActions[runIndex]; 
 
 
             if (this._isJumping) {
-                this._yVector -= this._gravity;
+                this._yVector -= this._gravity * this.pixSize;
                 this.positionY = this.positionY + this._yVector;
 
                 if (this.positionY <= 0) {
@@ -197,7 +250,7 @@ namespace Charactor {
             this._currentAction.style.left = this.positionX + 'px';
 
             this.targetDom.appendChild(this._currentAction);
-            if (this.positionX > this.targetDom.clientWidth - this.pixSize * 16 && this._isReverse == false) {
+            if (this.positionX > this.targetDom.clientWidth - this.pixSize * 18 && this._isReverse == false) {
                 this._isReverse = true;
             }
             if (this.positionX < 0 && this._isReverse == true) {
@@ -210,9 +263,9 @@ namespace Charactor {
             }
         }
 
-        public start(): void {
-            this.registerJump();
-            this._timer = setInterval(() => { this.drawAction() }, 35);
+        public run(): void {
+            this._isStarting = true;
+            this._timer = setInterval(() => { this.drawAction() }, 45);
         }
 
         public stop(): void {
@@ -220,9 +273,20 @@ namespace Charactor {
                 clearInterval(this._timer);
                 this._timer = 0;
             }
+            this._isStarting = false;
         }
 
-        public registerJump(): void {
+        public registerCommand(): void {
+            document.addEventListener('keypress', (e) => {
+                if (e.keyCode == 32) {
+                    if (this._isStarting) {
+                        this.stop();
+                    } else {
+                        this.run();
+                    }
+                }
+            });
+
             document.addEventListener('keydown', (e) => {
                 if (e.keyCode == 65) {
                     this.jump();
@@ -236,8 +300,8 @@ namespace Charactor {
                                 clearInterval(this._sppedUpTimer);
                                 this._sppedUpTimer = null;
                             }
-                        }, 30);
-                        this._step = 1;
+                        }, 45);
+                        this._step = Mario.STEP;
                     }
                 }
             });
@@ -257,7 +321,7 @@ namespace Charactor {
                                 clearInterval(this._sppedDownTimer);
                                 this._sppedDownTimer = null;
                             }
-                        }, 30);
+                        }, 45);
                     }
                 }
             });
@@ -270,10 +334,15 @@ namespace Charactor {
             }
         }
 
-        public draw(index: number, isReverse: boolean = false, left: number = 0): void {
+        public draw(index: number, positionX: number = 0, isReverse: boolean = false): void {
             this._currentAction = !isReverse ? this._actions[index] : this._reverseActions[index]; 
-            this._currentAction.style.left = left*this.pixSize + 'px';
+            this._currentAction.style.left = positionX * this.pixSize + 'px';
             this.targetDom.appendChild(this._currentAction);
+        }
+
+        public start(): void{
+            this.draw(0)
+            this.registerCommand();
         }
 
         public remove(): void {
@@ -283,5 +352,6 @@ namespace Charactor {
     }
 }
 
-var mario = new Charactor.Mario(document.body)
+var mario = new Charactor.Mario(document.body, 0, 3)
+mario.draw(0);
 mario.start();
