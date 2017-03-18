@@ -123,8 +123,8 @@ namespace Character {
         private _gravity = 2;
         private _speed = 2;
 
-        private _sppedUpTimer = null;
-        private _sppedDownTimer = null;
+        private _speedUpTimer = null;
+        private _speedDownTimer = null;
 
         private _isReverse = false;
         private _isJumping = false;
@@ -224,35 +224,35 @@ namespace Character {
         }
 
         private onSpeedUp(): void {
-            if (!this._sppedUpTimer) {
-                if (this._sppedDownTimer) {
-                    clearInterval(this._sppedDownTimer);
-                    this._sppedDownTimer = null;
+            if (!this._speedUpTimer) {
+                if (this._speedDownTimer) {
+                    clearInterval(this._speedDownTimer);
+                    this._speedDownTimer = null;
                 }
-                this._sppedUpTimer = setInterval(() => {
+                this._speedUpTimer = setInterval(() => {
                     if (this._speed < 10) {
                         if(!this._isBraking)
                             this._speed++;
                     } else {
-                        clearInterval(this._sppedUpTimer);
-                        this._sppedUpTimer = null;
+                        clearInterval(this._speedUpTimer);
+                        this._speedUpTimer = null;
                     }
                 }, this.frameInterval);
             }
         }
 
         private onAbortSpeedUp(): void {
-            if (!this._sppedDownTimer) {
-                this._sppedDownTimer = setInterval(() => {
-                    if (this._sppedUpTimer) {
-                        clearInterval(this._sppedUpTimer);
-                        this._sppedUpTimer = null;
+            if (!this._speedDownTimer) {
+                this._speedDownTimer = setInterval(() => {
+                    if (this._speedUpTimer) {
+                        clearInterval(this._speedUpTimer);
+                        this._speedUpTimer = null;
                     }
                     if (this._speed > 2) {
                         this._speed--;
                     } else {
-                        clearInterval(this._sppedDownTimer);
-                        this._sppedDownTimer = null;
+                        clearInterval(this._speedDownTimer);
+                        this._speedDownTimer = null;
                         this._isBraking = false;
                     }
                 }, this.frameInterval);
