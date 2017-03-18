@@ -142,25 +142,30 @@ namespace Charactor {
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]];
 
-        private static DEFAULT_CSS_TXT = "z-index: 999; position: absolute; bottom: 0;";
+        private static DEFAULT_CSS_TXT = "z-index: 2147483647; position: absolute; bottom: 0;";
 
         private _actions : HTMLCanvasElement[] = [];
         private _reverseActions : HTMLCanvasElement[]  = [];
-        private _actionIndex = 0;
         private _currentAction : HTMLCanvasElement = null;
-        private _isReverse = false;
-        private _isJumping = false;
+        private _runIndex = 0;
+
         private _step = Mario.STEP;
         private _currentStep = Mario.STEP;
-        private _timer = null;
-        private _sppedUpTimer = null;
-        private _sppedDownTimer = null;
         private _cssText = Mario.DEFAULT_CSS_TXT;
+
         private _yVector = 0;
         private _jumpPower = 18;
         private _gravity = 2;
+
         private positionY = 0;
         private _speed = 2;
+
+        private _frameTimer = null;
+        private _sppedUpTimer = null;
+        private _sppedDownTimer = null;
+
+        private _isReverse = false;
+        private _isJumping = false;
         private _isStarting = false;
 
         constructor(private targetDom, private positionX: number = 0, private pixSize: number = 2) {
@@ -211,19 +216,19 @@ namespace Charactor {
             let target = this.targetDom;
             this.removeCharactor();
 
-            let runIndex = this._actionIndex;
+            let runIndex = this._runIndex;
 
             if (this._currentStep < this._step) {
                 this._currentStep++;
             } else {
                 this._currentStep = 0;
-                this._actionIndex = this._actionIndex ^ 1;
+                this._runIndex = this._runIndex ^ 1;
             }
 
             if (this._speed > 8) {
-                runIndex = this._actionIndex == 0 ? 4 : 5;
+                runIndex = this._runIndex == 0 ? 4 : 5;
             } else {
-                runIndex = this._actionIndex;
+                runIndex = this._runIndex;
             }
 
             this._currentAction = !this._isReverse ? this._actions[runIndex] : this._reverseActions[runIndex]; 
@@ -265,13 +270,13 @@ namespace Charactor {
 
         public run(): void {
             this._isStarting = true;
-            this._timer = setInterval(() => { this.drawAction() }, 45);
+            this._frameTimer = setInterval(() => { this.drawAction() }, 45);
         }
 
         public stop(): void {
-            if (this._timer) {
-                clearInterval(this._timer);
-                this._timer = 0;
+            if (this._frameTimer) {
+                clearInterval(this._frameTimer);
+                this._frameTimer = null;
             }
             this._isStarting = false;
         }
