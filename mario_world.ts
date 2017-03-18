@@ -1,8 +1,115 @@
 namespace Charactor {
-    export class Mario {
+    class Position {
+        public x: number = 0;
+        public y: number = 0;
+    }
+
+    abstract class AbstractCharacter {
+        abstract chars: number[][][];
+        abstract colors: string[];
+        abstract drawAction(): void;        
+        abstract registerActionCommand(): void;
+
+        protected cssTextTemplate = "z-index: 2147483647; position: absolute; bottom: 0;";
+        protected currentAction: HTMLCanvasElement = null;
+        protected _actions : HTMLCanvasElement[] = [];
+        protected _reverseActions : HTMLCanvasElement[]  = [];
+
+        private _isStarting = false;
+        private _frameTimer: number = null;
+
+        constructor(protected targetDom,protected pixSize = 2, protected positon: Position = {x: 0, y:0}, private interval = 45) {
+        }
+
+        public init(): void{
+             for (let charactor of this.chars) {
+                this._actions.push(this.createCharacterAction(charactor));
+                this._reverseActions.push(this.createCharacterAction(charactor, true));
+            }           
+        }
+
+        private createCharacterAction(charactorMap: number[][], isReverse:boolean = false) : HTMLCanvasElement{
+            let element = document.createElement("canvas");
+            let ctx = element.getContext("2d");
+            let charWidth = this.pixSize * charactorMap[0].length;
+            let charHeight = this.pixSize * charactorMap.length;
+            element.setAttribute("width", charWidth.toString());
+            element.setAttribute("height", charHeight.toString());
+            element.style.cssText = this.cssTextTemplate;
+            AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse);
+            return element;
+        }    
+
+        private static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, isReverse: boolean) : void {
+            for (let y = 0; y < map.length; y++){
+                if (isReverse)
+                    map[y].reverse();
+                for (let x = 0; x < map[y].length; x++){
+                    if (map[y][x] != 0) {
+                        ctx.beginPath();
+                        ctx.rect(x * size, y * size, size, size);
+                        ctx.fillStyle = colors[map[y][x]];
+                        ctx.fill();
+                    }
+                }
+                if (isReverse) {
+                    map[y].reverse();
+                }
+            }
+        }
+
+        protected removeCharactor(): void {
+            if (this.currentAction != null) {
+                this.targetDom.removeChild(this.currentAction);
+                this.currentAction = null;
+            }
+        }
+
+        public draw(index: number = 0, positionX: number = null, isReverse: boolean = false): void {
+            this.currentAction = !isReverse ? this._actions[index] : this._reverseActions[index]; 
+            this.currentAction.style.left = (positionX!=null?positionX:this.positon.x) * this.pixSize + 'px';
+            this.targetDom.appendChild(this.currentAction);
+        }
+
+        public registerCommand(): void {
+            document.addEventListener('keypress', (e) => {
+                if (e.keyCode == 32) {
+                    if (this._isStarting) {
+                        this.stop();
+                    } else {
+                        this.start();
+                    }
+                }
+            });
+
+            this.registerActionCommand();
+        }
+
+        public start(): void {
+            this._isStarting = true;
+            this._frameTimer = setInterval(() => { this.drawAction() }, this.interval);
+        }
+
+        public stop(): void {
+            if (this._frameTimer) {
+                clearInterval(this._frameTimer);
+                this._frameTimer = null;
+            }
+            this._isStarting = false;
+        }
+
+        public destroy(): void {
+            this.stop();
+            this.removeCharactor();
+        }
+
+    }
+
+
+    export class Mario extends AbstractCharacter{
         private static STEP = 2;
-        private static COLOR_PALLET = ['','#000000','#ffffff','#520000','#8c5a18','#21318c','#ff4273','#b52963','#ffde73','#dea539','#ffd6c6','#ff736b','#84dece','#42849c'];
-        private static MARIO_CHAR = [[
+        colors = ['','#000000','#ffffff','#520000','#8c5a18','#21318c','#ff4273','#b52963','#ffde73','#dea539','#ffd6c6','#ff736b','#84dece','#42849c'];
+        chars = [[
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
@@ -142,83 +249,27 @@ namespace Charactor {
             [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]];
 
-        private static DEFAULT_CSS_TXT = "z-index: 2147483647; position: absolute; bottom: 0;";
-
-        private _actions : HTMLCanvasElement[] = [];
-        private _reverseActions : HTMLCanvasElement[]  = [];
-        private _currentAction : HTMLCanvasElement = null;
         private _runIndex = 0;
-
-        private _step = Mario.STEP;
         private _currentStep = Mario.STEP;
-        private _cssText = Mario.DEFAULT_CSS_TXT;
 
         private _yVector = 0;
         private _jumpPower = 18;
         private _gravity = 2;
-
-        private positionY = 0;
         private _speed = 2;
 
-        private _frameTimer = null;
         private _sppedUpTimer = null;
         private _sppedDownTimer = null;
 
         private _isReverse = false;
         private _isJumping = false;
-        private _isStarting = false;
 
-        constructor(private targetDom, private positionX: number = 0, private pixSize: number = 2) {
-            for (let charactor of Mario.MARIO_CHAR) {
-                this._actions.push(this.createCharactorAction(charactor));
-                this._reverseActions.push(this.createCharactorAction(charactor, true));
-            }
-        }
-
-        private createCharactorAction(charactorMap: number[][], isReverse:boolean = false) : HTMLCanvasElement{
-            let element = document.createElement("canvas");
-            let ctx = element.getContext("2d");
-            let charWidth = this.pixSize * 16;
-            let charHeight = this.pixSize * 22;
-            element.setAttribute("width", charWidth.toString());
-            element.setAttribute("height", charHeight.toString());
-            element.style.cssText = this._cssText;
-            Mario.drawCharactor(ctx, charactorMap, Mario.COLOR_PALLET, this.pixSize, isReverse);
-            return element;
-        }    
-
-        private static drawCharactor(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, isReverse: boolean) : void {
-            for (let y = 0; y < map.length; y++){
-                if (isReverse)
-                    map[y].reverse();
-                for (let x = 0; x < map[y].length; x++){
-                    if (map[y][x] != 0) {
-                        ctx.beginPath();
-                        ctx.rect(x * size, y * size, size, size);
-                        ctx.fillStyle = colors[map[y][x]];
-                        ctx.fill();
-                    }
-                }
-                if (isReverse) {
-                    map[y].reverse();
-                }
-            }
-        }
-
-        private removeCharactor(): void {
-            if (this._currentAction != null) {
-                this.targetDom.removeChild(this._currentAction);
-                this._currentAction = null;
-            }
-        }
-
-        private drawAction(): void {
+        drawAction(): void {
             let target = this.targetDom;
             this.removeCharactor();
 
             let runIndex = this._runIndex;
 
-            if (this._currentStep < this._step) {
+            if (this._currentStep < Mario.STEP) {
                 this._currentStep++;
             } else {
                 this._currentStep = 0;
@@ -231,67 +282,44 @@ namespace Charactor {
                 runIndex = this._runIndex;
             }
 
-            this._currentAction = !this._isReverse ? this._actions[runIndex] : this._reverseActions[runIndex]; 
+            this.currentAction = !this._isReverse ? this._actions[runIndex] : this._reverseActions[runIndex]; 
 
 
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
-                this.positionY = this.positionY + this._yVector;
+                this.positon.y = this.positon.y + this._yVector;
 
-                if (this.positionY <= 0) {
+                if (this.positon.y <= 0) {
                     this._isJumping = false;
                     this._yVector = 0;
-                    this.positionY = 0;
+                    this.positon.y = 0;
                 } else {
                     if (this._yVector > 0) {
-                        this._currentAction = !this._isReverse ? this._actions[2] : this._reverseActions[2];                         
+                        this.currentAction = !this._isReverse ? this._actions[2] : this._reverseActions[2];                         
                     } else {
-                        this._currentAction = !this._isReverse ? this._actions[3] : this._reverseActions[3];                                                 
+                        this.currentAction = !this._isReverse ? this._actions[3] : this._reverseActions[3];                                                 
                     }
                 }
-                this._currentAction.style.bottom = this.positionY + 'px';
+                this.currentAction.style.bottom = this.positon.y + 'px';
             }
 
-            this._currentAction.style.left = this.positionX + 'px';
+            this.currentAction.style.left = this.positon.x + 'px';
 
-            this.targetDom.appendChild(this._currentAction);
-            if (this.positionX > this.targetDom.clientWidth - this.pixSize * 18 && this._isReverse == false) {
+            this.targetDom.appendChild(this.currentAction);
+            if (this.positon.x > this.targetDom.clientWidth - this.pixSize * 18 && this._isReverse == false) {
                 this._isReverse = true;
             }
-            if (this.positionX < 0 && this._isReverse == true) {
+            if (this.positon.x < 0 && this._isReverse == true) {
                 this._isReverse = false;
             }
             if (!this._isReverse) {
-                this.positionX += this.pixSize * this._speed;
+                this.positon.x += this.pixSize * this._speed;
             } else {
-                this.positionX -= this.pixSize * this._speed;            
+                this.positon.x -= this.pixSize * this._speed;            
             }
         }
 
-        public run(): void {
-            this._isStarting = true;
-            this._frameTimer = setInterval(() => { this.drawAction() }, 45);
-        }
-
-        public stop(): void {
-            if (this._frameTimer) {
-                clearInterval(this._frameTimer);
-                this._frameTimer = null;
-            }
-            this._isStarting = false;
-        }
-
-        public registerCommand(): void {
-            document.addEventListener('keypress', (e) => {
-                if (e.keyCode == 32) {
-                    if (this._isStarting) {
-                        this.stop();
-                    } else {
-                        this.run();
-                    }
-                }
-            });
-
+        registerActionCommand(): void {
             document.addEventListener('keydown', (e) => {
                 if (e.keyCode == 65) {
                     this.jump();
@@ -306,7 +334,6 @@ namespace Charactor {
                                 this._sppedUpTimer = null;
                             }
                         }, 45);
-                        this._step = Mario.STEP;
                     }
                 }
             });
@@ -322,7 +349,6 @@ namespace Charactor {
                             if (this._speed > 2) {
                                 this._speed--;
                             } else {
-                                this._step = Mario.STEP;
                                 clearInterval(this._sppedDownTimer);
                                 this._sppedDownTimer = null;
                             }
@@ -339,24 +365,10 @@ namespace Charactor {
             }
         }
 
-        public draw(index: number, positionX: number = 0, isReverse: boolean = false): void {
-            this._currentAction = !isReverse ? this._actions[index] : this._reverseActions[index]; 
-            this._currentAction.style.left = positionX * this.pixSize + 'px';
-            this.targetDom.appendChild(this._currentAction);
-        }
-
-        public start(): void{
-            this.draw(0)
-            this.registerCommand();
-        }
-
-        public remove(): void {
-            this.stop();
-            this.removeCharactor();
-        }
     }
 }
 
-var mario = new Charactor.Mario(document.body, 0, 3)
-mario.draw(0);
-mario.start();
+var mario = new Charactor.Mario(document.body, 3)
+mario.init();
+mario.registerCommand();
+mario.draw();
