@@ -18,7 +18,7 @@ namespace Charactor {
         private _isStarting = false;
         private _frameTimer: number = null;
 
-        constructor(protected targetDom,protected pixSize = 2, protected positon: Position = {x: 0, y:0}, private interval = 45) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, private interval = 45) {
         }
 
         public init(): void{
@@ -40,9 +40,9 @@ namespace Charactor {
             return element;
         }    
 
-        private static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, isReverse: boolean) : void {
+        private static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, reverse: boolean) : void {
             for (let y = 0; y < map.length; y++){
-                if (isReverse)
+                if (reverse)
                     map[y].reverse();
                 for (let x = 0; x < map[y].length; x++){
                     if (map[y][x] != 0) {
@@ -52,7 +52,7 @@ namespace Charactor {
                         ctx.fill();
                     }
                 }
-                if (isReverse) {
+                if (reverse) {
                     map[y].reverse();
                 }
             }
@@ -65,9 +65,12 @@ namespace Charactor {
             }
         }
 
-        public draw(index: number = 0, positionX: number = null, isReverse: boolean = false): void {
-            this.currentAction = !isReverse ? this._actions[index] : this._reverseActions[index]; 
-            this.currentAction.style.left = (positionX!=null?positionX:this.positon.x) * this.pixSize + 'px';
+        public draw(index: number = 0, position: Position = null, reverse: boolean = false, removeCurrent = false): void {
+            if (removeCurrent) this.removeCharactor();
+            position = position || this.position;
+            this.currentAction = !reverse ? this._actions[index] : this._reverseActions[index]; 
+            this.currentAction.style.left = position.x + 'px';
+            this.currentAction.style.bottom = this.position.y + 'px';
             this.targetDom.appendChild(this.currentAction);
         }
 
@@ -264,8 +267,44 @@ namespace Charactor {
         private _isJumping = false;
 
         drawAction(): void {
-            let target = this.targetDom;
-            this.removeCharactor();
+            this.updateDirection();
+            let actionIndex = this.executeRun();
+            actionIndex = this.executeJump() || actionIndex;
+            this.draw(actionIndex, null, this._isReverse, true);
+        }
+
+        private updateDirection(): void{
+            if (this.position.x > this.targetDom.clientWidth - this.pixSize * 18 && this._isReverse == false) {
+                this._isReverse = true;
+            }
+            if (this.position.x < 0 && this._isReverse == true) {
+                this._isReverse = false;
+            }
+        }
+
+        private executeJump(): number {
+            if (this._isJumping) {
+                this._yVector -= this._gravity * this.pixSize;
+                this.position.y = this.position.y + this._yVector;
+                if (this.position.y <= 0) {
+                    this._isJumping = false;
+                    this._yVector = 0;
+                    this.position.y = 0;
+                    return null;
+                } else {
+                    return this._yVector > 0 ? 2 : 3;
+                }
+            } else {
+                return null;
+            }   
+        }
+
+        private executeRun():number {
+            if (!this._isReverse) {
+                this.position.x += this.pixSize * this._speed;
+            } else {
+                this.position.x -= this.pixSize * this._speed;            
+            }
 
             let runIndex = this._runIndex;
 
@@ -281,51 +320,27 @@ namespace Charactor {
             } else {
                 runIndex = this._runIndex;
             }
+            return runIndex;
+        }
 
-            this.currentAction = !this._isReverse ? this._actions[runIndex] : this._reverseActions[runIndex]; 
-
-
-            if (this._isJumping) {
-                this._yVector -= this._gravity * this.pixSize;
-                this.positon.y = this.positon.y + this._yVector;
-
-                if (this.positon.y <= 0) {
-                    this._isJumping = false;
-                    this._yVector = 0;
-                    this.positon.y = 0;
-                } else {
-                    if (this._yVector > 0) {
-                        this.currentAction = !this._isReverse ? this._actions[2] : this._reverseActions[2];                         
-                    } else {
-                        this.currentAction = !this._isReverse ? this._actions[3] : this._reverseActions[3];                                                 
-                    }
-                }
-                this.currentAction.style.bottom = this.positon.y + 'px';
-            }
-
-            this.currentAction.style.left = this.positon.x + 'px';
-
-            this.targetDom.appendChild(this.currentAction);
-            if (this.positon.x > this.targetDom.clientWidth - this.pixSize * 18 && this._isReverse == false) {
-                this._isReverse = true;
-            }
-            if (this.positon.x < 0 && this._isReverse == true) {
-                this._isReverse = false;
-            }
-            if (!this._isReverse) {
-                this.positon.x += this.pixSize * this._speed;
-            } else {
-                this.positon.x -= this.pixSize * this._speed;            
+        private onJump() {
+            if (!this._isJumping) {
+                this._isJumping = true;
+                this._yVector = this._jumpPower * this.pixSize;
             }
         }
 
         registerActionCommand(): void {
             document.addEventListener('keydown', (e) => {
                 if (e.keyCode == 65) {
-                    this.jump();
+                    this.onJump();
                 }
                 if (e.keyCode == 66 && !this._isJumping) {
                     if (!this._sppedUpTimer) {
+                        if (this._sppedDownTimer) {
+                            clearInterval(this._sppedDownTimer);
+                            this._sppedDownTimer = null;
+                        }
                         this._sppedUpTimer = setInterval(() => {
                             if (this._speed < 10) {
                                 this._speed++;
@@ -346,6 +361,10 @@ namespace Charactor {
                 if (e.keyCode == 66) {
                     if (!this._sppedDownTimer) {
                         this._sppedDownTimer = setInterval(() => {
+                            if (this._sppedUpTimer) {
+                                clearInterval(this._sppedUpTimer);
+                                this._sppedUpTimer = null;
+                            }
                             if (this._speed > 2) {
                                 this._speed--;
                             } else {
@@ -356,13 +375,6 @@ namespace Charactor {
                     }
                 }
             });
-        }
-
-        private jump() {
-            if (!this._isJumping) {
-                this._isJumping = true;
-                this._yVector = this._jumpPower * this.pixSize;
-            }
         }
 
     }
