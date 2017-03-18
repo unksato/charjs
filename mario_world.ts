@@ -18,7 +18,7 @@ namespace Charactor {
         private _isStarting = false;
         private _frameTimer: number = null;
 
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, private interval = 45) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected frameInterval = 45) {
         }
 
         public init(): void{
@@ -90,7 +90,7 @@ namespace Charactor {
 
         public start(): void {
             this._isStarting = true;
-            this._frameTimer = setInterval(() => { this.drawAction() }, this.interval);
+            this._frameTimer = setInterval(() => { this.drawAction() }, this.frameInterval);
         }
 
         public stop(): void {
@@ -323,10 +323,50 @@ namespace Charactor {
             return runIndex;
         }
 
-        private onJump() {
+        private onJump(): void {
             if (!this._isJumping) {
                 this._isJumping = true;
                 this._yVector = this._jumpPower * this.pixSize;
+            }
+        }
+
+        private onAbortJump(): void {
+            if (this._yVector > 0) {
+                this._yVector = 0;
+            }
+        }
+
+        private onSpeedUp(): void {
+            if (!this._sppedUpTimer) {
+                if (this._sppedDownTimer) {
+                    clearInterval(this._sppedDownTimer);
+                    this._sppedDownTimer = null;
+                }
+                this._sppedUpTimer = setInterval(() => {
+                    if (this._speed < 10) {
+                        this._speed++;
+                    } else {
+                        clearInterval(this._sppedUpTimer);
+                        this._sppedUpTimer = null;
+                    }
+                }, this.frameInterval);
+            }
+        }
+
+        private onAbortSpeedUp(): void {
+            if (!this._sppedDownTimer) {
+                this._sppedDownTimer = setInterval(() => {
+                    if (this._sppedUpTimer) {
+                        clearInterval(this._sppedUpTimer);
+                        this._sppedUpTimer = null;
+                    }
+                    if (this._speed > 2) {
+                        this._speed--;
+                    } else {
+                        clearInterval(this._sppedDownTimer);
+                        this._sppedDownTimer = null;
+                    }
+                }, this.frameInterval);
             }
         }
 
@@ -336,43 +376,15 @@ namespace Charactor {
                     this.onJump();
                 }
                 if (e.keyCode == 66 && !this._isJumping) {
-                    if (!this._sppedUpTimer) {
-                        if (this._sppedDownTimer) {
-                            clearInterval(this._sppedDownTimer);
-                            this._sppedDownTimer = null;
-                        }
-                        this._sppedUpTimer = setInterval(() => {
-                            if (this._speed < 10) {
-                                this._speed++;
-                            } else {
-                                clearInterval(this._sppedUpTimer);
-                                this._sppedUpTimer = null;
-                            }
-                        }, 45);
-                    }
+                    this.onSpeedUp();
                 }
             });
             document.addEventListener('keyup', (e) => {
                 if (e.keyCode == 65) {
-                    if (this._yVector > 0) {
-                        this._yVector = 0;
-                    }
+                    this.onAbortJump();
                 }
                 if (e.keyCode == 66) {
-                    if (!this._sppedDownTimer) {
-                        this._sppedDownTimer = setInterval(() => {
-                            if (this._sppedUpTimer) {
-                                clearInterval(this._sppedUpTimer);
-                                this._sppedUpTimer = null;
-                            }
-                            if (this._speed > 2) {
-                                this._speed--;
-                            } else {
-                                clearInterval(this._sppedDownTimer);
-                                this._sppedDownTimer = null;
-                            }
-                        }, 45);
-                    }
+                    this.onAbortSpeedUp();
                 }
             });
         }
