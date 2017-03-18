@@ -1,4 +1,4 @@
-namespace Charactor {
+namespace Character {
     class Position {
         public x: number = 0;
         public y: number = 0;
@@ -58,7 +58,7 @@ namespace Charactor {
             }
         }
 
-        protected removeCharactor(): void {
+        protected removeCharacter(): void {
             if (this.currentAction != null) {
                 this.targetDom.removeChild(this.currentAction);
                 this.currentAction = null;
@@ -66,7 +66,7 @@ namespace Charactor {
         }
 
         public draw(index: number = 0, position: Position = null, reverse: boolean = false, removeCurrent = false): void {
-            if (removeCurrent) this.removeCharactor();
+            if (removeCurrent) this.removeCharacter();
             position = position || this.position;
             this.currentAction = !reverse ? this._actions[index] : this._reverseActions[index]; 
             this.currentAction.style.left = position.x + 'px';
@@ -103,7 +103,7 @@ namespace Charactor {
 
         public destroy(): void {
             this.stop();
-            this.removeCharactor();
+            this.removeCharacter();
         }
 
     }
@@ -392,7 +392,7 @@ namespace Charactor {
     }
 }
 
-var mario = new Charactor.Mario(document.body, 3)
+var mario = new Character.Mario(document.body, 3)
 mario.init();
 mario.registerCommand();
 mario.draw();
