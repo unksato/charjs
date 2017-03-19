@@ -115,16 +115,18 @@ namespace Character {
 
     export class Mario extends AbstractCharacter{
         private static STEP = 2;
+        private static DEFAULT_SPEED = 2;
         private _runIndex = 0;
         private _currentStep = Mario.STEP;
 
         private _yVector = 0;
         private _jumpPower = 18;
         private _gravity = 2;
-        private _speed = 2;
+        private _speed = Mario.DEFAULT_SPEED;
 
         private _speedUpTimer = null;
         private _speedDownTimer = null;
+        private _squatTimer = null;
 
         private _isReverse = false;
         private _isJumping = false;
@@ -176,15 +178,16 @@ namespace Character {
         }
 
         private executeRun(): number {
-            if (this._isSquat) {
-                return 8;
-            }
             let directionUpdated = this.updateDirection();
-            
+
             if (!this._isReverse) {
                 this.position.x += this.pixSize * this._speed;
             } else {
                 this.position.x -= this.pixSize * this._speed;            
+            }
+
+            if (this._isSquat) {
+                return 8;
             }
 
             let runIndex = this._runIndex;
@@ -272,10 +275,26 @@ namespace Character {
         }
 
         private onSquat(): void {
+            this.onAbortSpeedUp();
             this._isSquat = true;
+            if (!this._squatTimer) {
+                this._squatTimer = setInterval(() => {
+                    if (this._speed > 0) {
+                        this._speed--;
+                    } else {
+                        clearInterval(this._squatTimer);
+                        this._squatTimer = null;
+                    }
+                }, this.frameInterval);
+            }
         }
 
         private onAbortSquat(): void {
+            if (this._squatTimer) {
+                clearInterval(this._squatTimer);
+                this._squatTimer = null;                
+            }
+            this._speed = Mario.DEFAULT_SPEED;
             this._isSquat = false;
         }
 
@@ -515,7 +534,6 @@ namespace Character {
             [ 0, 5, 5, 5, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0, 0],
             [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]            
         ]];
-
     }
 }
 
