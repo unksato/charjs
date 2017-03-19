@@ -129,6 +129,7 @@ namespace Character {
         private _isReverse = false;
         private _isJumping = false;
         private _isBraking = false;
+        private _isSquat = false;
 
         drawAction(): void {
             let actionIndex = this.executeRun();
@@ -175,6 +176,9 @@ namespace Character {
         }
 
         private executeRun(): number {
+            if (this._isSquat) {
+                return 8;
+            }
             let directionUpdated = this.updateDirection();
             
             if (!this._isReverse) {
@@ -267,6 +271,14 @@ namespace Character {
             }
         }
 
+        private onSquat(): void {
+            this._isSquat = true;
+        }
+
+        private onAbortSquat(): void {
+            this._isSquat = false;
+        }
+
         registerActionCommand(): void {
             document.addEventListener('keydown', (e) => {
                 if (e.keyCode == 65) {
@@ -275,6 +287,11 @@ namespace Character {
                 if (e.keyCode == 66 && !this._isJumping) {
                     this.onSpeedUp();
                 }
+
+                if (e.keyCode == 40 && !this._isJumping) {
+                    this.onSquat();
+                }
+
             });
             document.addEventListener('keyup', (e) => {
                 if (e.keyCode == 65) {
@@ -282,6 +299,9 @@ namespace Character {
                 }
                 if (e.keyCode == 66) {
                     this.onAbortSpeedUp();
+                }
+                if (e.keyCode == 40) {
+                    this.onAbortSquat();
                 }
             });
         }
@@ -471,12 +491,35 @@ namespace Character {
             [ 0, 0, 1, 4, 4, 4, 5,13, 5, 5, 0, 0, 0, 0, 0, 0],
             [ 0, 0, 1, 8, 1, 1, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0],
             [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ],[
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 3, 3, 6, 6, 6, 6, 3, 3, 0, 0, 0, 0, 0],
+            [ 0, 0, 3, 6, 6, 6, 6, 6, 7, 6, 6, 3, 0, 0, 0, 0],
+            [ 0, 3, 7, 7, 3, 3, 6, 7, 6, 6, 8, 6, 3, 0, 0, 0],
+            [ 0, 3, 7, 3, 2, 2, 3, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+            [ 0, 3, 3, 2, 2, 2, 2, 3, 7, 6, 1, 1, 1, 1, 0, 0],
+            [ 0, 5, 3, 2, 2, 2, 2, 3, 1, 1, 1, 1, 1, 1, 1, 0],
+            [ 5,13, 1, 3, 3, 3, 3, 7,10,10,10,10,10,10, 4, 0],
+            [ 5,13, 3, 7, 7, 7, 3,12, 1,11,11,11,11,11, 4, 0],
+            [ 5,13, 3, 7, 7, 3,13,13, 5, 1, 1, 1, 1, 1, 0, 0],
+            [ 5,13,13, 3, 3,13, 5, 5,12, 5, 1, 1, 1, 0, 0, 0],
+            [ 5, 5,13,13, 5, 5, 4, 1, 4, 1, 0, 0, 0, 0, 0, 0],
+            [ 0, 5, 5, 5, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]            
         ]];
 
     }
 }
 
-var mario = new Character.Mario(document.body, 3)
+var mario = new Character.Mario(document.body, 2)
 mario.init();
 mario.registerCommand();
 mario.draw()
@@ -488,3 +531,4 @@ mario.draw()
 //mario.draw(5, {x:500, y:0});
 //mario.draw(6, {x:600, y:0});
 //mario.draw(7, {x:700, y:0});
+//mario.draw(8, {x:800, y:0});
