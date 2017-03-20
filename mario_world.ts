@@ -6,9 +6,22 @@ namespace Character {
 
     export class GameMaster {
 
-        constructor(private targetDom, private charSize) {
-            
+        static GAME_MASTERS = {};
+
+        constructor(private targetDom, private charSize) {   
         }
+
+        public static GetGameMaster(gameName: string, targetDom, charSize: any): GameMaster {
+            let master = GameMaster.GAME_MASTERS[gameName];
+            if (master) {
+                return master;
+            }
+
+            master = new GameMaster(targetDom, charSize);
+            GameMaster.GAME_MASTERS[gameName] = master;
+            return master;
+        }
+
         private _enemys: AbstractCharacter[] = []
         private _player: AbstractCharacter = null;
         
@@ -783,7 +796,7 @@ namespace Character {
 
 }
 
-let master = new Character.GameMaster(document.body, 2);
+let master = Character.GameMaster.GetGameMaster('sample' ,document.body, 2);
 var mario = master.CreateCharInstance(Character.Mario, {x:0, y:0});
 var goomba1 = master.CreateCharInstance(Character.Goomba, {x: 300,y:0}, false);
 var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
