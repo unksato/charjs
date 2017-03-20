@@ -734,6 +734,10 @@ namespace Character {
         drawAction(): void {
             let directionUpdated = this.updateDirection();
 
+            if (this.doHitTestWithOtherEnemy()) {
+                this._isReverse = !this._isReverse;
+            }
+
             if (!this._isReverse) {
                 this.position.x += this.pixSize * this._speed;
             } else {
@@ -750,6 +754,29 @@ namespace Character {
             this.draw(this._actionIndex, null, this._isReverse, true);
         }
 
+        private doHitTestWithOtherEnemy(): boolean {
+            if (this._gameMaster) {
+                let enemys = this._gameMaster.getEnemys();
+                for (let enemy of enemys) {
+                    if (enemy != this) {
+                        let ePos = enemy.getPosition();
+                        let eSize = enemy.getCharSize()
+                        if (this.position.y > ePos.y + eSize.height)
+                            continue;
+                        if (ePos.y > this.position.y + this.charHeight)
+                            continue;
+                        if (this.position.x > ePos.x + eSize.width)
+                            continue;
+                        if (ePos.x > this.position.x + this.charWidth)
+                            continue;
+                        return true;
+                    }
+                }
+            }
+            return false;
+
+        }
+
         registerActionCommand(): void {
         }
     }
@@ -758,8 +785,8 @@ namespace Character {
 
 let master = new Character.GameMaster(document.body, 2);
 var mario = master.CreateCharInstance(Character.Mario, {x:0, y:0});
-//var goomba1 = master.CreateCharInstance(Character.Goomba, {x: 300,y:0}, true);
-//var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
+var goomba1 = master.CreateCharInstance(Character.Goomba, {x: 300,y:0}, false);
+var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
 //var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
 
 master.init();
