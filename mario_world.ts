@@ -11,7 +11,7 @@ namespace Character {
         constructor(private targetDom, private charSize) {   
         }
 
-        public static GetGameMaster(gameName: string, targetDom, charSize: any): GameMaster {
+        public static GetController(gameName: string, targetDom, charSize: any): GameMaster {
             let master = GameMaster.GAME_MASTERS[gameName];
             if (master) {
                 return master;
@@ -65,6 +65,12 @@ namespace Character {
         public doGameOver(): void {
             for (let enemy of this._enemys) {
                 enemy.stop();
+            }
+        }
+
+        public doGool(): void {
+            for (let enemy of this._enemys) {
+                enemy.stop();
             }            
         }
     }
@@ -89,7 +95,7 @@ namespace Character {
         private _isStarting = false;
         private _frameTimer: number = null;
 
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, private zIndex = 2147483647, protected frameInterval = 45) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, protected zIndex = 2147483647, protected frameInterval = 45) {
         }
 
         public init(): void{
@@ -102,7 +108,7 @@ namespace Character {
         private createCharacterAction(charactorMap: number[][], isReverse:boolean = false) : HTMLCanvasElement{
             let element = document.createElement("canvas");
             let ctx = element.getContext("2d");
-            this.charWidth = this.pixSize * charactorMap[0].length;
+            this.charWidth = this.pixSize * charactorMap[0].length + 1;
             this.charHeight = this.pixSize * charactorMap.length;
 
             element.setAttribute("width", this.charWidth.toString());
@@ -436,6 +442,29 @@ namespace Character {
             }, this.frameInterval);
         }
 
+        private _backgroundOpacity = 0;
+
+        public gool(): void {
+            if (this._gameMaster) this._gameMaster.doGool();
+
+            let blackScreen = document.createElement('div');
+            if (this.targetDom == document.body)
+                this.targetDom.style.cssText = 'margin: 0px;'; // only document body 
+
+            this._gameOverTimer = setInterval(() => {
+                if (Math.floor(this._backgroundOpacity) != 1) {
+                    this._backgroundOpacity += 0.02;
+                } else {
+                    this.stop();
+                    this.draw(10, null, false, true);
+                }
+                blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
+
+            }, this.frameInterval);
+
+            this.targetDom.appendChild(blackScreen);
+        }
+
         registerActionCommand(): void {
             document.addEventListener('keydown', (e) => {
                 if (e.keyCode == 65 && !this._isSquat) {
@@ -695,6 +724,29 @@ namespace Character {
             [ 0, 1, 8, 4, 4, 1, 5, 5, 5, 5, 0, 1, 1, 1, 1, 0],
             [ 0, 1, 1, 1, 1, 4, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0],
             [ 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]            
+        ], [
+            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0],
+            [ 1, 1, 0, 1, 1, 6, 6, 2, 8, 8, 2, 6, 6, 3, 0, 0],
+            [ 1, 2, 1, 2, 1, 6, 6, 1, 1, 1, 1, 6, 6, 6, 3, 0],
+            [ 0, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0],
+            [ 1, 2, 1, 1, 1,11,11, 1,11,11, 1,11,11, 1, 3, 0],
+            [ 1, 1, 1, 2, 1,10,10, 1,10,10, 1,10,10, 1, 4, 0],
+            [ 1, 2, 1, 2, 1, 1,10,10,10,10,10,10, 1, 1,10, 4],
+            [ 0, 1, 1, 1, 3,10, 1,11,11,11,11, 1,10, 4,11, 4],
+            [ 0, 3, 7, 6, 3,11, 1, 1, 1, 1, 1, 1,11, 4, 4, 0],
+            [ 0, 0, 3, 7, 6, 4,11, 1, 1, 1, 1,11, 4, 7, 7, 4],
+            [ 0, 0, 3, 7, 6, 3, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4],
+            [ 0, 0, 0, 3, 6, 5,12,12,12,12,12, 7, 7, 2, 2, 4],
+            [ 0, 0, 0, 0, 5,13,12, 2, 2,12,12, 2, 4, 2, 2, 4],
+            [ 0, 0, 0, 0, 5,13,13, 2, 2,12,12, 2, 5, 4, 4, 0],
+            [ 0, 0, 0, 5,13,13,13,13,13,12,12,12,12, 5, 0, 0],
+            [ 0, 0, 0, 5,13,13,13,13,13,13,13,12,12, 5, 0, 0],
+            [ 0, 0, 5,13,13,13,13,13,13,13,13,13,13, 5, 0, 0],
+            [ 0, 1, 4, 4, 4, 5, 5, 5, 5, 5, 5, 4, 4, 4, 1, 0],
+            [ 1, 4, 8, 4, 1, 0, 0, 0, 0, 0, 0, 1, 4, 8, 4, 1],
+            [ 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
         ]];
 
     }
@@ -796,10 +848,11 @@ namespace Character {
 
 }
 
-let master = Character.GameMaster.GetGameMaster('sample' ,document.body, 2);
-var mario = master.CreateCharInstance(Character.Mario, {x:0, y:0});
-var goomba1 = master.CreateCharInstance(Character.Goomba, {x: 300,y:0}, false);
-var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
+let master = Character.GameMaster.GetController('sample' ,document.body, 10);
+var mario = master.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
+
+//var goomba1 = master.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, false);
+//var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
 //var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
 
 master.init();
@@ -821,3 +874,5 @@ master.start();
 //mario.draw(7, {x:700, y:0});
 //mario.draw(8, {x:800, y:0});
 //mario.draw(9, {x:800, y:0});
+//mario.draw(10, {x:900, y:0});
+mario.gool();
