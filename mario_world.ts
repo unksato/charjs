@@ -4,11 +4,64 @@ namespace Character {
         public y: number = 0;
     }
 
+    export class GameMaster {
+
+        constructor(private targetDom, private charSize) {
+            
+        }
+        private _enemys: AbstractCharacter[] = []
+        private _player: AbstractCharacter = null;
+        
+        public CreateCharInstance<C extends AbstractCharacter>(clz: { new (targetDom, pixSize, position, reverse): C }, position: Position, isReverse = false) : C {
+
+            let char = new clz(this.targetDom, this.charSize, position, isReverse);
+
+            if (char.isEnemy) {
+                this._enemys.push(char);
+            } else {
+                this._player = char;
+            }
+            char._gameMaster = this;
+
+            return char;
+        }
+
+        public getEnemys(): AbstractCharacter[] {
+            return this._enemys;
+        }
+
+        public init(): void {
+            if (this._player) {
+                this._player.init();
+            }
+            for (let enemy of this._enemys) {
+                enemy.init();
+            }
+        }
+
+        public start(): void {
+            for (let enemy of this._enemys) {
+                enemy.start();
+            }
+            if (this._player) {
+                this._player.start();
+            }
+            
+        }
+
+        public doGameOver(): void {
+            for (let enemy of this._enemys) {
+                enemy.stop();
+            }            
+        }
+    }
+
     abstract class AbstractCharacter {
         abstract chars: number[][][];
         abstract colors: string[];
         abstract drawAction(): void;        
         abstract registerActionCommand(): void;
+        abstract isEnemy: boolean;
         
         protected cssTextTemplate = `z-index: ${this.zIndex}; position: absolute; bottom: 0;`;
         protected currentAction: HTMLCanvasElement = null;
@@ -18,10 +71,12 @@ namespace Character {
         protected charWidth: number = null;
         protected charHeight: number = null;
 
+        public _gameMaster: GameMaster = null;
+
         private _isStarting = false;
         private _frameTimer: number = null;
 
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, private zIndex = 2147483647, protected frameInterval = 45) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, private zIndex = 2147483647, protected frameInterval = 45) {
         }
 
         public init(): void{
@@ -93,6 +148,7 @@ namespace Character {
         }
 
         public start(): void {
+            this.registerCommand();
             this._isStarting = true;
             this._frameTimer = setInterval(() => { this.drawAction() }, this.frameInterval);
         }
@@ -110,36 +166,15 @@ namespace Character {
             this.removeCharacter();
         }
 
-    }
-
-
-    export class Mario extends AbstractCharacter{
-        private static STEP = 2;
-        private static DEFAULT_SPEED = 2;
-        private _runIndex = 0;
-        private _currentStep = Mario.STEP;
-
-        private _yVector = 0;
-        private _jumpPower = 18;
-        private _gravity = 2;
-        private _speed = Mario.DEFAULT_SPEED;
-
-        private _speedUpTimer = null;
-        private _speedDownTimer = null;
-        private _squatTimer = null;
-
-        private _isReverse = false;
-        private _isJumping = false;
-        private _isBraking = false;
-        private _isSquat = false;
-
-        drawAction(): void {
-            let actionIndex = this.executeRun();
-            actionIndex = this.executeJump() || actionIndex;
-            this.draw(actionIndex, null, this._isReverse, true);
+        public getPosition(): Position {
+            return this.position;
         }
 
-        private updateDirection(): boolean{
+        public getCharSize(): { height: number, width: number } {
+            return { height: this.charHeight, width: this.charWidth };
+        }
+
+        protected updateDirection(): boolean{
             let currentDirection = this._isReverse;
 
             if (this.position.x > this.targetDom.clientWidth - this.charWidth - (/*Magic offset*/ this.pixSize * 2) && this._isReverse == false) {
@@ -150,6 +185,65 @@ namespace Character {
             }
 
             return currentDirection != this._isReverse;
+        }
+
+    }
+
+
+    export class Mario extends AbstractCharacter{
+        private static STEP = 2;
+        private static DEFAULT_SPEED = 2;
+        private _runIndex = 0;
+        private _currentStep = Mario.STEP;
+
+        isEnemy = false;
+
+        private _yVector = 0;
+        private _jumpPower = 18;
+        private _gravity = 2;
+        private _speed = Mario.DEFAULT_SPEED;
+        private _gameOverWaitCount = 0;
+
+
+        private _speedUpTimer = null;
+        private _speedDownTimer = null;
+        private _squatTimer = null;
+        private _gameOverTimer = null;
+
+        private _isJumping = false;
+        private _isBraking = false;
+        private _isSquat = false;
+
+
+        drawAction(): void {
+            if (this.doHitTest()) {
+                this.gameOver();
+            } else {
+                let actionIndex = this.executeRun();
+                actionIndex = this.executeJump() || actionIndex;
+                this.draw(actionIndex, null, this._isReverse, true);
+            }
+        }
+
+        private doHitTest(): boolean {
+            if (this._gameMaster) {
+                let enemys = this._gameMaster.getEnemys();
+                for (let enemy of enemys) {
+                    let ePos = enemy.getPosition();
+                    let eSize = enemy.getCharSize()
+                    if (this.position.y > ePos.y + eSize.height)
+                        continue;
+                    if (ePos.y > this.position.y + this.charHeight)
+                        continue;
+                    if (this.position.x > ePos.x + eSize.width)
+                        continue;
+                    if (ePos.x > this.position.x + this.charWidth)
+                        continue;
+
+                    return true;
+                }
+            }
+            return false;
         }
 
         private executeJump(): number {
@@ -212,7 +306,6 @@ namespace Character {
                     if ((this._isReverse && this.position.x < this.charWidth * 3) ||
                         (!this._isReverse && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)
                     ) {
-                        debugger;
                         runIndex = 6;
                         if (this._speed > 2)
                             this._speed--;
@@ -296,6 +389,38 @@ namespace Character {
             }
             this._speed = Mario.DEFAULT_SPEED;
             this._isSquat = false;
+        }
+
+        public gameOver(): void {
+            if (this._gameMaster) this._gameMaster.doGameOver();
+            this.stop();
+            this._gameOverTimer = setInterval(() => {
+                if (this._gameOverWaitCount < 20) {
+                    this._gameOverWaitCount++;
+                    this.draw(9, null, false, true);
+                    this._yVector = this._jumpPower * this.pixSize;
+                    return;
+                }
+
+                this._yVector -= this._gravity * this.pixSize;
+                this.position.y = this.position.y + this._yVector;
+
+                if (this.position.y < this.charHeight * 5 * -1) {
+                    clearInterval(this._gameOverTimer);
+                    this.destroy();
+                    return;
+                }
+
+                if (this._currentStep < Mario.STEP) {
+                    this._currentStep++;
+                } else {
+                    this._currentStep = 0;
+                    this._runIndex = this._runIndex ^ 1;
+                }
+
+                this.draw(9, null, this._runIndex == 0 ? true : false, true);
+
+            }, this.frameInterval);
         }
 
         registerActionCommand(): void {
@@ -533,14 +658,119 @@ namespace Character {
             [ 5, 5,13,13, 5, 5, 4, 1, 4, 1, 0, 0, 0, 0, 0, 0],
             [ 0, 5, 5, 5, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0, 0],
             [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]            
+        ], [
+            [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
+            [ 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0, 0],
+            [ 0, 0, 0, 3, 6, 6, 2, 8, 8, 2, 6, 6, 3, 0, 0, 0],
+            [ 0, 0, 3, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 3, 0, 0],
+            [ 0, 0, 3, 6, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0, 0],
+            [ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0],
+            [ 0, 0, 0, 3, 1, 6, 1, 6, 6, 1, 6, 1, 3, 0, 0, 0],
+            [ 0, 0, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 1, 0, 0],
+            [ 0, 0, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 0, 0, 0],
+            [ 0, 0, 1, 1, 6,11, 1,11,11, 1,11, 6, 1, 1, 0, 0],
+            [ 0, 4,10, 1,11,11, 2, 2, 2, 2,11,11, 1,10, 4, 0],
+            [ 0, 4,10, 1, 1,10,10,10,10,10,10, 1, 1,10, 4, 0],
+            [ 0, 4,11, 1,10, 1,11,11,11,11, 1,10, 1,11, 4, 0],
+            [ 4, 2, 4,10, 1, 1, 1, 1, 1, 1, 1, 1,10, 4, 0, 0],
+            [ 4, 2, 2, 4,10,10,10, 3, 3,10,10,10, 4, 4, 4, 0],
+            [ 0, 4, 6, 6, 4, 4,10, 7, 7,10, 4, 4, 6, 2, 2, 4],
+            [ 0, 4, 3, 6, 5, 4,10, 6, 6,10, 4, 1, 1, 1, 2, 4],
+            [ 0, 0, 0, 5,12,12, 4,10,10, 4, 2, 1, 1, 1, 1, 0],
+            [ 0, 0, 0, 5,12, 2, 2, 4, 4, 2, 2, 1, 1, 1, 1, 0],
+            [ 0, 0, 1, 1, 1, 2, 2,13,13,13, 5, 1, 1, 1, 1, 0],
+            [ 0, 1, 8, 4, 4, 1, 5, 5, 5, 5, 0, 1, 1, 1, 1, 0],
+            [ 0, 1, 1, 1, 1, 4, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+            [ 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]            
         ]];
+
     }
+
+    export class Goomba extends AbstractCharacter {
+        colors = ['','#000000','#ffffff','#b82800','#f88800','#f87800','#f8c000','#f8f800'];
+        chars = [[
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+            [0,0,0,0,1,1,3,3,3,3,1,1,0,0,0,0],
+            [0,0,0,1,4,1,1,1,1,3,3,3,1,1,1,1],
+            [0,0,1,4,2,4,3,1,1,1,3,1,1,1,0,0],
+            [0,1,3,3,4,3,3,3,2,1,1,1,2,3,1,0],
+            [0,1,3,3,3,3,3,2,2,2,3,2,2,2,3,1],
+            [1,3,3,3,3,3,3,2,2,1,3,1,2,2,3,1],
+            [1,3,3,3,3,3,3,3,2,2,3,2,2,3,3,1],
+            [1,3,3,3,3,3,3,4,4,4,4,4,4,3,3,1],
+            [0,1,3,3,3,4,4,2,1,1,1,1,2,3,1,0],
+            [0,5,5,5,4,4,1,1,4,4,4,4,1,4,4,0],
+            [5,6,6,7,5,5,4,4,4,4,4,4,4,1,4,0],
+            [1,6,6,7,7,2,5,0,0,0,0,1,1,7,2,1],
+            [0,1,1,6,7,7,5,1,1,1,1,6,6,1,1,0],
+            [0,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0]
+        ],[
+            [0.0,0,0,0,0,1,1,1,1,0,0,0,0,0,0],
+            [0,0,0,0,1,1,3,3,3,3,1,1,0,0,0,0],
+            [0,0,0,1,4,3,3,3,1,1,1,3,1,1,1,0],
+            [0,0,1,4,2,4,3,3,3,3,1,1,3,1,1,0],
+            [0,1,3,3,4,3,3,3,3,3,2,1,1,1,2,0],
+            [0,1,3,3,3,3,3,3,3,2,2,2,1,2,2,0],
+            [1,3,3,3,3,3,3,3,3,2,2,1,3,1,2,1],
+            [1,3,3,3,3,3,3,3,3,3,2,2,3,2,2,1],
+            [1,3,3,3,3,3,3,3,3,4,4,4,4,4,4,1],
+            [0,1,3,3,3,3,3,4,4,2,1,1,1,1,1,0],
+            [0,1,3,3,3,3,4,4,1,1,4,4,4,4,1,0],
+            [0,0,1,3,3,4,4,4,4,4,4,4,4,1,0,0],
+            [0,0,0,1,1,5,5,5,5,5,4,1,1,0,0,0],
+            [0,0,0,0,0,5,6,6,7,7,5,0,0,0,0,0],
+            [0,0,0,0,0,5,6,6,6,6,2,5,0,0,0,0],
+            [0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0]
+            ]];
+
+
+        private _speed = 1;
+        private static STEP = 2;
+        private _currentStep = 0;
+        private _actionIndex = 0;
+        isEnemy = true;
+
+        drawAction(): void {
+            let directionUpdated = this.updateDirection();
+
+            if (!this._isReverse) {
+                this.position.x += this.pixSize * this._speed;
+            } else {
+                this.position.x -= this.pixSize * this._speed;            
+            }
+
+            if (this._currentStep < Goomba.STEP) {
+                this._currentStep++;
+            } else {
+                this._currentStep = 0;
+                this._actionIndex = this._actionIndex ^ 1;
+            }
+
+            this.draw(this._actionIndex, null, this._isReverse, true);
+        }
+
+        registerActionCommand(): void {
+        }
+    }
+
 }
 
-var mario = new Character.Mario(document.body, 2)
-mario.init();
-mario.registerCommand();
-mario.draw()
+let master = new Character.GameMaster(document.body, 2);
+var mario = master.CreateCharInstance(Character.Mario, {x:0, y:0});
+var goomba1 = master.CreateCharInstance(Character.Goomba, {x: 300,y:0}, true);
+var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
+var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
+
+master.init();
+master.start();
+
+
+//goomba1.start();
+//goomba2.start();
+//goomba3.start();
+//mario.registerCommand();
+//mario.draw()
 //mario.draw(0, {x:0, y:0});
 //mario.draw(1, {x:100, y:0});
 //mario.draw(2, {x:200, y:0});
@@ -550,3 +780,4 @@ mario.draw()
 //mario.draw(6, {x:600, y:0});
 //mario.draw(7, {x:700, y:0});
 //mario.draw(8, {x:800, y:0});
+//mario.draw(9, {x:800, y:0});
