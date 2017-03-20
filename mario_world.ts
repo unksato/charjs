@@ -451,12 +451,27 @@ namespace Character {
             if (this.targetDom == document.body)
                 this.targetDom.style.cssText = 'margin: 0px;'; // only document body 
 
-            this._gameOverTimer = setInterval(() => {
+            let goolDimTimer = setInterval(() => {
                 if (Math.floor(this._backgroundOpacity) != 1) {
                     this._backgroundOpacity += 0.02;
                 } else {
                     this.stop();
                     this.draw(10, null, false, true);
+                    clearInterval(goolDimTimer);
+                    let goolDimOffTimer = setInterval(() => {
+                        if (Math.ceil(this._backgroundOpacity) != 0) {
+                            this._backgroundOpacity -= 0.04;
+                        } else {
+                            clearInterval(goolDimOffTimer);
+                            this.targetDom.removeChild(blackScreen);
+
+                            this.start();
+
+                            // TODO: GO back circle
+                        }
+                        blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
+
+                    }, this.frameInterval);
                 }
                 blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
 
@@ -848,16 +863,15 @@ namespace Character {
 
 }
 
-let master = Character.GameMaster.GetController('sample' ,document.body, 10);
+let master = Character.GameMaster.GetController('sample' ,document.body, 2);
 var mario = master.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
 
-//var goomba1 = master.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, false);
-//var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
+var goomba1 = master.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, false);
+var goomba2 = master.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
 //var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
 
 master.init();
 master.start();
-
 
 //goomba1.start();
 //goomba2.start();
@@ -875,4 +889,4 @@ master.start();
 //mario.draw(8, {x:800, y:0});
 //mario.draw(9, {x:800, y:0});
 //mario.draw(10, {x:900, y:0});
-mario.gool();
+//mario.gool();
