@@ -425,10 +425,10 @@ namespace Character {
 
         registerActionCommand(): void {
             document.addEventListener('keydown', (e) => {
-                if (e.keyCode == 65) {
+                if (e.keyCode == 65 && !this._isSquat) {
                     this.onJump();
                 }
-                if (e.keyCode == 66 && !this._isJumping) {
+                if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
                     this.onSpeedUp();
                 }
 
@@ -758,9 +758,9 @@ namespace Character {
 
 let master = new Character.GameMaster(document.body, 2);
 var mario = master.CreateCharInstance(Character.Mario, {x:0, y:0});
-var goomba1 = master.CreateCharInstance(Character.Goomba, {x: 300,y:0}, true);
-var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
-var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
+//var goomba1 = master.CreateCharInstance(Character.Goomba, {x: 300,y:0}, true);
+//var goomba2 = master.CreateCharInstance(Character.Goomba, {x: 500,y:0}, true);
+//var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
 
 master.init();
 master.start();
