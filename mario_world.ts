@@ -95,7 +95,7 @@ namespace Character {
         private _isStarting = false;
         private _frameTimer: number = null;
 
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, protected zIndex = 2147483647, protected frameInterval = 45) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, protected zIndex = 2147483645, protected frameInterval = 45) {
         }
 
         public init(): void{
@@ -204,6 +204,14 @@ namespace Character {
             }
 
             return currentDirection != this._isReverse;
+        }
+
+        public checkMobile(): boolean {
+            if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
     }
@@ -466,8 +474,9 @@ namespace Character {
                             this.targetDom.removeChild(blackScreen);
 
                             this.start();
-
                             // TODO: GO back circle
+                            // this.drawBlackClipCircle(this.targetDom, { x: 300, y: 1000 }, 500, 0);
+
                         }
                         blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
 
@@ -480,31 +489,60 @@ namespace Character {
             this.targetDom.appendChild(blackScreen);
         }
 
+        private drawBlackClipCircle(targetDom, position: Position, size: number, count: number): void {
+            let element = document.createElement("canvas");
+            element.id = `brackout_circle_${count}`;
+            let ctx = element.getContext("2d");
+            let width = this.targetDom.clientWidth;
+            let height = this.targetDom.clientHeight;
+
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
+            element.style.cssText = `z-index: ${this.zIndex + 1}; position: absolute;`;
+            ctx.beginPath();
+            ctx.rect(0, 0, width, height);
+            ctx.fillStyle = 'rgb(0, 0, 0)';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(position.x, position.y, size, 0, Math.PI * 2, false);
+            ctx.clip();
+            ctx.rect(0, 0, width, height);
+            ctx.fillStyle = 'rgb(255, 255, 255, 1)';
+            ctx.fill();
+            targetDom.appendChild(element);
+            if (count != 0)
+                targetDom.removeChild(document.getElementById(`brackout_circle_${count - 1}`));
+        }
+
         registerActionCommand(): void {
-            document.addEventListener('keydown', (e) => {
-                if (e.keyCode == 65 && !this._isSquat) {
-                    this.onJump();
-                }
-                if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
-                    this.onSpeedUp();
-                }
+            if (this.checkMobile()) {
 
-                if (e.keyCode == 40 && !this._isJumping) {
-                    this.onSquat();
-                }
+            } else {
+                document.addEventListener('keydown', (e) => {
+                    if (e.keyCode == 65 && !this._isSquat) {
+                        this.onJump();
+                    }
+                    if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
+                        this.onSpeedUp();
+                    }
 
-            });
-            document.addEventListener('keyup', (e) => {
-                if (e.keyCode == 65) {
-                    this.onAbortJump();
-                }
-                if (e.keyCode == 66) {
-                    this.onAbortSpeedUp();
-                }
-                if (e.keyCode == 40) {
-                    this.onAbortSquat();
-                }
-            });
+                    if (e.keyCode == 40 && !this._isJumping) {
+                        this.onSquat();
+                    }
+
+                });
+                document.addEventListener('keyup', (e) => {
+                    if (e.keyCode == 65) {
+                        this.onAbortJump();
+                    }
+                    if (e.keyCode == 66) {
+                        this.onAbortSpeedUp();
+                    }
+                    if (e.keyCode == 40) {
+                        this.onAbortSquat();
+                    }
+                });
+            }
         }
 
         colors = ['','#000000','#ffffff','#520000','#8c5a18','#21318c','#ff4273','#b52963','#ffde73','#dea539','#ffd6c6','#ff736b','#84dece','#42849c'];
@@ -868,25 +906,21 @@ var mario = master.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
 
 var goomba1 = master.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, false);
 var goomba2 = master.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
-//var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
+var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
 
 master.init();
 master.start();
 
-//goomba1.start();
-//goomba2.start();
-//goomba3.start();
-//mario.registerCommand();
-//mario.draw()
-//mario.draw(0, {x:0, y:0});
-//mario.draw(1, {x:100, y:0});
-//mario.draw(2, {x:200, y:0});
-//mario.draw(3, {x:300, y:0});
-//mario.draw(4, {x:400, y:0});
-//mario.draw(5, {x:500, y:0});
-//mario.draw(6, {x:600, y:0});
-//mario.draw(7, {x:700, y:0});
-//mario.draw(8, {x:800, y:0});
-//mario.draw(9, {x:800, y:0});
-//mario.draw(10, {x:900, y:0});
-//mario.gool();
+// mario.draw(0, {x:0, y:0});
+// mario.draw(1, {x:100, y:0});
+// mario.draw(2, {x:200, y:0});
+// mario.draw(3, {x:300, y:0});
+// mario.draw(4, {x:400, y:0});
+// mario.draw(5, {x:500, y:0});
+// mario.draw(6, {x:600, y:0});
+// mario.draw(7, {x:700, y:0});
+// mario.draw(8, {x:800, y:0});
+// mario.draw(9, {x:800, y:0});
+// mario.draw(10, {x:900, y:0});
+
+// mario.gool();
