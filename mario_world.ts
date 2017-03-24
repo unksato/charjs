@@ -4,6 +4,20 @@ namespace Character {
         public y: number = 0;
     }
 
+    interface ICharacter {
+        init(): void;
+        start(): void;
+        stop(): void;
+        destroy(): void;
+        getPosition(): Position;
+        getCharSize(): { height: number, width: number };
+    }
+
+    interface IEnemy extends ICharacter{
+        onStepped(): void;
+        isStepped(): boolean; 
+    }
+
     export class GameMaster {
 
         static GAME_MASTERS = {};
@@ -22,7 +36,7 @@ namespace Character {
             return master;
         }
 
-        private _enemys: AbstractCharacter[] = []
+        private _enemys: IEnemy[] = []
         private _player: AbstractCharacter = null;
         
         public CreateCharInstance<C extends AbstractCharacter>(clz: { new (targetDom, pixSize, position, reverse): C }, position: Position, isReverse = false) : C {
@@ -30,7 +44,7 @@ namespace Character {
             let char = new clz(this.targetDom, this.charSize, position, isReverse);
 
             if (char.isEnemy) {
-                this._enemys.push(char);
+                this._enemys.push(<any>char);
             } else {
                 this._player = char;
             }
@@ -39,8 +53,8 @@ namespace Character {
             return char;
         }
 
-        public getEnemys(): AbstractCharacter[] {
-            return this._enemys;
+        public getEnemys(): IEnemy[] {
+            return <any>this._enemys;
         }
 
         public init(): void {
@@ -75,17 +89,20 @@ namespace Character {
         }
     }
 
-    abstract class AbstractCharacter {
+    abstract class AbstractCharacter implements ICharacter{
         abstract chars: number[][][];
         abstract colors: string[];
         abstract drawAction(): void;        
         abstract registerActionCommand(): void;
         abstract isEnemy: boolean;
-        
+        abstract useVertical: boolean;
+
         protected cssTextTemplate = `z-index: ${this.zIndex}; position: absolute; bottom: 0;`;
         protected currentAction: HTMLCanvasElement = null;
         protected _actions : HTMLCanvasElement[] = [];
         protected _reverseActions : HTMLCanvasElement[]  = [];
+        protected _verticalActions : HTMLCanvasElement[]  = [];
+        protected _verticalReverseActions : HTMLCanvasElement[]  = [];
 
         protected charWidth: number = null;
         protected charHeight: number = null;
@@ -102,10 +119,14 @@ namespace Character {
              for (let charactor of this.chars) {
                 this._actions.push(this.createCharacterAction(charactor));
                 this._reverseActions.push(this.createCharacterAction(charactor, true));
-            }           
+                if (this.useVertical) {
+                    this._verticalActions.push(this.createCharacterAction(charactor, false, true));
+                    this._verticalReverseActions.push(this.createCharacterAction(charactor, true, true));
+                }
+             }           
         }
 
-        private createCharacterAction(charactorMap: number[][], isReverse:boolean = false) : HTMLCanvasElement{
+        private createCharacterAction(charactorMap: number[][], isReverse:boolean = false, isVerticalRotation:boolean = false) : HTMLCanvasElement{
             let element = document.createElement("canvas");
             let ctx = element.getContext("2d");
             this.charWidth = this.pixSize * charactorMap[0].length + 1;
@@ -114,13 +135,15 @@ namespace Character {
             element.setAttribute("width", this.charWidth.toString());
             element.setAttribute("height", this.charHeight.toString());
             element.style.cssText = this.cssTextTemplate;
-            AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse);
+            AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
             return element;
         }    
 
-        private static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, reverse: boolean) : void {
+        private static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, reverse: boolean, vertical: boolean) : void {
             if (reverse)
                 ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
+            if (vertical)
+                ctx.transform(1, 0, 0, -1, 0, map.length * size);
             for (let y = 0; y < map.length; y++){
                 for (let x = 0; x < map[y].length; x++){
                     if (map[y][x] != 0) {
@@ -140,10 +163,14 @@ namespace Character {
             }
         }
 
-        public draw(index: number = 0, position: Position = null, reverse: boolean = false, removeCurrent = false): void {
+        public draw(index: number = 0, position: Position = null, reverse: boolean = false, vertical = false, removeCurrent = false): void {
             if (removeCurrent) this.removeCharacter();
             position = position || this.position;
-            this.currentAction = !reverse ? this._actions[index] : this._reverseActions[index]; 
+            if (!vertical) {
+                this.currentAction = !reverse ? this._actions[index] : this._reverseActions[index]; 
+            } else {
+                this.currentAction = !reverse ? this._verticalActions[index] : this._verticalReverseActions[index];                 
+            }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = this.position.y + 'px';
             this.targetDom.appendChild(this.currentAction);
@@ -221,6 +248,7 @@ namespace Character {
         private _currentStep = Mario.STEP;
 
         isEnemy = false;
+        useVertical = false;
 
         private _yVector = 0;
         private _jumpPower = 18;
@@ -238,20 +266,19 @@ namespace Character {
         private _isBraking = false;
         private _isSquat = false;
 
-
         drawAction(): void {
             if (this.doHitTest()) {
                 this.gameOver();
             } else {
                 let actionIndex = this.executeRun();
                 actionIndex = this.executeJump() || actionIndex;
-                this.draw(actionIndex, null, this._isReverse, true);
+                this.draw(actionIndex, null, this._isReverse, false, true);
             }
         }
 
         private doHitTest(): boolean {
             if (this._gameMaster) {
-                let enemys = this._gameMaster.getEnemys();
+                let enemys: IEnemy[] = this._gameMaster.getEnemys();
                 for (let enemy of enemys) {
                     let ePos = enemy.getPosition();
                     let eSize = enemy.getCharSize()
@@ -264,6 +291,16 @@ namespace Character {
                     if (ePos.x > this.position.x + this.charWidth)
                         continue;
 
+                    if (enemy.isStepped()) {
+                        enemy.destroy();
+                        continue;
+                    }
+
+                    if (this._isJumping && this._yVector < 0) {
+                        enemy.onStepped();
+                        this._yVector = 12 * this.pixSize;
+                        continue;
+                    }
                     return true;
                 }
             }
@@ -421,7 +458,7 @@ namespace Character {
             this._gameOverTimer = setInterval(() => {
                 if (this._gameOverWaitCount < 20) {
                     this._gameOverWaitCount++;
-                    this.draw(9, null, false, true);
+                    this.draw(9, null, false, false, true);
                     this._yVector = this._jumpPower * this.pixSize;
                     return;
                 }
@@ -442,7 +479,7 @@ namespace Character {
                     this._runIndex = this._runIndex ^ 1;
                 }
 
-                this.draw(9, null, this._runIndex == 0 ? true : false, true);
+                this.draw(9, null, this._runIndex == 0 ? true : false, false, true);
 
             }, this.frameInterval);
         }
@@ -461,7 +498,7 @@ namespace Character {
                     this._backgroundOpacity += 0.02;
                 } else {
                     this.stop();
-                    this.draw(10, null, false, true);
+                    this.draw(10, null, false, false, true);
                     clearInterval(goolDimTimer);
                     let goolDimOffTimer = setInterval(() => {
                         if (Math.ceil(this._backgroundOpacity) != 0) {
@@ -801,7 +838,7 @@ namespace Character {
 
     }
 
-    export class Goomba extends AbstractCharacter {
+    export class Goomba extends AbstractCharacter implements IEnemy {
         colors = ['','#000000','#ffffff','#b82800','#f88800','#f87800','#f8c000','#f8f800'];
         chars = [[
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -839,12 +876,15 @@ namespace Character {
             [0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0]
             ]];
 
+        useVertical = true;
+        isEnemy = true;
 
         private _speed = 1;
         private static STEP = 2;
         private _currentStep = 0;
         private _actionIndex = 0;
-        isEnemy = true;
+
+        private _isStepped = false;
 
         drawAction(): void {
             let directionUpdated = this.updateDirection();
@@ -866,7 +906,20 @@ namespace Character {
                 this._actionIndex = this._actionIndex ^ 1;
             }
 
-            this.draw(this._actionIndex, null, this._isReverse, true);
+            this.draw(this._actionIndex, null, this._isReverse, this._isStepped, true);
+        }
+
+        isStepped(): boolean{
+            return this._isStepped;
+        }
+
+        onStepped(): void {
+            this._isStepped = true;
+            this._speed = 0;
+        }
+
+        public onKicked(): void {
+
         }
 
         private doHitTestWithOtherEnemy(): boolean {
