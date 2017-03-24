@@ -119,9 +119,9 @@ namespace Character {
         }    
 
         private static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, reverse: boolean) : void {
+            if (reverse)
+                ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
             for (let y = 0; y < map.length; y++){
-                if (reverse)
-                    map[y].reverse();
                 for (let x = 0; x < map[y].length; x++){
                     if (map[y][x] != 0) {
                         ctx.beginPath();
@@ -129,9 +129,6 @@ namespace Character {
                         ctx.fillStyle = colors[map[y][x]];
                         ctx.fill();
                     }
-                }
-                if (reverse) {
-                    map[y].reverse();
                 }
             }
         }
