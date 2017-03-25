@@ -336,6 +336,8 @@ namespace Character {
                 targetDom.removeChild(document.getElementById(`brackout_circle_${count - 1}`));
         }
 
+        private _canSpeedUpForMobile: boolean = true;
+
         registerActionCommand(): void {
             if (this.checkMobile()) {
                 document.addEventListener('touchstart', (e)=>{
@@ -346,7 +348,24 @@ namespace Character {
                 });
                 document.addEventListener('touchcancel', (e)=>{
                     this.onAbortJump();
-                });                
+                });
+                window.addEventListener('deviceorientation',(e)=>{
+                    if(Math.abs(e.gamma) > 50 && this._canSpeedUpForMobile){
+                        if(this._isReverse && e.gamma < 0){
+                            this._canSpeedUpForMobile = false;
+                            this.onSpeedUp();
+                        }else if(this._isReverse && e.gamma > 0){
+                            this._canSpeedUpForMobile = false;
+                            this.onSpeedUp();
+                        }
+                    }else{
+                        if(!this._canSpeedUpForMobile){
+                            this.onAbortSpeedUp();
+                            this._canSpeedUpForMobile = true;
+                        }
+                    }
+                });
+
             } else {
                 document.addEventListener('keydown', (e) => {
                     if (e.keyCode == 65 && !this._isSquat) {

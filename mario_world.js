@@ -37,6 +37,7 @@ var Character;
             _this._isSquat = false;
             _this._attackDirection = 1;
             _this._backgroundOpacity = 0;
+            _this._canSpeedUpForMobile = true;
             _this.colors = ['', '#000000', '#ffffff', '#520000', '#8c5a18', '#21318c', '#ff4273', '#b52963', '#ffde73', '#dea539', '#ffd6c6', '#ff736b', '#84dece', '#42849c'];
             _this.chars = [[
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -617,6 +618,24 @@ var Character;
                 });
                 document.addEventListener('touchcancel', function (e) {
                     _this.onAbortJump();
+                });
+                window.addEventListener('deviceorientation', function (e) {
+                    if (Math.abs(e.gamma) > 50 && _this._canSpeedUpForMobile) {
+                        if (_this._isReverse && e.gamma < 0) {
+                            _this._canSpeedUpForMobile = false;
+                            _this.onSpeedUp();
+                        }
+                        else if (_this._isReverse && e.gamma > 0) {
+                            _this._canSpeedUpForMobile = false;
+                            _this.onSpeedUp();
+                        }
+                    }
+                    else {
+                        if (!_this._canSpeedUpForMobile) {
+                            _this.onAbortSpeedUp();
+                            _this._canSpeedUpForMobile = true;
+                        }
+                    }
                 });
             }
             else {
