@@ -350,7 +350,7 @@ namespace Character {
                     this.onAbortJump();
                 });
                 window.addEventListener('deviceorientation',(e)=>{
-                    if(Math.abs(e.gamma) > 50 && this._canSpeedUpForMobile){
+                    if(Math.abs(e.gamma) > 20 && this._canSpeedUpForMobile){
                         if(this._isReverse && e.gamma < 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
