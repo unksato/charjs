@@ -269,39 +269,39 @@ namespace Character {
         public gool(): void {
             if (this._gameMaster) this._gameMaster.doGool();
 
+            this._speed = 1;
+
             let blackScreen = document.createElement('div');
             if (this.targetDom == document.body)
                 this.targetDom.style.cssText = 'margin: 0px;'; // only document body 
 
             let goolDimTimer = setInterval(() => {
                 if (Math.floor(this._backgroundOpacity) != 1) {
-                    this._backgroundOpacity += 0.02;
+                    this._backgroundOpacity += 0.01;
                 } else {
                     this.stop();
                     this.draw(10, null, false, false, true);
                     clearInterval(goolDimTimer);
                     let goolDimOffTimer = setInterval(() => {
                         if (Math.ceil(this._backgroundOpacity) != 0) {
-                            this._backgroundOpacity -= 0.04;
+                            this._backgroundOpacity -= 0.02;
                         } else {
                             clearInterval(goolDimOffTimer);
                             this.targetDom.removeChild(blackScreen);
 
                             this.start();
-                            // TODO: GO back circle
 
                             let circleSize = 400;
                             let circleAnimationCount = 0;
                             let circleTimer = setInterval(() => {
-                                if(circleSize == 0){
+                                circleSize-=2;
+                                this.drawBlackClipCircle(this.targetDom, this.position, circleSize, circleAnimationCount);
+                                circleAnimationCount++;
+                                if(circleSize <= 0){
                                     clearInterval(circleTimer);
                                     this.destroy();
                                 }
-                                this.drawBlackClipCircle(this.targetDom, this.position, circleSize, circleAnimationCount);
-                                circleAnimationCount++;
-                                circleSize--;
-                            }, 1)
-
+                            }, 1);
                         }
                         blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
 
@@ -320,17 +320,17 @@ namespace Character {
             let ctx = element.getContext("2d");
             let width = this.targetDom.clientWidth;
             let height = this.targetDom.clientHeight;
-
             element.setAttribute("width", width.toString());
             element.setAttribute("height", height.toString());
             element.style.cssText = `z-index: ${this.zIndex + 1}; position: absolute;`;
-
             ctx.fillStyle = "black";
             ctx.fillRect(0,0,width,height);
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.beginPath();
 
-            ctx.arc(position.x + this.charWidth / 2, height - position.y - this.charHeight / 2, size, 0, Math.PI * 2, false);
+            if(size > 0){
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                ctx.arc(position.x + this.charWidth / 2, height - position.y - this.charHeight / 2, size, 0, Math.PI * 2, false);
+            }
             ctx.fill();
 
             targetDom.appendChild(element);
@@ -340,7 +340,15 @@ namespace Character {
 
         registerActionCommand(): void {
             if (this.checkMobile()) {
-
+                document.addEventListener('touchstart', (e)=>{
+                    this.onJump();
+                });
+                document.addEventListener('touchend', (e)=>{
+                    this.onAbortJump();
+                });
+                document.addEventListener('touchcancel', (e)=>{
+                    this.onAbortJump();
+                });                
             } else {
                 document.addEventListener('keydown', (e) => {
                     if (e.keyCode == 65 && !this._isSquat) {

@@ -547,12 +547,13 @@ var Character;
             var _this = this;
             if (this._gameMaster)
                 this._gameMaster.doGool();
+            this._speed = 1;
             var blackScreen = document.createElement('div');
             if (this.targetDom == document.body)
                 this.targetDom.style.cssText = 'margin: 0px;'; // only document body 
             var goolDimTimer = setInterval(function () {
                 if (Math.floor(_this._backgroundOpacity) != 1) {
-                    _this._backgroundOpacity += 0.02;
+                    _this._backgroundOpacity += 0.01;
                 }
                 else {
                     _this.stop();
@@ -560,23 +561,22 @@ var Character;
                     clearInterval(goolDimTimer);
                     var goolDimOffTimer_1 = setInterval(function () {
                         if (Math.ceil(_this._backgroundOpacity) != 0) {
-                            _this._backgroundOpacity -= 0.04;
+                            _this._backgroundOpacity -= 0.02;
                         }
                         else {
                             clearInterval(goolDimOffTimer_1);
                             _this.targetDom.removeChild(blackScreen);
                             _this.start();
-                            // TODO: GO back circle
                             var circleSize_1 = 400;
                             var circleAnimationCount_1 = 0;
                             var circleTimer_1 = setInterval(function () {
-                                if (circleSize_1 == 0) {
+                                circleSize_1 -= 2;
+                                _this.drawBlackClipCircle(_this.targetDom, _this.position, circleSize_1, circleAnimationCount_1);
+                                circleAnimationCount_1++;
+                                if (circleSize_1 <= 0) {
                                     clearInterval(circleTimer_1);
                                     _this.destroy();
                                 }
-                                _this.drawBlackClipCircle(_this.targetDom, _this.position, circleSize_1, circleAnimationCount_1);
-                                circleAnimationCount_1++;
-                                circleSize_1--;
                             }, 1);
                         }
                         blackScreen.style.cssText = "z-index: " + (_this.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + _this._backgroundOpacity + ";";
@@ -597,9 +597,11 @@ var Character;
             element.style.cssText = "z-index: " + (this.zIndex + 1) + "; position: absolute;";
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, width, height);
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.beginPath();
-            ctx.arc(position.x + this.charWidth / 2, height - position.y - this.charHeight / 2, size, 0, Math.PI * 2, false);
+            if (size > 0) {
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                ctx.arc(position.x + this.charWidth / 2, height - position.y - this.charHeight / 2, size, 0, Math.PI * 2, false);
+            }
             ctx.fill();
             targetDom.appendChild(element);
             if (count != 0)
@@ -608,6 +610,15 @@ var Character;
         Mario.prototype.registerActionCommand = function () {
             var _this = this;
             if (this.checkMobile()) {
+                document.addEventListener('touchstart', function (e) {
+                    _this.onJump();
+                });
+                document.addEventListener('touchend', function (e) {
+                    _this.onAbortJump();
+                });
+                document.addEventListener('touchcancel', function (e) {
+                    _this.onAbortJump();
+                });
             }
             else {
                 document.addEventListener('keydown', function (e) {
