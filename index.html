@@ -1,7 +1,38 @@
 <html>
     <head>
         <title>Charjs Sample</title>
+        <script type="text/javascript" src="./abstract_character.js"></script>
         <script type="text/javascript" src="./mario_world.js"></script>
+        <script type="text/javascript" src="./goomba_world.js"></script>
+        <script type="text/javascript" src="./game_master.js"></script>
+        <script>
+            window.onload = function(){
+                let master = Character.GameMaster.GetController('sample' ,document.body, 2);
+                var mario = master.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
+
+                var goomba1 = master.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, false);
+                var goomba2 = master.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
+                var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
+
+                master.init();
+                master.start();
+
+                // mario.draw(0, {x:0, y:0});
+                // mario.draw(1, {x:100, y:0});
+                // mario.draw(2, {x:200, y:0});
+                // mario.draw(3, {x:300, y:0});
+                // mario.draw(4, {x:400, y:0});
+                // mario.draw(5, {x:500, y:0});
+                // mario.draw(6, {x:600, y:0});
+                // mario.draw(7, {x:700, y:0});
+                // mario.draw(8, {x:800, y:0});
+                // mario.draw(9, {x:800, y:0});
+                // mario.draw(10, {x:900, y:0});
+                // mario.draw(11, {x:1000, y:0});
+
+                // mario.gool();
+            }
+        </script>
     </head>
     <body>
     </body>

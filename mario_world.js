@@ -10,228 +10,6 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Character;
 (function (Character) {
-    var Position = (function () {
-        function Position() {
-            this.x = 0;
-            this.y = 0;
-        }
-        return Position;
-    }());
-    var GameMaster = (function () {
-        function GameMaster(targetDom, charSize) {
-            this.targetDom = targetDom;
-            this.charSize = charSize;
-            this._enemys = [];
-            this._player = null;
-        }
-        GameMaster.GetController = function (gameName, targetDom, charSize) {
-            var master = GameMaster.GAME_MASTERS[gameName];
-            if (master) {
-                return master;
-            }
-            master = new GameMaster(targetDom, charSize);
-            GameMaster.GAME_MASTERS[gameName] = master;
-            return master;
-        };
-        GameMaster.prototype.CreateCharInstance = function (clz, position, isReverse) {
-            if (isReverse === void 0) { isReverse = false; }
-            var char = new clz(this.targetDom, this.charSize, position, isReverse);
-            if (char.isEnemy) {
-                this._enemys.push(char);
-            }
-            else {
-                this._player = char;
-            }
-            char._gameMaster = this;
-            return char;
-        };
-        GameMaster.prototype.getEnemys = function () {
-            return this._enemys;
-        };
-        GameMaster.prototype.init = function () {
-            if (this._player) {
-                this._player.init();
-            }
-            for (var _i = 0, _a = this._enemys; _i < _a.length; _i++) {
-                var enemy = _a[_i];
-                enemy.init();
-            }
-        };
-        GameMaster.prototype.start = function () {
-            for (var _i = 0, _a = this._enemys; _i < _a.length; _i++) {
-                var enemy = _a[_i];
-                enemy.start();
-            }
-            if (this._player) {
-                this._player.start();
-            }
-        };
-        GameMaster.prototype.doGameOver = function () {
-            for (var _i = 0, _a = this._enemys; _i < _a.length; _i++) {
-                var enemy = _a[_i];
-                enemy.stop();
-            }
-        };
-        GameMaster.prototype.doGool = function () {
-            for (var _i = 0, _a = this._enemys; _i < _a.length; _i++) {
-                var enemy = _a[_i];
-                enemy.stop();
-            }
-        };
-        return GameMaster;
-    }());
-    GameMaster.GAME_MASTERS = {};
-    Character.GameMaster = GameMaster;
-    var AbstractCharacter = (function () {
-        function AbstractCharacter(targetDom, pixSize, position, _isReverse, zIndex, frameInterval) {
-            if (pixSize === void 0) { pixSize = 2; }
-            if (position === void 0) { position = { x: 0, y: 0 }; }
-            if (_isReverse === void 0) { _isReverse = false; }
-            if (zIndex === void 0) { zIndex = 2147483645; }
-            if (frameInterval === void 0) { frameInterval = 45; }
-            var _this = this;
-            this.targetDom = targetDom;
-            this.pixSize = pixSize;
-            this.position = position;
-            this._isReverse = _isReverse;
-            this.zIndex = zIndex;
-            this.frameInterval = frameInterval;
-            this.cssTextTemplate = "z-index: " + this.zIndex + "; position: absolute; bottom: 0;";
-            this.currentAction = null;
-            this._actions = [];
-            this._reverseActions = [];
-            this._verticalActions = [];
-            this._verticalReverseActions = [];
-            this.charWidth = null;
-            this.charHeight = null;
-            this._gameMaster = null;
-            this._isStarting = false;
-            this._frameTimer = null;
-            this._gravity = 2;
-            this.defaultCommand = function (e) {
-                if (e.keyCode == 32) {
-                    if (_this._isStarting) {
-                        _this.stop();
-                    }
-                    else {
-                        _this.start();
-                    }
-                }
-            };
-        }
-        AbstractCharacter.prototype.init = function () {
-            for (var _i = 0, _a = this.chars; _i < _a.length; _i++) {
-                var charactor = _a[_i];
-                this._actions.push(this.createCharacterAction(charactor));
-                this._reverseActions.push(this.createCharacterAction(charactor, true));
-                if (this.useVertical) {
-                    this._verticalActions.push(this.createCharacterAction(charactor, false, true));
-                    this._verticalReverseActions.push(this.createCharacterAction(charactor, true, true));
-                }
-            }
-        };
-        AbstractCharacter.prototype.createCharacterAction = function (charactorMap, isReverse, isVerticalRotation) {
-            if (isReverse === void 0) { isReverse = false; }
-            if (isVerticalRotation === void 0) { isVerticalRotation = false; }
-            var element = document.createElement("canvas");
-            var ctx = element.getContext("2d");
-            this.charWidth = this.pixSize * charactorMap[0].length + 1;
-            this.charHeight = this.pixSize * charactorMap.length;
-            element.setAttribute("width", this.charWidth.toString());
-            element.setAttribute("height", this.charHeight.toString());
-            element.style.cssText = this.cssTextTemplate;
-            AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
-            return element;
-        };
-        AbstractCharacter.drawCharacter = function (ctx, map, colors, size, reverse, vertical) {
-            if (reverse)
-                ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
-            if (vertical)
-                ctx.transform(1, 0, 0, -1, 0, map.length * size);
-            for (var y = 0; y < map.length; y++) {
-                for (var x = 0; x < map[y].length; x++) {
-                    if (map[y][x] != 0) {
-                        ctx.beginPath();
-                        ctx.rect(x * size, y * size, size, size);
-                        ctx.fillStyle = colors[map[y][x]];
-                        ctx.fill();
-                    }
-                }
-            }
-        };
-        AbstractCharacter.prototype.removeCharacter = function () {
-            if (this.currentAction != null) {
-                this.targetDom.removeChild(this.currentAction);
-                this.currentAction = null;
-            }
-        };
-        AbstractCharacter.prototype.draw = function (index, position, reverse, vertical, removeCurrent) {
-            if (index === void 0) { index = 0; }
-            if (position === void 0) { position = null; }
-            if (reverse === void 0) { reverse = false; }
-            if (vertical === void 0) { vertical = false; }
-            if (removeCurrent === void 0) { removeCurrent = false; }
-            if (removeCurrent)
-                this.removeCharacter();
-            position = position || this.position;
-            if (!vertical) {
-                this.currentAction = !reverse ? this._actions[index] : this._reverseActions[index];
-            }
-            else {
-                this.currentAction = !reverse ? this._verticalActions[index] : this._verticalReverseActions[index];
-            }
-            this.currentAction.style.left = position.x + 'px';
-            this.currentAction.style.bottom = this.position.y + 'px';
-            this.targetDom.appendChild(this.currentAction);
-        };
-        AbstractCharacter.prototype.registerCommand = function () {
-            document.addEventListener('keypress', this.defaultCommand);
-            this.registerActionCommand();
-        };
-        AbstractCharacter.prototype.start = function () {
-            var _this = this;
-            this.registerCommand();
-            this._isStarting = true;
-            this._frameTimer = setInterval(function () { _this.onAction(); }, this.frameInterval);
-        };
-        AbstractCharacter.prototype.stop = function () {
-            if (this._frameTimer) {
-                clearInterval(this._frameTimer);
-                this._frameTimer = null;
-            }
-            this._isStarting = false;
-        };
-        AbstractCharacter.prototype.destroy = function () {
-            this.stop();
-            this.removeCharacter();
-            document.removeEventListener('keypress', this.defaultCommand);
-        };
-        AbstractCharacter.prototype.getPosition = function () {
-            return this.position;
-        };
-        AbstractCharacter.prototype.getCharSize = function () {
-            return { height: this.charHeight, width: this.charWidth };
-        };
-        AbstractCharacter.prototype.updateDirection = function () {
-            var currentDirection = this._isReverse;
-            if (this.position.x > this.targetDom.clientWidth - this.charWidth - (this.pixSize * 2) && this._isReverse == false) {
-                this._isReverse = true;
-            }
-            if (this.position.x < 0 && this._isReverse == true) {
-                this._isReverse = false;
-            }
-            return currentDirection != this._isReverse;
-        };
-        AbstractCharacter.prototype.checkMobile = function () {
-            if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        };
-        return AbstractCharacter;
-    }());
     var HitStatus;
     (function (HitStatus) {
         HitStatus[HitStatus["none"] = 0] = "none";
@@ -562,11 +340,10 @@ var Character;
         Mario.prototype.doHitTest = function () {
             if (this._gameMaster) {
                 var enemys = this._gameMaster.getEnemys();
-                for (var _i = 0, enemys_1 = enemys; _i < enemys_1.length; _i++) {
-                    var enemy = enemys_1[_i];
-                    if (!enemy.isKilled()) {
-                        var ePos = enemy.getPosition();
-                        var eSize = enemy.getCharSize();
+                for (var name_1 in enemys) {
+                    if (!enemys[name_1].isKilled()) {
+                        var ePos = enemys[name_1].getPosition();
+                        var eSize = enemys[name_1].getCharSize();
                         if (this.position.y > ePos.y + eSize.height)
                             continue;
                         if (ePos.y > this.position.y + this.charHeight)
@@ -575,15 +352,15 @@ var Character;
                             continue;
                         if (ePos.x > this.position.x + this.charWidth)
                             continue;
-                        if (enemy.isStepped()) {
+                        if (enemys[name_1].isStepped()) {
                             var playerCenter = this.position.x + this.charWidth / 2;
                             var enemyCenter = ePos.x + eSize.width / 2;
                             this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
-                            enemy.onKicked(this._attackDirection, this._speed * 3);
+                            enemys[name_1].onKicked(this._attackDirection, this._speed * 3);
                             return HitStatus.attack;
                         }
                         if (this._isJumping && this._yVector < 0) {
-                            enemy.onStepped();
+                            enemys[name_1].onStepped();
                             this._yVector = 12 * this.pixSize;
                             continue;
                         }
@@ -852,160 +629,9 @@ var Character;
             }
         };
         return Mario;
-    }(AbstractCharacter));
+    }(Character.AbstractCharacter));
     Mario.STEP = 2;
     Mario.DEFAULT_SPEED = 2;
     Character.Mario = Mario;
-    var Goomba = (function (_super) {
-        __extends(Goomba, _super);
-        function Goomba() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.colors = ['', '#000000', '#ffffff', '#b82800', '#f88800', '#f87800', '#f8c000', '#f8f800'];
-            _this.chars = [[
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 1, 1, 3, 3, 3, 3, 1, 1, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 4, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1],
-                    [0, 0, 1, 4, 2, 4, 3, 1, 1, 1, 3, 1, 1, 1, 0, 0],
-                    [0, 1, 3, 3, 4, 3, 3, 3, 2, 1, 1, 1, 2, 3, 1, 0],
-                    [0, 1, 3, 3, 3, 3, 3, 2, 2, 2, 3, 2, 2, 2, 3, 1],
-                    [1, 3, 3, 3, 3, 3, 3, 2, 2, 1, 3, 1, 2, 2, 3, 1],
-                    [1, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 2, 2, 3, 3, 1],
-                    [1, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 3, 3, 1],
-                    [0, 1, 3, 3, 3, 4, 4, 2, 1, 1, 1, 1, 2, 3, 1, 0],
-                    [0, 5, 5, 5, 4, 4, 1, 1, 4, 4, 4, 4, 1, 4, 4, 0],
-                    [5, 6, 6, 7, 5, 5, 4, 4, 4, 4, 4, 4, 4, 1, 4, 0],
-                    [1, 6, 6, 7, 7, 2, 5, 0, 0, 0, 0, 1, 1, 7, 2, 1],
-                    [0, 1, 1, 6, 7, 7, 5, 1, 1, 1, 1, 6, 6, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0]
-                ], [
-                    [0.0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 1, 1, 3, 3, 3, 3, 1, 1, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 4, 3, 3, 3, 1, 1, 1, 3, 1, 1, 1, 0],
-                    [0, 0, 1, 4, 2, 4, 3, 3, 3, 3, 1, 1, 3, 1, 1, 0],
-                    [0, 1, 3, 3, 4, 3, 3, 3, 3, 3, 2, 1, 1, 1, 2, 0],
-                    [0, 1, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 1, 2, 2, 0],
-                    [1, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 1, 3, 1, 2, 1],
-                    [1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 3, 2, 2, 1],
-                    [1, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 1],
-                    [0, 1, 3, 3, 3, 3, 3, 4, 4, 2, 1, 1, 1, 1, 1, 0],
-                    [0, 1, 3, 3, 3, 3, 4, 4, 1, 1, 4, 4, 4, 4, 1, 0],
-                    [0, 0, 1, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 1, 0, 0],
-                    [0, 0, 0, 1, 1, 5, 5, 5, 5, 5, 4, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 5, 6, 6, 7, 7, 5, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 5, 6, 6, 6, 6, 2, 5, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-                ]];
-            _this.useVertical = true;
-            _this.isEnemy = true;
-            _this._speed = 1;
-            _this._currentStep = 0;
-            _this._actionIndex = 0;
-            _this._isKilled = false;
-            _this._isStepped = false;
-            return _this;
-        }
-        Goomba.prototype.isKilled = function () {
-            return this._isKilled;
-        };
-        Goomba.prototype.onAction = function () {
-            var directionUpdated = this.updateDirection();
-            if (this.doHitTestWithOtherEnemy()) {
-                this._isReverse = !this._isReverse;
-            }
-            if (!this._isReverse) {
-                this.position.x += this.pixSize * this._speed;
-            }
-            else {
-                this.position.x -= this.pixSize * this._speed;
-            }
-            if (this._currentStep < Goomba.STEP) {
-                this._currentStep++;
-            }
-            else {
-                this._currentStep = 0;
-                this._actionIndex = this._actionIndex ^ 1;
-            }
-            this.draw(this._actionIndex, null, this._isReverse, this._isStepped, true);
-        };
-        Goomba.prototype.isStepped = function () {
-            return this._isStepped;
-        };
-        Goomba.prototype.onStepped = function () {
-            this._isStepped = true;
-            this._speed = 0;
-        };
-        Goomba.prototype.onKicked = function (direction, kickPower) {
-            var _this = this;
-            this.stop();
-            this._isKilled = true;
-            var yVector = 10 * this.pixSize;
-            var killTimer = setInterval(function () {
-                yVector -= _this._gravity * _this.pixSize;
-                _this.position.y = _this.position.y + yVector;
-                _this.position.x += kickPower * direction;
-                if (_this.position.y < _this.charHeight * 5 * -1) {
-                    clearInterval(killTimer);
-                    _this.destroy();
-                    return;
-                }
-                if (_this._currentStep < Goomba.STEP) {
-                    _this._currentStep++;
-                }
-                else {
-                    _this._currentStep = 0;
-                    _this._actionIndex = _this._actionIndex ^ 1;
-                }
-                _this.draw(_this._actionIndex, null, direction > 0 ? false : true, _this._isStepped, true);
-            }, this.frameInterval);
-        };
-        Goomba.prototype.doHitTestWithOtherEnemy = function () {
-            if (this._gameMaster) {
-                var enemys = this._gameMaster.getEnemys();
-                for (var _i = 0, enemys_2 = enemys; _i < enemys_2.length; _i++) {
-                    var enemy = enemys_2[_i];
-                    if (enemy != this) {
-                        var ePos = enemy.getPosition();
-                        var eSize = enemy.getCharSize();
-                        if (this.position.y > ePos.y + eSize.height)
-                            continue;
-                        if (ePos.y > this.position.y + this.charHeight)
-                            continue;
-                        if (this.position.x > ePos.x + eSize.width)
-                            continue;
-                        if (ePos.x > this.position.x + this.charWidth)
-                            continue;
-                        return true;
-                    }
-                }
-            }
-            return false;
-        };
-        Goomba.prototype.registerActionCommand = function () {
-        };
-        return Goomba;
-    }(AbstractCharacter));
-    Goomba.STEP = 2;
-    Character.Goomba = Goomba;
 })(Character || (Character = {}));
-var master = Character.GameMaster.GetController('sample', document.body, 3);
-var mario = master.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
-var goomba1 = master.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, false);
-var goomba2 = master.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
-var goomba3 = master.CreateCharInstance(Character.Goomba, { x: 800, y: 0 }, true);
-master.init();
-master.start();
-// mario.draw(0, {x:0, y:0});
-// mario.draw(1, {x:100, y:0});
-// mario.draw(2, {x:200, y:0});
-// mario.draw(3, {x:300, y:0});
-// mario.draw(4, {x:400, y:0});
-// mario.draw(5, {x:500, y:0});
-// mario.draw(6, {x:600, y:0});
-// mario.draw(7, {x:700, y:0});
-// mario.draw(8, {x:800, y:0});
-// mario.draw(9, {x:800, y:0});
-// mario.draw(10, {x:900, y:0});
-// mario.draw(11, {x:1000, y:0});
-// mario.gool();
 //# sourceMappingURL=mario_world.js.map
