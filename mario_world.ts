@@ -287,11 +287,9 @@ namespace Character {
                             this._backgroundOpacity -= 0.02;
                         } else {
                             clearInterval(goolDimOffTimer);
-                            this.targetDom.removeChild(blackScreen);
-
                             this.start();
 
-                            let circleSize = 400;
+                            let circleSize = this.targetDom.clientWidth > this.targetDom.clientHeight ? this.targetDom.clientWidth  : this.targetDom.clientHeight ;
                             let circleAnimationCount = 0;
                             let circleTimer = setInterval(() => {
                                 circleSize-=2;

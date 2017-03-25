@@ -565,9 +565,8 @@ var Character;
                         }
                         else {
                             clearInterval(goolDimOffTimer_1);
-                            _this.targetDom.removeChild(blackScreen);
                             _this.start();
-                            var circleSize_1 = 400;
+                            var circleSize_1 = _this.targetDom.clientWidth > _this.targetDom.clientHeight ? _this.targetDom.clientWidth : _this.targetDom.clientHeight;
                             var circleAnimationCount_1 = 0;
                             var circleTimer_1 = setInterval(function () {
                                 circleSize_1 -= 2;
