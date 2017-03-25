@@ -115,7 +115,6 @@ namespace Character {
         private _frameTimer: number = null;
         protected _gravity = 2;
 
-
         constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, protected zIndex = 2147483645, protected frameInterval = 45) {
         }
 
@@ -181,17 +180,18 @@ namespace Character {
         }
 
         public registerCommand(): void {
-            document.addEventListener('keypress', (e) => {
-                if (e.keyCode == 32) {
-                    if (this._isStarting) {
-                        this.stop();
-                    } else {
-                        this.start();
-                    }
-                }
-            });
-
+            document.addEventListener('keypress', this.defaultCommand);
             this.registerActionCommand();
+        }
+
+        defaultCommand = (e:KeyboardEvent) => {
+            if (e.keyCode == 32) {
+                if (this._isStarting) {
+                    this.stop();
+                } else {
+                    this.start();
+                }
+            }
         }
 
         public start(): void {
@@ -211,6 +211,7 @@ namespace Character {
         public destroy(): void {
             this.stop();
             this.removeCharacter();
+            document.removeEventListener('keypress', this.defaultCommand);
         }
 
         public getPosition(): Position {
@@ -273,6 +274,7 @@ namespace Character {
         private _isJumping = false;
         private _isBraking = false;
         private _isSquat = false;
+        private _attackDirection = 1;
 
 
         onAction(): void {
@@ -282,12 +284,10 @@ namespace Character {
                     break;
                 case HitStatus.attack:
                     this.draw(11, null, this._attackDirection >= 0 ? false : true, false, true);
-
                     this.stop();
                     let waitTimer = setTimeout(() => {
                         this.start();
                     }, this.frameInterval * 3);
-
                     break;
                 default:
                     let actionIndex = this.executeRun();
@@ -295,9 +295,6 @@ namespace Character {
                     this.draw(actionIndex, null, this._isReverse, false, true);
             }
         }
-
-        private _attackDirection = 1;
-
 
         private doHitTest(): HitStatus {
             if (this._gameMaster) {
