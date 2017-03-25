@@ -15,6 +15,8 @@ namespace Character {
 
     interface IEnemy extends ICharacter{
         onStepped(): void;
+        onKicked(direction: number, kickPower: number): void;
+        isKilled(): boolean;
         isStepped(): boolean; 
     }
 
@@ -92,7 +94,7 @@ namespace Character {
     abstract class AbstractCharacter implements ICharacter{
         abstract chars: number[][][];
         abstract colors: string[];
-        abstract drawAction(): void;        
+        abstract onAction(): void;        
         abstract registerActionCommand(): void;
         abstract isEnemy: boolean;
         abstract useVertical: boolean;
@@ -111,6 +113,8 @@ namespace Character {
 
         private _isStarting = false;
         private _frameTimer: number = null;
+        protected _gravity = 2;
+
 
         constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, protected zIndex = 2147483645, protected frameInterval = 45) {
         }
@@ -193,7 +197,7 @@ namespace Character {
         public start(): void {
             this.registerCommand();
             this._isStarting = true;
-            this._frameTimer = setInterval(() => { this.drawAction() }, this.frameInterval);
+            this._frameTimer = setInterval(() => { this.onAction() }, this.frameInterval);
         }
 
         public stop(): void {
@@ -240,6 +244,11 @@ namespace Character {
 
     }
 
+    enum HitStatus{
+        none,
+        dammage,
+        attack
+    }
 
     export class Mario extends AbstractCharacter{
         private static STEP = 2;
@@ -252,7 +261,6 @@ namespace Character {
 
         private _yVector = 0;
         private _jumpPower = 18;
-        private _gravity = 2;
         private _speed = Mario.DEFAULT_SPEED;
         private _gameOverWaitCount = 0;
 
@@ -266,45 +274,65 @@ namespace Character {
         private _isBraking = false;
         private _isSquat = false;
 
-        drawAction(): void {
-            if (this.doHitTest()) {
-                this.gameOver();
-            } else {
-                let actionIndex = this.executeRun();
-                actionIndex = this.executeJump() || actionIndex;
-                this.draw(actionIndex, null, this._isReverse, false, true);
+
+        onAction(): void {
+            switch (this.doHitTest()) {
+                case HitStatus.dammage:
+                    this.gameOver();
+                    break;
+                case HitStatus.attack:
+                    this.draw(11, null, this._attackDirection >= 0 ? false : true, false, true);
+
+                    this.stop();
+                    let waitTimer = setTimeout(() => {
+                        this.start();
+                    }, this.frameInterval * 3);
+
+                    break;
+                default:
+                    let actionIndex = this.executeRun();
+                    actionIndex = this.executeJump() || actionIndex;
+                    this.draw(actionIndex, null, this._isReverse, false, true);
             }
         }
 
-        private doHitTest(): boolean {
+        private _attackDirection = 1;
+
+
+        private doHitTest(): HitStatus {
             if (this._gameMaster) {
                 let enemys: IEnemy[] = this._gameMaster.getEnemys();
                 for (let enemy of enemys) {
-                    let ePos = enemy.getPosition();
-                    let eSize = enemy.getCharSize()
-                    if (this.position.y > ePos.y + eSize.height)
-                        continue;
-                    if (ePos.y > this.position.y + this.charHeight)
-                        continue;
-                    if (this.position.x > ePos.x + eSize.width)
-                        continue;
-                    if (ePos.x > this.position.x + this.charWidth)
-                        continue;
+                    if (!enemy.isKilled()) {
+                        let ePos = enemy.getPosition();
+                        let eSize = enemy.getCharSize()
+                        if (this.position.y > ePos.y + eSize.height)
+                            continue;
+                        if (ePos.y > this.position.y + this.charHeight)
+                            continue;
+                        if (this.position.x > ePos.x + eSize.width)
+                            continue;
+                        if (ePos.x > this.position.x + this.charWidth)
+                            continue;
 
-                    if (enemy.isStepped()) {
-                        enemy.destroy();
-                        continue;
-                    }
+                        if (enemy.isStepped()) {
+                            let playerCenter = this.position.x + this.charWidth / 2;
+                            let enemyCenter = ePos.x + eSize.width / 2;
+                            this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
+                            enemy.onKicked(this._attackDirection, this._speed * 3);
+                            return HitStatus.attack;
+                        }
 
-                    if (this._isJumping && this._yVector < 0) {
-                        enemy.onStepped();
-                        this._yVector = 12 * this.pixSize;
-                        continue;
+                        if (this._isJumping && this._yVector < 0) {
+                            enemy.onStepped();
+                            this._yVector = 12 * this.pixSize;
+                            continue;
+                        }
+                        return HitStatus.dammage;
                     }
-                    return true;
                 }
             }
-            return false;
+            return HitStatus.none;
         }
 
         private executeJump(): number {
@@ -906,10 +934,15 @@ namespace Character {
         private static STEP = 2;
         private _currentStep = 0;
         private _actionIndex = 0;
+        private _isKilled = false;
 
         private _isStepped = false;
 
-        drawAction(): void {
+        isKilled(): boolean{
+            return this._isKilled;
+        }
+
+        onAction(): void {
             let directionUpdated = this.updateDirection();
 
             if (this.doHitTestWithOtherEnemy()) {
@@ -941,8 +974,33 @@ namespace Character {
             this._speed = 0;
         }
 
-        public onKicked(): void {
+        onKicked(direction:number, kickPower: number): void {
+            this.stop();
+            this._isKilled = true;
+            let yVector = 10 * this.pixSize;
+            let killTimer = setInterval(() => {
 
+                yVector -= this._gravity * this.pixSize;
+                this.position.y = this.position.y + yVector;
+                this.position.x += kickPower * direction;
+
+                if (this.position.y < this.charHeight * 5 * -1) {
+                    clearInterval(killTimer);
+                    this.destroy();
+                    return;
+                }
+
+                if (this._currentStep < Goomba.STEP) {
+                    this._currentStep++;
+                } else {
+                    this._currentStep = 0;
+                    this._actionIndex = this._actionIndex ^ 1;
+                }
+
+                this.draw(this._actionIndex, null, direction > 0 ? false : true, this._isStepped, true);
+
+
+            }, this.frameInterval);
         }
 
         private doHitTestWithOtherEnemy(): boolean {
