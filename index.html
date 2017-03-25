@@ -7,15 +7,15 @@
         <script type="text/javascript" src="./game_master.js"></script>
         <script>
             window.onload = function(){
-                let master = Character.GameMaster.GetController('sample' ,document.body, 2);
-                var mario = master.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
+                var controller = Character.GameMaster.GetController('sample' ,document.body, 2);
 
-                var goomba1 = master.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, false);
-                var goomba2 = master.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
-                var goomba3 = master.CreateCharInstance(Character.Goomba, {x: 800,y:0}, true);
+                controller.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
+                controller.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, true);
+                controller.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
+                controller.CreateCharInstance(Character.Goomba, { x: 800, y: 0 }, true);
 
-                master.init();
-                master.start();
+                controller.init();
+                controller.start();
 
                 // mario.draw(0, {x:0, y:0});
                 // mario.draw(1, {x:100, y:0});

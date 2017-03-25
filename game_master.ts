@@ -41,6 +41,9 @@ namespace Character {
 
         public deleteEnemy(char : IEnemy) {
             delete this._enemys[char._name];
+            if(Object.keys(this._enemys).length == 0){
+                (<any>this._player).gool();
+            }
         }
 
         public getEnemys(): {[name:string]:IEnemy} {

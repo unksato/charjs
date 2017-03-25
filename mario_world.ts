@@ -289,7 +289,17 @@ namespace Character {
 
                             this.start();
                             // TODO: GO back circle
-                            // this.drawBlackClipCircle(this.targetDom, { x: 300, y: 1000 }, 500, 0);
+
+                            let circleSize = 400;
+                            let circleAnimationCount = 0;
+                            let t = setInterval(() => {
+                                if(circleSize == 0)
+                                    clearInterval(t);
+
+                                this.drawBlackClipCircle(this.targetDom, this.position, circleSize, circleAnimationCount);
+                                circleAnimationCount++;
+                                circleSize--;
+                            }, 1)
 
                         }
                         blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
@@ -313,16 +323,15 @@ namespace Character {
             element.setAttribute("width", width.toString());
             element.setAttribute("height", height.toString());
             element.style.cssText = `z-index: ${this.zIndex + 1}; position: absolute;`;
+
+            ctx.fillStyle = "black";
+            ctx.fillRect(0,0,width,height);
+            ctx.globalCompositeOperation = "destination-out";
             ctx.beginPath();
-            ctx.rect(0, 0, width, height);
-            ctx.fillStyle = 'rgb(0, 0, 0)';
+
+            ctx.arc(position.x + this.charWidth / 2, height - position.y - this.charHeight / 2, size, 0, Math.PI * 2, false);
             ctx.fill();
-            ctx.beginPath();
-            ctx.arc(position.x, position.y, size, 0, Math.PI * 2, false);
-            ctx.clip();
-            ctx.rect(0, 0, width, height);
-            ctx.fillStyle = 'rgb(255, 255, 255, 1)';
-            ctx.fill();
+
             targetDom.appendChild(element);
             if (count != 0)
                 targetDom.removeChild(document.getElementById(`brackout_circle_${count - 1}`));

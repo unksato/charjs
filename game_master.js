@@ -34,6 +34,9 @@ var Character;
         };
         GameMaster.prototype.deleteEnemy = function (char) {
             delete this._enemys[char._name];
+            if (Object.keys(this._enemys).length == 0) {
+                this._player.gool();
+            }
         };
         GameMaster.prototype.getEnemys = function () {
             return this._enemys;
