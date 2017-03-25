@@ -569,7 +569,7 @@ var Character;
                             var circleSize_1 = _this.targetDom.clientWidth > _this.targetDom.clientHeight ? _this.targetDom.clientWidth : _this.targetDom.clientHeight;
                             var circleAnimationCount_1 = 0;
                             var circleTimer_1 = setInterval(function () {
-                                circleSize_1 -= 2;
+                                circleSize_1 -= 5;
                                 _this.drawBlackClipCircle(_this.targetDom, _this.position, circleSize_1, circleAnimationCount_1);
                                 circleAnimationCount_1++;
                                 if (circleSize_1 <= 0) {

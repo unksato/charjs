@@ -292,7 +292,7 @@ namespace Character {
                             let circleSize = this.targetDom.clientWidth > this.targetDom.clientHeight ? this.targetDom.clientWidth  : this.targetDom.clientHeight ;
                             let circleAnimationCount = 0;
                             let circleTimer = setInterval(() => {
-                                circleSize-=2;
+                                circleSize-=5;
                                 this.drawBlackClipCircle(this.targetDom, this.position, circleSize, circleAnimationCount);
                                 circleAnimationCount++;
                                 if(circleSize <= 0){
