@@ -292,10 +292,11 @@ namespace Character {
 
                             let circleSize = 400;
                             let circleAnimationCount = 0;
-                            let t = setInterval(() => {
-                                if(circleSize == 0)
-                                    clearInterval(t);
-
+                            let circleTimer = setInterval(() => {
+                                if(circleSize == 0){
+                                    clearInterval(circleTimer);
+                                    this.destroy();
+                                }
                                 this.drawBlackClipCircle(this.targetDom, this.position, circleSize, circleAnimationCount);
                                 circleAnimationCount++;
                                 circleSize--;

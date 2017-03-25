@@ -569,9 +569,11 @@ var Character;
                             // TODO: GO back circle
                             var circleSize_1 = 400;
                             var circleAnimationCount_1 = 0;
-                            var t_1 = setInterval(function () {
-                                if (circleSize_1 == 0)
-                                    clearInterval(t_1);
+                            var circleTimer_1 = setInterval(function () {
+                                if (circleSize_1 == 0) {
+                                    clearInterval(circleTimer_1);
+                                    _this.destroy();
+                                }
                                 _this.drawBlackClipCircle(_this.targetDom, _this.position, circleSize_1, circleAnimationCount_1);
                                 circleAnimationCount_1++;
                                 circleSize_1--;
