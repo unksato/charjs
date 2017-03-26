@@ -4,7 +4,7 @@
         <script>
             window.onload = function(){
                 window.addEventListener('deviceorientation',function(e){
-                    document.body.innerText = "### alpha:" + e.alpha + " ### beta:" + e.beta + " ### gamma:" + e.gamma;
+                    document.body.innerText = "### alpha:" + e.alpha.toFixed(2) + "<br/>### beta:" + e.beta.toFixed(2) + "<br/>### gamma:" + e.gamma.toFixed(2);
                 })
 
             }
