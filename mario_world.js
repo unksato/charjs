@@ -622,11 +622,11 @@ var Character;
                 window.addEventListener('deviceorientation', function (e) {
                     var gamma = Math.round(e.gamma);
                     if (Math.abs(gamma) >= 40 && _this._canSpeedUpForMobile) {
-                        if (_this._isReverse && gamma > 0) {
+                        if (_this._isReverse && gamma < 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }
-                        else if (!_this._isReverse && gamma < 0) {
+                        else if (!_this._isReverse && gamma > 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }

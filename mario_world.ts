@@ -353,10 +353,10 @@ namespace Character {
                 window.addEventListener('deviceorientation',(e)=>{
                     let gamma = Math.round(e.gamma);
                     if(Math.abs(gamma) >= 40 && this._canSpeedUpForMobile){
-                        if(this._isReverse && gamma > 0){
+                        if(this._isReverse && gamma < 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
-                        }else if(!this._isReverse && gamma < 0){
+                        }else if(!this._isReverse && gamma > 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
                         }
