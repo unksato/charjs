@@ -631,7 +631,7 @@ var Character;
                             _this.onSpeedUp();
                         }
                     }
-                    else {
+                    else if (Math.abs(gamma) < 40) {
                         if (!_this._canSpeedUpForMobile) {
                             _this.onAbortSpeedUp();
                             _this._canSpeedUpForMobile = true;
