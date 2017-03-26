@@ -360,11 +360,9 @@ namespace Character {
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
                         }
-                    }else if(Math.abs(gamma) < 40){
-                        if(!this._canSpeedUpForMobile){
-                            this.onAbortSpeedUp();
-                            this._canSpeedUpForMobile = true;
-                        }
+                    }else if(Math.abs(gamma) < 40 && !this._canSpeedUpForMobile){
+                        this.onAbortSpeedUp();
+                        this._canSpeedUpForMobile = true;
                     }
                 });
 
