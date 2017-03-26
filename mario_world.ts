@@ -338,13 +338,19 @@ namespace Character {
 
         private _canSpeedUpForMobile: boolean = true;
         private _screenModeForMobile: string = 'PORTRAIT';
+        private _deviceDirection: number = 1;
 
         registerActionCommand(): void {
             if (this.checkMobile()) {
                 if(window.orientation == 0){
                     this._screenModeForMobile = 'PORTRAIT';
-                }else{
+                    this._deviceDirection = 1;
+                }else if(window.orientation == 90){
                     this._screenModeForMobile = 'LANSCAPE';
+                    this._deviceDirection = 1;
+                }else if(window.orientation == -90){
+                    this._screenModeForMobile = 'LANSCAPE';
+                    this._deviceDirection = -1;
                 }
 
                 document.addEventListener('touchstart', (e)=>{
@@ -367,7 +373,7 @@ namespace Character {
                             motion = Math.round(e.beta);
                             break;                       
                     }
-
+                    motion = motion * this._deviceDirection;
                     if(Math.abs(motion) >= 40 && this._canSpeedUpForMobile){
                         if(this._isReverse && motion < 0){
                             this._canSpeedUpForMobile = false;
@@ -384,11 +390,17 @@ namespace Character {
                 window.addEventListener('orientationchange', (e)=>{
                     if (window.matchMedia("(orientation: portrait)").matches) {
                         this._screenModeForMobile = 'PORTRAIT';
+                        this._deviceDirection = 1;
                     }
                     if (window.matchMedia("(orientation: landscape)").matches) {
                         this._screenModeForMobile = 'LANSCAPE';
+                        if(window.orientation == 90){
+                            this._deviceDirection = 1;
+                        }else{
+                            this._deviceDirection = -1;                            
+                        }
                     }
-                })
+                },false);
 
             } else {
                 document.addEventListener('keydown', (e) => {

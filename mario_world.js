@@ -39,6 +39,7 @@ var Character;
             _this._backgroundOpacity = 0;
             _this._canSpeedUpForMobile = true;
             _this._screenModeForMobile = 'PORTRAIT';
+            _this._deviceDirection = 1;
             _this.colors = ['', '#000000', '#ffffff', '#520000', '#8c5a18', '#21318c', '#ff4273', '#b52963', '#ffde73', '#dea539', '#ffd6c6', '#ff736b', '#84dece', '#42849c'];
             _this.chars = [[
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -613,9 +614,15 @@ var Character;
             if (this.checkMobile()) {
                 if (window.orientation == 0) {
                     this._screenModeForMobile = 'PORTRAIT';
+                    this._deviceDirection = 1;
                 }
-                else {
+                else if (window.orientation == 90) {
                     this._screenModeForMobile = 'LANSCAPE';
+                    this._deviceDirection = 1;
+                }
+                else if (window.orientation == -90) {
+                    this._screenModeForMobile = 'LANSCAPE';
+                    this._deviceDirection = -1;
                 }
                 document.addEventListener('touchstart', function (e) {
                     _this.onJump();
@@ -636,6 +643,7 @@ var Character;
                             motion = Math.round(e.beta);
                             break;
                     }
+                    motion = motion * _this._deviceDirection;
                     if (Math.abs(motion) >= 40 && _this._canSpeedUpForMobile) {
                         if (_this._isReverse && motion < 0) {
                             _this._canSpeedUpForMobile = false;
@@ -654,11 +662,18 @@ var Character;
                 window.addEventListener('orientationchange', function (e) {
                     if (window.matchMedia("(orientation: portrait)").matches) {
                         _this._screenModeForMobile = 'PORTRAIT';
+                        _this._deviceDirection = 1;
                     }
                     if (window.matchMedia("(orientation: landscape)").matches) {
                         _this._screenModeForMobile = 'LANSCAPE';
+                        if (window.orientation == 90) {
+                            _this._deviceDirection = 1;
+                        }
+                        else {
+                            _this._deviceDirection = -1;
+                        }
                     }
-                });
+                }, false);
             }
             else {
                 document.addEventListener('keydown', function (e) {
