@@ -4,6 +4,16 @@ namespace Character {
         public y: number = 0;
     }
 
+    export enum Direction {
+        right,
+        left
+    }
+
+    export enum Vertical {
+        up,
+        down
+    }
+
     export interface ICharacter {
         _name: string;
         init(): void;
@@ -33,10 +43,10 @@ namespace Character {
 
         protected cssTextTemplate = `z-index: ${this.zIndex}; position: absolute; bottom: 0;`;
         protected currentAction: HTMLCanvasElement = null;
-        protected _actions : HTMLCanvasElement[] = [];
-        protected _reverseActions : HTMLCanvasElement[]  = [];
-        protected _verticalActions : HTMLCanvasElement[]  = [];
-        protected _verticalReverseActions : HTMLCanvasElement[]  = [];
+        protected _rightActions : HTMLCanvasElement[] = [];
+        protected _leftActions : HTMLCanvasElement[]  = [];
+        protected _verticalRightActions : HTMLCanvasElement[]  = [];
+        protected _verticalLeftActions : HTMLCanvasElement[]  = [];
 
         protected charWidth: number = null;
         protected charHeight: number = null;
@@ -47,16 +57,16 @@ namespace Character {
         private _frameTimer: number = null;
         protected _gravity = 2;
 
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _isReverse = false, protected zIndex = 2147483645, protected frameInterval = 45) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, protected zIndex = 2147483645, protected frameInterval = 45) {
         }
 
         public init(): void{
              for (let charactor of this.chars) {
-                this._actions.push(this.createCharacterAction(charactor));
-                this._reverseActions.push(this.createCharacterAction(charactor, true));
+                this._rightActions.push(this.createCharacterAction(charactor));
+                this._leftActions.push(this.createCharacterAction(charactor, true));
                 if (this.useVertical) {
-                    this._verticalActions.push(this.createCharacterAction(charactor, false, true));
-                    this._verticalReverseActions.push(this.createCharacterAction(charactor, true, true));
+                    this._verticalRightActions.push(this.createCharacterAction(charactor, false, true));
+                    this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
                 }
              }           
         }
@@ -98,13 +108,13 @@ namespace Character {
             }
         }
 
-        public draw(index: number = 0, position: Position = null, reverse: boolean = false, vertical = false, removeCurrent = false): void {
+        public draw(index: number = 0, position: Position = null, direction: Direction = Direction.right, vertical: Vertical = Vertical.up, removeCurrent = false): void {
             if (removeCurrent) this.removeCharacter();
             position = position || this.position;
-            if (!vertical) {
-                this.currentAction = !reverse ? this._actions[index] : this._reverseActions[index]; 
+            if (vertical == Vertical.up) {
+                this.currentAction = direction == Direction.right ? this._rightActions[index] : this._leftActions[index]; 
             } else {
-                this.currentAction = !reverse ? this._verticalActions[index] : this._verticalReverseActions[index];                 
+                this.currentAction = direction == Direction.right ? this._verticalRightActions[index] : this._verticalLeftActions[index];                 
             }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = this.position.y + 'px';
@@ -158,16 +168,16 @@ namespace Character {
         }
 
         protected updateDirection(): boolean{
-            let currentDirection = this._isReverse;
+            let currentDirection = this._direction;
 
-            if (this.position.x > this.targetDom.clientWidth - this.charWidth - (/*Magic offset*/ this.pixSize * 2) && this._isReverse == false) {
-                this._isReverse = true;
+            if (this.position.x > this.targetDom.clientWidth - this.charWidth - (/*Magic offset*/ this.pixSize * 2) && this._direction == Direction.right) {
+                this._direction = Direction.left;
             }
-            if (this.position.x < 0 && this._isReverse == true) {
-                this._isReverse = false;
+            if (this.position.x < 0 && this._direction == Direction.left) {
+                this._direction = Direction.right;
             }
 
-            return currentDirection != this._isReverse;
+            return currentDirection != this._direction;
         }
 
         public checkMobile(): boolean {

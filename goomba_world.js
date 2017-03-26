@@ -56,7 +56,7 @@ var Character;
             _this._currentStep = 0;
             _this._actionIndex = 0;
             _this._isKilled = false;
-            _this._isStepped = false;
+            _this._vertical = Character.Vertical.up;
             return _this;
         }
         Goomba.prototype.isKilled = function () {
@@ -65,9 +65,9 @@ var Character;
         Goomba.prototype.onAction = function () {
             var directionUpdated = this.updateDirection();
             if (this.doHitTestWithOtherEnemy()) {
-                this._isReverse = !this._isReverse;
+                this._direction = this._direction == Character.Direction.right ? Character.Direction.left : Character.Direction.right;
             }
-            if (!this._isReverse) {
+            if (this._direction == Character.Direction.right) {
                 this.position.x += this.pixSize * this._speed;
             }
             else {
@@ -80,13 +80,13 @@ var Character;
                 this._currentStep = 0;
                 this._actionIndex = this._actionIndex ^ 1;
             }
-            this.draw(this._actionIndex, null, this._isReverse, this._isStepped, true);
+            this.draw(this._actionIndex, null, this._direction, this._vertical, true);
         };
         Goomba.prototype.isStepped = function () {
-            return this._isStepped;
+            return this._vertical == Character.Vertical.down;
         };
         Goomba.prototype.onStepped = function () {
-            this._isStepped = true;
+            this._vertical = Character.Vertical.down;
             this._speed = 0;
         };
         Goomba.prototype.onKicked = function (direction, kickPower) {
@@ -110,7 +110,7 @@ var Character;
                     _this._currentStep = 0;
                     _this._actionIndex = _this._actionIndex ^ 1;
                 }
-                _this.draw(_this._actionIndex, null, direction > 0 ? false : true, _this._isStepped, true);
+                _this.draw(_this._actionIndex, null, direction > 0 ? Character.Direction.right : Character.Direction.left, Character.Vertical.down, true);
             }, this.frameInterval);
         };
         Goomba.prototype.doHitTestWithOtherEnemy = function () {

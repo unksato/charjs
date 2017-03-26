@@ -8,27 +8,37 @@ var Character;
         return Position;
     }());
     Character.Position = Position;
+    var Direction;
+    (function (Direction) {
+        Direction[Direction["right"] = 0] = "right";
+        Direction[Direction["left"] = 1] = "left";
+    })(Direction = Character.Direction || (Character.Direction = {}));
+    var Vertical;
+    (function (Vertical) {
+        Vertical[Vertical["up"] = 0] = "up";
+        Vertical[Vertical["down"] = 1] = "down";
+    })(Vertical = Character.Vertical || (Character.Vertical = {}));
     var AbstractCharacter = (function () {
-        function AbstractCharacter(targetDom, pixSize, position, _isReverse, zIndex, frameInterval) {
+        function AbstractCharacter(targetDom, pixSize, position, _direction, zIndex, frameInterval) {
             if (pixSize === void 0) { pixSize = 2; }
             if (position === void 0) { position = { x: 0, y: 0 }; }
-            if (_isReverse === void 0) { _isReverse = false; }
+            if (_direction === void 0) { _direction = Direction.right; }
             if (zIndex === void 0) { zIndex = 2147483645; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = this;
             this.targetDom = targetDom;
             this.pixSize = pixSize;
             this.position = position;
-            this._isReverse = _isReverse;
+            this._direction = _direction;
             this.zIndex = zIndex;
             this.frameInterval = frameInterval;
             this._name = '';
             this.cssTextTemplate = "z-index: " + this.zIndex + "; position: absolute; bottom: 0;";
             this.currentAction = null;
-            this._actions = [];
-            this._reverseActions = [];
-            this._verticalActions = [];
-            this._verticalReverseActions = [];
+            this._rightActions = [];
+            this._leftActions = [];
+            this._verticalRightActions = [];
+            this._verticalLeftActions = [];
             this.charWidth = null;
             this.charHeight = null;
             this._gameMaster = null;
@@ -49,11 +59,11 @@ var Character;
         AbstractCharacter.prototype.init = function () {
             for (var _i = 0, _a = this.chars; _i < _a.length; _i++) {
                 var charactor = _a[_i];
-                this._actions.push(this.createCharacterAction(charactor));
-                this._reverseActions.push(this.createCharacterAction(charactor, true));
+                this._rightActions.push(this.createCharacterAction(charactor));
+                this._leftActions.push(this.createCharacterAction(charactor, true));
                 if (this.useVertical) {
-                    this._verticalActions.push(this.createCharacterAction(charactor, false, true));
-                    this._verticalReverseActions.push(this.createCharacterAction(charactor, true, true));
+                    this._verticalRightActions.push(this.createCharacterAction(charactor, false, true));
+                    this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
                 }
             }
         };
@@ -92,20 +102,20 @@ var Character;
                 this.currentAction = null;
             }
         };
-        AbstractCharacter.prototype.draw = function (index, position, reverse, vertical, removeCurrent) {
+        AbstractCharacter.prototype.draw = function (index, position, direction, vertical, removeCurrent) {
             if (index === void 0) { index = 0; }
             if (position === void 0) { position = null; }
-            if (reverse === void 0) { reverse = false; }
-            if (vertical === void 0) { vertical = false; }
+            if (direction === void 0) { direction = Direction.right; }
+            if (vertical === void 0) { vertical = Vertical.up; }
             if (removeCurrent === void 0) { removeCurrent = false; }
             if (removeCurrent)
                 this.removeCharacter();
             position = position || this.position;
-            if (!vertical) {
-                this.currentAction = !reverse ? this._actions[index] : this._reverseActions[index];
+            if (vertical == Vertical.up) {
+                this.currentAction = direction == Direction.right ? this._rightActions[index] : this._leftActions[index];
             }
             else {
-                this.currentAction = !reverse ? this._verticalActions[index] : this._verticalReverseActions[index];
+                this.currentAction = direction == Direction.right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
             }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = this.position.y + 'px';
@@ -143,14 +153,14 @@ var Character;
             return { height: this.charHeight, width: this.charWidth };
         };
         AbstractCharacter.prototype.updateDirection = function () {
-            var currentDirection = this._isReverse;
-            if (this.position.x > this.targetDom.clientWidth - this.charWidth - (this.pixSize * 2) && this._isReverse == false) {
-                this._isReverse = true;
+            var currentDirection = this._direction;
+            if (this.position.x > this.targetDom.clientWidth - this.charWidth - (this.pixSize * 2) && this._direction == Direction.right) {
+                this._direction = Direction.left;
             }
-            if (this.position.x < 0 && this._isReverse == true) {
-                this._isReverse = false;
+            if (this.position.x < 0 && this._direction == Direction.left) {
+                this._direction = Direction.right;
             }
-            return currentDirection != this._isReverse;
+            return currentDirection != this._direction;
         };
         AbstractCharacter.prototype.checkMobile = function () {
             if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {

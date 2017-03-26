@@ -36,7 +36,9 @@ var Character;
             _this._isSpecial = false;
             _this._isBraking = false;
             _this._isSquat = false;
-            _this._attackDirection = 1;
+            _this._attackDirection = Character.Direction.right;
+            _this._specialAnimationIndex = 0;
+            _this._specialAnimation = [{ index: 0, direction: Character.Direction.right }, { index: 12, direction: Character.Direction.right }, { index: 0, direction: Character.Direction.left }, { index: 13, direction: Character.Direction.right }];
             _this._backgroundOpacity = 0;
             _this._canSpeedUpForMobile = true;
             _this._screenModeForMobile = 'PORTRAIT';
@@ -375,16 +377,16 @@ var Character;
                     this.gameOver();
                     break;
                 case HitStatus.attack:
-                    this.draw(11, null, this._attackDirection >= 0 ? false : true, false, true);
+                    this.draw(11, null, this._attackDirection, Character.Vertical.up, true);
                     this.stop();
                     var waitTimer = setTimeout(function () {
                         _this.start();
                     }, this.frameInterval * 3);
                     break;
                 default:
-                    var actionIndex = this.executeRun();
-                    actionIndex = this.executeJump() || actionIndex;
-                    this.draw(actionIndex, null, this._isReverse, false, true);
+                    var action = this.executeRun();
+                    action = this.executeJump() || action;
+                    this.draw(action.index, null, action.direction, Character.Vertical.up, true);
             }
         };
         Mario.prototype.doHitTest = function () {
@@ -410,7 +412,15 @@ var Character;
                             return HitStatus.attack;
                         }
                         if (this._isJumping && this._yVector < 0) {
-                            enemys[name_1].onStepped();
+                            if (this._isSpecial) {
+                                var playerCenter = this.position.x + this.charWidth / 2;
+                                var enemyCenter = ePos.x + eSize.width / 2;
+                                this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
+                                enemys[name_1].onKicked(this._attackDirection, this._speed * 3);
+                            }
+                            else {
+                                enemys[name_1].onStepped();
+                            }
                             this._yVector = 12 * this.pixSize;
                             continue;
                         }
@@ -431,16 +441,24 @@ var Character;
                     return null;
                 }
                 else {
-                    if (this._speed > 8) {
-                        if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
-                            return null;
+                    if (!this._isSpecial) {
+                        if (this._speed > 8) {
+                            if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
+                                return null;
+                            }
+                            else {
+                                return { index: 7, direction: this._direction };
+                            }
                         }
                         else {
-                            return 7;
+                            return { index: this._yVector > 0 ? 2 : 3, direction: this._direction };
                         }
                     }
                     else {
-                        return this._yVector > 0 ? 2 : 3;
+                        this._specialAnimationIndex++;
+                        if (this._specialAnimationIndex > this._specialAnimation.length)
+                            this._specialAnimationIndex = 0;
+                        return this._specialAnimation[this._specialAnimationIndex];
                     }
                 }
             }
@@ -450,14 +468,14 @@ var Character;
         };
         Mario.prototype.executeRun = function () {
             var directionUpdated = this.updateDirection();
-            if (!this._isReverse) {
+            if (this._direction == Character.Direction.right) {
                 this.position.x += this.pixSize * this._speed;
             }
             else {
                 this.position.x -= this.pixSize * this._speed;
             }
             if (this._isSquat) {
-                return 8;
+                return { index: 8, direction: this._direction };
             }
             var runIndex = this._runIndex;
             if (this._currentStep < Mario.STEP) {
@@ -477,8 +495,8 @@ var Character;
             // Braking action
             if (!this._isJumping) {
                 if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                    if ((this._isReverse && this.position.x < this.charWidth * 3) ||
-                        (!this._isReverse && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)) {
+                    if ((this._direction == Character.Direction.left && this.position.x < this.charWidth * 3) ||
+                        (this._direction == Character.Direction.right && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)) {
                         runIndex = 6;
                         if (this._speed > 2)
                             this._speed--;
@@ -489,7 +507,8 @@ var Character;
                     this._isBraking = false;
                 }
             }
-            return runIndex;
+            return { index: runIndex, direction: this._direction };
+            ;
         };
         Mario.prototype.onJump = function () {
             if (!this._isJumping) {
@@ -580,7 +599,7 @@ var Character;
             this._gameOverTimer = setInterval(function () {
                 if (_this._gameOverWaitCount < 20) {
                     _this._gameOverWaitCount++;
-                    _this.draw(9, null, false, false, true);
+                    _this.draw(9, null, Character.Direction.right, Character.Vertical.up, true);
                     _this._yVector = _this._jumpPower * _this.pixSize;
                     return;
                 }
@@ -598,7 +617,7 @@ var Character;
                     _this._currentStep = 0;
                     _this._runIndex = _this._runIndex ^ 1;
                 }
-                _this.draw(9, null, _this._runIndex == 0 ? true : false, false, true);
+                _this.draw(9, null, _this._runIndex == 0 ? Character.Direction.left : Character.Direction.right, Character.Vertical.up, true);
             }, this.frameInterval);
         };
         Mario.prototype.gool = function () {
@@ -615,7 +634,7 @@ var Character;
                 }
                 else {
                     _this.stop();
-                    _this.draw(10, null, false, false, true);
+                    _this.draw(10, null, Character.Direction.right, Character.Vertical.up, true);
                     clearInterval(goolDimTimer);
                     var goolDimOffTimer_1 = setInterval(function () {
                         if (Math.ceil(_this._backgroundOpacity) != 0) {
@@ -700,11 +719,11 @@ var Character;
                     }
                     motion = motion * _this._deviceDirection;
                     if (Math.abs(motion) >= 20 && _this._canSpeedUpForMobile) {
-                        if (_this._isReverse && motion < 0) {
+                        if (_this._direction == Character.Direction.left && motion < 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }
-                        else if (!_this._isReverse && motion > 0) {
+                        else if (_this._direction == Character.Direction.right && motion > 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }
@@ -735,6 +754,9 @@ var Character;
                     if (e.keyCode == 65 && !_this._isSquat) {
                         _this.onJump();
                     }
+                    if (e.keyCode == 88 && !_this._isSquat) {
+                        _this.onSpecialJump();
+                    }
                     if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat) {
                         _this.onSpeedUp();
                     }
@@ -744,6 +766,9 @@ var Character;
                 });
                 document.addEventListener('keyup', function (e) {
                     if (e.keyCode == 65) {
+                        _this.onAbortJump();
+                    }
+                    if (e.keyCode == 88) {
                         _this.onAbortJump();
                     }
                     if (e.keyCode == 66) {

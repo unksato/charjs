@@ -46,7 +46,7 @@ namespace Character {
         private _actionIndex = 0;
         private _isKilled = false;
 
-        private _isStepped = false;
+        private _vertical : Vertical = Vertical.up;
 
         isKilled(): boolean{
             return this._isKilled;
@@ -56,10 +56,10 @@ namespace Character {
             let directionUpdated = this.updateDirection();
 
             if (this.doHitTestWithOtherEnemy()) {
-                this._isReverse = !this._isReverse;
+                this._direction = this._direction == Direction.right ? Direction.left : Direction.right;
             }
 
-            if (!this._isReverse) {
+            if (this._direction == Direction.right) {
                 this.position.x += this.pixSize * this._speed;
             } else {
                 this.position.x -= this.pixSize * this._speed;            
@@ -72,15 +72,15 @@ namespace Character {
                 this._actionIndex = this._actionIndex ^ 1;
             }
 
-            this.draw(this._actionIndex, null, this._isReverse, this._isStepped, true);
+            this.draw(this._actionIndex, null, this._direction, this._vertical, true);
         }
 
         isStepped(): boolean{
-            return this._isStepped;
+            return this._vertical == Vertical.down;
         }
 
         onStepped(): void {
-            this._isStepped = true;
+            this._vertical = Vertical.down;
             this._speed = 0;
         }
 
@@ -107,8 +107,7 @@ namespace Character {
                     this._actionIndex = this._actionIndex ^ 1;
                 }
 
-                this.draw(this._actionIndex, null, direction > 0 ? false : true, this._isStepped, true);
-
+                this.draw(this._actionIndex, null, direction > 0 ? Direction.right : Direction.left, Vertical.down, true);
 
             }, this.frameInterval);
         }

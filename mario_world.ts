@@ -31,7 +31,7 @@ namespace Character {
 
         private _isBraking = false;
         private _isSquat = false;
-        private _attackDirection = 1;
+        private _attackDirection : Direction = Direction.right;
 
 
         onAction(): void {
@@ -40,16 +40,16 @@ namespace Character {
                     this.gameOver();
                     break;
                 case HitStatus.attack:
-                    this.draw(11, null, this._attackDirection >= 0 ? false : true, false, true);
+                    this.draw(11, null, this._attackDirection, Vertical.up, true);
                     this.stop();
                     let waitTimer = setTimeout(() => {
                         this.start();
                     }, this.frameInterval * 3);
                     break;
                 default:
-                    let actionIndex = this.executeRun();
-                    actionIndex = this.executeJump() || actionIndex;
-                    this.draw(actionIndex, null, this._isReverse, false, true);
+                    let action = this.executeRun();
+                    action = this.executeJump() || action;
+                    this.draw(action.index, null, action.direction, Vertical.up, true);
             }
         }
 
@@ -78,7 +78,14 @@ namespace Character {
                         }
 
                         if (this._isJumping && this._yVector < 0) {
-                            enemys[name].onStepped();
+                            if(this._isSpecial){
+                                let playerCenter = this.position.x + this.charWidth / 2;
+                                let enemyCenter = ePos.x + eSize.width / 2;
+                                this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
+                                enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                            }else{
+                                enemys[name].onStepped();
+                            }
                             this._yVector = 12 * this.pixSize;
                             continue;
                         }
@@ -89,7 +96,10 @@ namespace Character {
             return HitStatus.none;
         }
 
-        private executeJump(): number {
+        private _specialAnimationIndex = 0;
+        private _specialAnimation = [{index:0, direction:Direction.right},{index:12, direction:Direction.right},{index:0, direction:Direction.left},{index:13, direction:Direction.right}]
+
+        private executeJump(): {index:number, direction: Direction} {
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
                 this.position.y = this.position.y + this._yVector;
@@ -104,14 +114,16 @@ namespace Character {
                             if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
                                 return null;
                             } else {
-                                return 7;
+                                return {index:7, direction:this._direction};
                             }
                         } else {
-                            return this._yVector > 0 ? 2 : 3;
+                            return {index:this._yVector > 0 ? 2 : 3, direction:this._direction};
                         }
                     }else{
-                        // TODO: add Special Jump logic
-                        return null;                        
+                        this._specialAnimationIndex++;
+                        if(this._specialAnimationIndex > this._specialAnimation.length)
+                            this._specialAnimationIndex=0;
+                        return this._specialAnimation[this._specialAnimationIndex];
                     }
                 }
             } else {
@@ -119,17 +131,17 @@ namespace Character {
             }   
         }
 
-        private executeRun(): number {
+        private executeRun(): { index:number, direction: Direction} {
             let directionUpdated = this.updateDirection();
 
-            if (!this._isReverse) {
+            if (this._direction == Direction.right) {
                 this.position.x += this.pixSize * this._speed;
             } else {
                 this.position.x -= this.pixSize * this._speed;            
             }
 
             if (this._isSquat) {
-                return 8;
+                return {index:8, direction: this._direction};
             }
 
             let runIndex = this._runIndex;
@@ -151,8 +163,8 @@ namespace Character {
             // Braking action
             if (!this._isJumping) {
                 if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                    if ((this._isReverse && this.position.x < this.charWidth * 3) ||
-                        (!this._isReverse && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)
+                    if ((this._direction == Direction.left && this.position.x < this.charWidth * 3) ||
+                        (this._direction == Direction.right && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)
                     ) {
                         runIndex = 6;
                         if (this._speed > 2)
@@ -163,7 +175,7 @@ namespace Character {
                     this._isBraking = false;
                 }
             }
-            return runIndex;
+            return {index:runIndex, direction: this._direction};;
         }
 
         private onJump(): void {
@@ -255,7 +267,7 @@ namespace Character {
             this._gameOverTimer = setInterval(() => {
                 if (this._gameOverWaitCount < 20) {
                     this._gameOverWaitCount++;
-                    this.draw(9, null, false, false, true);
+                    this.draw(9, null, Direction.right, Vertical.up, true);
                     this._yVector = this._jumpPower * this.pixSize;
                     return;
                 }
@@ -276,7 +288,7 @@ namespace Character {
                     this._runIndex = this._runIndex ^ 1;
                 }
 
-                this.draw(9, null, this._runIndex == 0 ? true : false, false, true);
+                this.draw(9, null, this._runIndex == 0 ? Direction.left : Direction.right, Vertical.up, true);
 
             }, this.frameInterval);
         }
@@ -297,7 +309,7 @@ namespace Character {
                     this._backgroundOpacity += 0.01;
                 } else {
                     this.stop();
-                    this.draw(10, null, false, false, true);
+                    this.draw(10, null, Direction.right, Vertical.up, true);
                     clearInterval(goolDimTimer);
                     let goolDimOffTimer = setInterval(() => {
                         if (Math.ceil(this._backgroundOpacity) != 0) {
@@ -392,10 +404,10 @@ namespace Character {
                     }
                     motion = motion * this._deviceDirection;
                     if(Math.abs(motion) >= 20 && this._canSpeedUpForMobile){
-                        if(this._isReverse && motion < 0){
+                        if(this._direction == Direction.left && motion < 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
-                        }else if(!this._isReverse && motion > 0){
+                        }else if(this._direction == Direction.right && motion > 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
                         }
@@ -424,6 +436,10 @@ namespace Character {
                     if (e.keyCode == 65 && !this._isSquat) {
                         this.onJump();
                     }
+                    if (e.keyCode == 88 && !this._isSquat) {
+                        this.onSpecialJump();
+                    }
+
                     if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
                         this.onSpeedUp();
                     }
@@ -435,6 +451,9 @@ namespace Character {
                 });
                 document.addEventListener('keyup', (e) => {
                     if (e.keyCode == 65) {
+                        this.onAbortJump();
+                    }
+                    if (e.keyCode == 88) {
                         this.onAbortJump();
                     }
                     if (e.keyCode == 66) {
