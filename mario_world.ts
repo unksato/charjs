@@ -27,6 +27,8 @@ namespace Character {
         private _gameOverTimer = null;
 
         private _isJumping = false;
+        private _isSpecial = false;
+
         private _isBraking = false;
         private _isSquat = false;
         private _attackDirection = 1;
@@ -97,14 +99,19 @@ namespace Character {
                     this.position.y = 0;
                     return null;
                 } else {
-                    if (this._speed > 8) {
-                        if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
-                            return null;
+                    if(!this._isSpecial) {
+                        if (this._speed > 8) {
+                            if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
+                                return null;
+                            } else {
+                                return 7;
+                            }
                         } else {
-                            return 7;
+                            return this._yVector > 0 ? 2 : 3;
                         }
-                    } else {
-                        return this._yVector > 0 ? 2 : 3;
+                    }else{
+                        // TODO: add Special Jump logic
+                        return null;                        
                     }
                 }
             } else {
@@ -162,6 +169,15 @@ namespace Character {
         private onJump(): void {
             if (!this._isJumping) {
                 this._isJumping = true;
+                this._isSpecial = false;
+                this._yVector = this._jumpPower * this.pixSize;
+            }
+        }
+
+        private onSpecialJump(): void {
+            if (!this._isJumping) {
+                this._isJumping = true;
+                this._isSpecial = true;
                 this._yVector = this._jumpPower * this.pixSize;
             }
         }
@@ -171,6 +187,7 @@ namespace Character {
                 this._yVector = 0;
             }
         }
+
 
         private onSpeedUp(): void {
             if (!this._speedUpTimer) {

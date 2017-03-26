@@ -33,6 +33,7 @@ var Character;
             _this._squatTimer = null;
             _this._gameOverTimer = null;
             _this._isJumping = false;
+            _this._isSpecial = false;
             _this._isBraking = false;
             _this._isSquat = false;
             _this._attackDirection = 1;
@@ -493,6 +494,14 @@ var Character;
         Mario.prototype.onJump = function () {
             if (!this._isJumping) {
                 this._isJumping = true;
+                this._isSpecial = false;
+                this._yVector = this._jumpPower * this.pixSize;
+            }
+        };
+        Mario.prototype.onSpecialJump = function () {
+            if (!this._isJumping) {
+                this._isJumping = true;
+                this._isSpecial = true;
                 this._yVector = this._jumpPower * this.pixSize;
             }
         };
