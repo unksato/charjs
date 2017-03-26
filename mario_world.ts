@@ -337,9 +337,16 @@ namespace Character {
         }
 
         private _canSpeedUpForMobile: boolean = true;
+        private _screenModeForMobile: string = 'PORTRAIT';
 
         registerActionCommand(): void {
             if (this.checkMobile()) {
+                if(window.orientation == 0){
+                    this._screenModeForMobile = 'PORTRAIT';
+                }else{
+                    this._screenModeForMobile = 'LANSCAPE';
+                }
+
                 document.addEventListener('touchstart', (e)=>{
                     this.onJump();
                 });
@@ -351,20 +358,37 @@ namespace Character {
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
-                    let gamma = Math.round(e.gamma);
-                    if(Math.abs(gamma) >= 40 && this._canSpeedUpForMobile){
-                        if(this._isReverse && gamma < 0){
+                    let motion = 0;
+                    switch(this._screenModeForMobile){
+                        case 'PORTRAIT':
+                            motion = Math.round(e.gamma);
+                            break;    
+                        case 'LANSCAPE':
+                            motion = Math.round(e.beta);
+                            break;                       
+                    }
+
+                    if(Math.abs(motion) >= 40 && this._canSpeedUpForMobile){
+                        if(this._isReverse && motion < 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
-                        }else if(!this._isReverse && gamma > 0){
+                        }else if(!this._isReverse && motion > 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
                         }
-                    }else if(Math.abs(gamma) < 40 && !this._canSpeedUpForMobile){
+                    }else if(Math.abs(motion) < 40 && !this._canSpeedUpForMobile){
                         this.onAbortSpeedUp();
                         this._canSpeedUpForMobile = true;
                     }
                 });
+                window.addEventListener('orientationchange', (e)=>{
+                    if (window.matchMedia("(orientation: portrait)").matches) {
+                        this._screenModeForMobile = 'PORTRAIT';
+                    }
+                    if (window.matchMedia("(orientation: landscape)").matches) {
+                        this._screenModeForMobile = 'LANSCAPE';
+                    }
+                })
 
             } else {
                 document.addEventListener('keydown', (e) => {

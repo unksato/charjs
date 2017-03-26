@@ -38,6 +38,7 @@ var Character;
             _this._attackDirection = 1;
             _this._backgroundOpacity = 0;
             _this._canSpeedUpForMobile = true;
+            _this._screenModeForMobile = 'PORTRAIT';
             _this.colors = ['', '#000000', '#ffffff', '#520000', '#8c5a18', '#21318c', '#ff4273', '#b52963', '#ffde73', '#dea539', '#ffd6c6', '#ff736b', '#84dece', '#42849c'];
             _this.chars = [[
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -610,6 +611,12 @@ var Character;
         Mario.prototype.registerActionCommand = function () {
             var _this = this;
             if (this.checkMobile()) {
+                if (window.orientation == 0) {
+                    this._screenModeForMobile = 'PORTRAIT';
+                }
+                else {
+                    this._screenModeForMobile = 'LANSCAPE';
+                }
                 document.addEventListener('touchstart', function (e) {
                     _this.onJump();
                 });
@@ -620,20 +627,36 @@ var Character;
                     _this.onAbortJump();
                 });
                 window.addEventListener('deviceorientation', function (e) {
-                    var gamma = Math.round(e.gamma);
-                    if (Math.abs(gamma) >= 40 && _this._canSpeedUpForMobile) {
-                        if (_this._isReverse && gamma < 0) {
+                    var motion = 0;
+                    switch (_this._screenModeForMobile) {
+                        case 'PORTRAIT':
+                            motion = Math.round(e.gamma);
+                            break;
+                        case 'LANSCAPE':
+                            motion = Math.round(e.beta);
+                            break;
+                    }
+                    if (Math.abs(motion) >= 40 && _this._canSpeedUpForMobile) {
+                        if (_this._isReverse && motion < 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }
-                        else if (!_this._isReverse && gamma > 0) {
+                        else if (!_this._isReverse && motion > 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }
                     }
-                    else if (Math.abs(gamma) < 40 && !_this._canSpeedUpForMobile) {
+                    else if (Math.abs(motion) < 40 && !_this._canSpeedUpForMobile) {
                         _this.onAbortSpeedUp();
                         _this._canSpeedUpForMobile = true;
+                    }
+                });
+                window.addEventListener('orientationchange', function (e) {
+                    if (window.matchMedia("(orientation: portrait)").matches) {
+                        _this._screenModeForMobile = 'PORTRAIT';
+                    }
+                    if (window.matchMedia("(orientation: landscape)").matches) {
+                        _this._screenModeForMobile = 'LANSCAPE';
                     }
                 });
             }
