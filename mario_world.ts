@@ -360,7 +360,7 @@ namespace Character {
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
                         }
-                    }else{
+                    }else if(Math.abs(gamma) < 40){
                         if(!this._canSpeedUpForMobile){
                             this.onAbortSpeedUp();
                             this._canSpeedUpForMobile = true;
