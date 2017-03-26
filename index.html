@@ -7,9 +7,9 @@
         <script type="text/javascript" src="./game_master.js"></script>
         <script>
             window.onload = function(){
-                var controller = Character.GameMaster.GetController('sample' ,document.body, 3);
+                var controller = Character.GameMaster.GetController('sample' ,document.body, 10);
 
-                controller.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
+                var mario = controller.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
                 controller.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, true);
                 controller.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
                 controller.CreateCharInstance(Character.Goomba, { x: 800, y: 0 }, true);
@@ -29,6 +29,8 @@
                 // mario.draw(9, {x:800, y:0});
                 // mario.draw(10, {x:900, y:0});
                 // mario.draw(11, {x:1000, y:0});
+                // mario.draw(12, {x:1100, y:0});
+                // mario.draw(13, {x:1200, y:0});
 
                 // mario.gool();
             }
