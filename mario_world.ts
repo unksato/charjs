@@ -351,11 +351,12 @@ namespace Character {
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
-                    if(Math.abs(e.gamma) > 15 && this._canSpeedUpForMobile){
-                        if(this._isReverse && e.gamma > 0){
+                    let gamma = Math.round(e.gamma);
+                    if(Math.abs(gamma) > 15 && this._canSpeedUpForMobile){
+                        if(this._isReverse && gamma > 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
-                        }else if(!this._isReverse && e.gamma < 0){
+                        }else if(!this._isReverse && gamma < 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
                         }

@@ -620,12 +620,13 @@ var Character;
                     _this.onAbortJump();
                 });
                 window.addEventListener('deviceorientation', function (e) {
-                    if (Math.abs(e.gamma) > 15 && _this._canSpeedUpForMobile) {
-                        if (_this._isReverse && e.gamma > 0) {
+                    var gamma = Math.round(e.gamma);
+                    if (Math.abs(gamma) > 15 && _this._canSpeedUpForMobile) {
+                        if (_this._isReverse && gamma > 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }
-                        else if (!_this._isReverse && e.gamma < 0) {
+                        else if (!_this._isReverse && gamma < 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
                         }
