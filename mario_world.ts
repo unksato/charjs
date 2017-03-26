@@ -374,7 +374,7 @@ namespace Character {
                             break;                       
                     }
                     motion = motion * this._deviceDirection;
-                    if(Math.abs(motion) >= 40 && this._canSpeedUpForMobile){
+                    if(Math.abs(motion) >= 20 && this._canSpeedUpForMobile){
                         if(this._isReverse && motion < 0){
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
@@ -382,7 +382,7 @@ namespace Character {
                             this._canSpeedUpForMobile = false;
                             this.onSpeedUp();
                         }
-                    }else if(Math.abs(motion) < 40 && !this._canSpeedUpForMobile){
+                    }else if(Math.abs(motion) < 20 && !this._canSpeedUpForMobile){
                         this.onAbortSpeedUp();
                         this._canSpeedUpForMobile = true;
                     }

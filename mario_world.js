@@ -644,7 +644,7 @@ var Character;
                             break;
                     }
                     motion = motion * _this._deviceDirection;
-                    if (Math.abs(motion) >= 40 && _this._canSpeedUpForMobile) {
+                    if (Math.abs(motion) >= 20 && _this._canSpeedUpForMobile) {
                         if (_this._isReverse && motion < 0) {
                             _this._canSpeedUpForMobile = false;
                             _this.onSpeedUp();
@@ -654,7 +654,7 @@ var Character;
                             _this.onSpeedUp();
                         }
                     }
-                    else if (Math.abs(motion) < 40 && !_this._canSpeedUpForMobile) {
+                    else if (Math.abs(motion) < 20 && !_this._canSpeedUpForMobile) {
                         _this.onAbortSpeedUp();
                         _this._canSpeedUpForMobile = true;
                     }
