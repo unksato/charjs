@@ -381,32 +381,18 @@ namespace Character {
                     this._screenModeForMobile = 'LANSCAPE';
                     this._deviceDirection = -1;
                 }
-
-                let didFirstTap = false;
-                let didDoubleTap = false;
-
                 document.addEventListener('touchstart', (e)=>{
-                    if(!didFirstTap){
-                        didFirstTap = true;
-                        setTimeout(()=>{
-                            if(!didDoubleTap){
-                                this.onJump();
-                            }
-                            didFirstTap = false;
-                            didDoubleTap = false;
-                        },150);
-                    }else{
-                        didDoubleTap = true;
+                    if(e.targetTouches.length > 1) {
                         this.onSpecialJump();
+                    }else{
+                        this.onJump();
                     }
                 });
                 document.addEventListener('touchend', (e)=>{
-                    if(!didFirstTap && !didDoubleTap)
-                        this.onAbortJump();
+                    this.onAbortJump();
                 });
                 document.addEventListener('touchcancel', (e)=>{
-                    if(!didFirstTap && !didDoubleTap)
-                        this.onAbortJump();
+                    this.onAbortJump();
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
