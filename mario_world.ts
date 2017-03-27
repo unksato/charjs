@@ -382,14 +382,31 @@ namespace Character {
                     this._deviceDirection = -1;
                 }
 
+                let didFirstTap = false;
+                let didDoubleTap = false;
+
                 document.addEventListener('touchstart', (e)=>{
-                    this.onJump();
+                    if(!didFirstTap){
+                        didFirstTap = true;
+                        setTimeout(()=>{
+                            if(!didDoubleTap){
+                                this.onJump();
+                            }
+                            didFirstTap = false;
+                            didDoubleTap = false;
+                        },150);
+                    }else{
+                        didDoubleTap = true;
+                        this.onSpecialJump();
+                    }
                 });
                 document.addEventListener('touchend', (e)=>{
-                    this.onAbortJump();
+                    if(!didFirstTap && !didDoubleTap)
+                        this.onAbortJump();
                 });
                 document.addEventListener('touchcancel', (e)=>{
-                    this.onAbortJump();
+                    if(!didFirstTap && !didDoubleTap)
+                        this.onAbortJump();
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
