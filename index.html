@@ -8,7 +8,7 @@
         <script type="text/javascript" src="./game_master.js"></script>
         <script>
             window.onload = function(){
-                var controller = Character.GameMaster.GetController('sample' ,document.body, 4);
+                var controller = Character.GameMaster.GetController('sample' ,document.body, 2);
 
                 var mario = controller.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
                 controller.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, true);
