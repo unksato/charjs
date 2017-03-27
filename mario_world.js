@@ -698,31 +698,19 @@ var Character;
                     this._screenModeForMobile = 'LANSCAPE';
                     this._deviceDirection = -1;
                 }
-                var didFirstTap_1 = false;
-                var didDoubleTap_1 = false;
                 document.addEventListener('touchstart', function (e) {
-                    if (!didFirstTap_1) {
-                        didFirstTap_1 = true;
-                        setTimeout(function () {
-                            if (!didDoubleTap_1) {
-                                _this.onJump();
-                            }
-                            didFirstTap_1 = false;
-                            didDoubleTap_1 = false;
-                        }, 100);
+                    if (e.targetTouches.length > 1) {
+                        _this.onSpecialJump();
                     }
                     else {
-                        didDoubleTap_1 = true;
-                        _this.onSpecialJump();
+                        _this.onJump();
                     }
                 });
                 document.addEventListener('touchend', function (e) {
-                    if (!didFirstTap_1 && !didDoubleTap_1)
-                        _this.onAbortJump();
+                    _this.onAbortJump();
                 });
                 document.addEventListener('touchcancel', function (e) {
-                    if (!didFirstTap_1 && !didDoubleTap_1)
-                        _this.onAbortJump();
+                    _this.onAbortJump();
                 });
                 window.addEventListener('deviceorientation', function (e) {
                     var motion = 0;
