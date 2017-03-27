@@ -709,7 +709,7 @@ var Character;
                             }
                             didFirstTap_1 = false;
                             didDoubleTap_1 = false;
-                        }, 150);
+                        }, 100);
                     }
                     else {
                         didDoubleTap_1 = true;
