@@ -39,6 +39,8 @@ var Character;
             _this._attackDirection = Character.Direction.right;
             _this._specialAnimationIndex = 0;
             _this._specialAnimation = [{ index: 0, direction: Character.Direction.right }, { index: 12, direction: Character.Direction.right }, { index: 0, direction: Character.Direction.left }, { index: 13, direction: Character.Direction.right }];
+            _this._grabedEnemy = null;
+            _this._grabbing = false;
             _this._backgroundOpacity = 0;
             _this._canSpeedUpForMobile = true;
             _this._screenModeForMobile = 'PORTRAIT';
@@ -367,6 +369,75 @@ var Character;
                     [0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 1, 0, 0, 0, 0],
                     [0, 0, 0, 1, 4, 4, 4, 1, 1, 4, 4, 4, 1, 0, 0, 0],
                     [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]
+                ], [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [0, 0, 0, 0, 3, 6, 6, 7, 7, 8, 8, 2, 3, 0, 0, 0],
+                    [0, 0, 0, 3, 6, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 3, 10, 1, 1, 1, 11, 1, 11, 1, 11, 0, 0, 0, 0],
+                    [0, 3, 10, 4, 10, 1, 11, 10, 1, 10, 1, 10, 0, 0, 0, 0],
+                    [0, 3, 11, 4, 10, 1, 1, 10, 10, 10, 10, 10, 10, 10, 4, 0],
+                    [0, 3, 1, 11, 11, 1, 10, 10, 1, 11, 11, 11, 11, 11, 4, 0],
+                    [5, 13, 13, 13, 13, 11, 11, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [5, 13, 13, 13, 13, 13, 3, 6, 6, 6, 4, 4, 4, 4, 0, 0],
+                    [5, 13, 13, 13, 5, 5, 3, 7, 7, 6, 6, 3, 2, 4, 4, 4],
+                    [5, 13, 13, 13, 13, 13, 13, 3, 3, 7, 7, 3, 2, 2, 2, 4],
+                    [0, 5, 13, 13, 1, 4, 4, 4, 1, 3, 3, 3, 2, 2, 2, 4],
+                    [0, 0, 5, 5, 1, 4, 4, 4, 8, 1, 8, 1, 4, 4, 4, 0],
+                    [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+                ], [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 3, 10, 1, 1, 1, 11, 1, 11, 1, 11, 0, 0, 0, 0],
+                    [0, 3, 10, 4, 10, 1, 11, 10, 1, 10, 1, 10, 4, 4, 0, 0],
+                    [0, 3, 11, 4, 10, 1, 1, 10, 10, 10, 10, 10, 10, 10, 4, 0],
+                    [0, 3, 1, 11, 10, 1, 10, 10, 1, 11, 11, 11, 11, 11, 4, 0],
+                    [0, 0, 1, 1, 11, 11, 10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 4, 4, 11, 11, 11, 1, 1, 4, 4, 4, 0, 0],
+                    [0, 0, 0, 0, 5, 13, 4, 4, 4, 4, 4, 3, 2, 4, 4, 4],
+                    [0, 0, 0, 5, 13, 13, 3, 6, 6, 6, 6, 3, 2, 2, 2, 4],
+                    [0, 0, 0, 5, 13, 13, 3, 7, 7, 7, 7, 3, 2, 2, 2, 4],
+                    [0, 0, 0, 5, 13, 13, 13, 3, 3, 3, 3, 3, 4, 4, 4, 0],
+                    [0, 0, 0, 5, 13, 13, 13, 13, 13, 13, 12, 12, 5, 0, 0, 0],
+                    [0, 0, 0, 5, 13, 13, 13, 13, 13, 5, 13, 5, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 5, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+                ], [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 3, 10, 1, 1, 1, 11, 1, 11, 1, 11, 0, 0, 0, 0],
+                    [0, 3, 10, 4, 10, 1, 11, 10, 1, 10, 1, 10, 4, 4, 0, 0],
+                    [0, 3, 11, 4, 10, 1, 1, 10, 10, 10, 10, 10, 10, 10, 4, 0],
+                    [0, 3, 1, 11, 10, 1, 10, 10, 1, 11, 11, 11, 11, 11, 4, 0],
+                    [0, 0, 1, 1, 11, 11, 10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 1, 4, 11, 11, 11, 11, 1, 1, 4, 4, 4, 0, 0],
+                    [0, 0, 0, 0, 5, 4, 4, 4, 4, 4, 4, 3, 2, 4, 4, 4],
+                    [0, 0, 0, 5, 5, 13, 3, 6, 6, 6, 6, 3, 2, 2, 2, 4],
+                    [0, 0, 1, 5, 13, 13, 3, 7, 7, 7, 7, 3, 2, 2, 2, 4],
+                    [0, 1, 4, 5, 13, 13, 13, 3, 3, 3, 3, 3, 4, 4, 4, 1],
+                    [0, 1, 4, 5, 13, 13, 13, 13, 13, 13, 12, 5, 1, 4, 1, 1],
+                    [0, 1, 4, 1, 5, 5, 13, 13, 13, 13, 5, 1, 4, 1, 1, 0],
+                    [0, 1, 4, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
+                    [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                 ]];
             return _this;
         }
@@ -405,11 +476,17 @@ var Character;
                         if (ePos.x > this.position.x + this.charWidth)
                             continue;
                         if (enemys[name_1].isStepped()) {
-                            var playerCenter = this.position.x + this.charWidth / 2;
-                            var enemyCenter = ePos.x + eSize.width / 2;
-                            this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
-                            enemys[name_1].onKicked(this._attackDirection, this._speed * 3);
-                            return HitStatus.attack;
+                            if (!this._grabbing) {
+                                var playerCenter = this.position.x + this.charWidth / 2;
+                                var enemyCenter = ePos.x + eSize.width / 2;
+                                this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
+                                enemys[name_1].onKicked(this._attackDirection, this._speed * 3);
+                                return HitStatus.attack;
+                            }
+                            else {
+                                this.grabEnemy(enemys[name_1]);
+                                continue;
+                            }
                         }
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
@@ -509,6 +586,18 @@ var Character;
             }
             return { index: runIndex, direction: this._direction };
             ;
+        };
+        Mario.prototype.grabEnemy = function (enemy) {
+            this._grabedEnemy = enemy;
+            enemy.stop();
+        };
+        Mario.prototype.putEnemy = function () {
+        };
+        Mario.prototype.onGrab = function () {
+            this._grabbing = true;
+        };
+        Mario.prototype.onAbortGrab = function () {
+            this._grabbing = false;
         };
         Mario.prototype.onJump = function () {
             if (!this._isJumping) {
@@ -764,9 +853,11 @@ var Character;
                     }
                     if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat) {
                         _this.onSpeedUp();
+                        _this.onGrab();
                     }
                     if (e.keyCode == 40 && !_this._isJumping) {
                         _this.onSquat();
+                        _this.onAbortGrab();
                     }
                 });
                 document.addEventListener('keyup', function (e) {
