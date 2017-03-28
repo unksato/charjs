@@ -149,6 +149,9 @@ var Character;
         AbstractCharacter.prototype.getPosition = function () {
             return this.position;
         };
+        AbstractCharacter.prototype.setPosition = function (pos) {
+            this.position = pos;
+        };
         AbstractCharacter.prototype.getCharSize = function () {
             return { height: this.charHeight, width: this.charWidth };
         };

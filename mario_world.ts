@@ -70,11 +70,16 @@ namespace Character {
                             continue;
 
                         if (enemys[name].isStepped()) {
-                            let playerCenter = this.position.x + this.charWidth / 2;
-                            let enemyCenter = ePos.x + eSize.width / 2;
-                            this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
-                            enemys[name].onKicked(this._attackDirection, this._speed * 3);
-                            return HitStatus.attack;
+                            if(!this._grabbing){
+                                let playerCenter = this.position.x + this.charWidth / 2;
+                                let enemyCenter = ePos.x + eSize.width / 2;
+                                this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
+                                enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                                return HitStatus.attack;
+                            }else{
+                                this.grabEnemy(enemys[name]);
+                                continue;
+                            }
                         }
 
                         if (this._isJumping && this._yVector < 0) {
@@ -176,6 +181,26 @@ namespace Character {
                 }
             }
             return {index:runIndex, direction: this._direction};;
+        }
+
+        private _grabedEnemy : IEnemy = null;
+        private _grabbing = false;
+
+        private grabEnemy(enemy: IEnemy) : void {
+            this._grabedEnemy = enemy;
+            enemy.stop();
+        }
+
+        private putEnemy() : void {
+
+        }
+
+        private onGrab(): void {
+            this._grabbing = true;
+        }
+
+        private onAbortGrab(): void {
+            this._grabbing = false;
         }
 
         private onJump(): void {
@@ -445,10 +470,12 @@ namespace Character {
 
                     if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
                         this.onSpeedUp();
+                        this.onGrab();
                     }
 
                     if (e.keyCode == 40 && !this._isJumping) {
                         this.onSquat();
+                        this.onAbortGrab();
                     }
 
                 });

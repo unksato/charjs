@@ -21,6 +21,7 @@ namespace Character {
         stop(): void;
         destroy(): void;
         getPosition(): Position;
+        setPosition(position: Position): void;
         getCharSize(): { height: number, width: number };
     }
 
@@ -161,6 +162,10 @@ namespace Character {
 
         public getPosition(): Position {
             return this.position;
+        }
+
+        public setPosition(pos: Position): void {
+            this.position = pos;
         }
 
         public getCharSize(): { height: number, width: number } {
