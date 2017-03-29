@@ -368,7 +368,7 @@ namespace Character {
 
         private drawBlackClipCircle(targetDom, position: Position, size: number, count: number): void {
             let element = document.createElement("canvas");
-            element.id = `brackout_circle_${count}`;
+            element.id = `blackout_circle_${count}`;
             let ctx = element.getContext("2d");
             let width = this.targetDom.clientWidth;
             let height = this.targetDom.clientHeight;
