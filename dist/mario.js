@@ -1257,9 +1257,11 @@ var Charjs;
                     if (e.keyCode == 88 && !_this._isSquat) {
                         _this.onSpecialJump();
                     }
+                    if (e.keyCode == 89 && !_this._isSquat) {
+                        _this.onGrab();
+                    }
                     if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat) {
                         _this.onSpeedUp();
-                        _this.onGrab();
                     }
                     if (e.keyCode == 40 && !_this._isJumping) {
                         _this.onSquat();
@@ -1272,9 +1274,11 @@ var Charjs;
                     if (e.keyCode == 88) {
                         _this.onAbortJump();
                     }
+                    if (e.keyCode == 89) {
+                        _this.onAbortGrab();
+                    }
                     if (e.keyCode == 66) {
                         _this.onAbortSpeedUp();
-                        _this.onAbortGrab();
                     }
                     if (e.keyCode == 40) {
                         _this.onAbortSquat();

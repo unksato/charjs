@@ -549,9 +549,12 @@ namespace Charjs {
                         this.onSpecialJump();
                     }
 
+                    if (e.keyCode == 89 && !this._isSquat) {
+                        this.onGrab();
+                    }
+
                     if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
                         this.onSpeedUp();
-                        this.onGrab();
                     }
 
                     if (e.keyCode == 40 && !this._isJumping) {
@@ -566,9 +569,11 @@ namespace Charjs {
                     if (e.keyCode == 88) {
                         this.onAbortJump();
                     }
+                    if (e.keyCode == 89) {
+                        this.onAbortGrab();
+                    }
                     if (e.keyCode == 66) {
                         this.onAbortSpeedUp();
-                        this.onAbortGrab();
                     }
                     if (e.keyCode == 40) {
                         this.onAbortSquat();
