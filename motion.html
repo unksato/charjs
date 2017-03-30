@@ -4,7 +4,10 @@
         <script>
             window.onload = function(){
                 document.addEventListener('touchstart',function(e){
-                    document.body.innerText = "### touch-length:" + e.targetTouches.length;
+                    document.body.innerText = "### touch-start:" + e.targetTouches.length;
+                })
+                document.addEventListener('touchend',function(e){
+                    document.body.innerText = "### touch-end:" + e.targetTouches.length;
                 })
 
             }
