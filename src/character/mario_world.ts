@@ -435,29 +435,29 @@ namespace Charjs {
                             this.onJump();                     
                     }
                 });
-                document.addEventListener('touchend', (e)=>{
-                    if(e.targetTouches.length == 3){
-                        this.onAbortSquat();
-                    }else if(e.targetTouches.length == 1){
-                        this.onAbortJump();
-                        this.onAbortSquat();
-                    }else{
-                        this.onAbortGrab();
-                        this.onAbortJump();
-                        this.onAbortSquat();
+
+                let touchAbort = function(touchLength: number){
+                    switch(touchLength) {
+                        case 3:
+                            this.onAbortSquat();
+                            break;
+                        case 1:
+                        case 2:
+                            this.onAbortJump();
+                            this.onAbortSquat();
+                            break;
+                        default:
+                            this.onAbortGrab();
+                            this.onAbortJump();
+                            this.onAbortSquat();
                     }
+                }
+
+                document.addEventListener('touchend', (e)=>{
+                    touchAbort(e.targetTouches.length);
                 });
                 document.addEventListener('touchcancel', (e)=>{
-                    if(e.targetTouches.length == 3){
-                        this.onAbortSquat();
-                    }else if(e.targetTouches.length == 1){
-                        this.onAbortJump();
-                        this.onAbortSquat();
-                    }else{
-                        this.onAbortGrab();
-                        this.onAbortJump();
-                        this.onAbortSquat();
-                    }
+                    touchAbort(e.targetTouches.length);
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{

@@ -1148,33 +1148,27 @@ var Charjs;
                             _this.onJump();
                     }
                 });
+                var touchAbort_1 = function (touchLength) {
+                    switch (touchLength) {
+                        case 3:
+                            this.onAbortSquat();
+                            break;
+                        case 1:
+                        case 2:
+                            this.onAbortJump();
+                            this.onAbortSquat();
+                            break;
+                        default:
+                            this.onAbortGrab();
+                            this.onAbortJump();
+                            this.onAbortSquat();
+                    }
+                };
                 document.addEventListener('touchend', function (e) {
-                    if (e.targetTouches.length == 3) {
-                        _this.onAbortSquat();
-                    }
-                    else if (e.targetTouches.length == 1) {
-                        _this.onAbortJump();
-                        _this.onAbortSquat();
-                    }
-                    else {
-                        _this.onAbortGrab();
-                        _this.onAbortJump();
-                        _this.onAbortSquat();
-                    }
+                    touchAbort_1(e.targetTouches.length);
                 });
                 document.addEventListener('touchcancel', function (e) {
-                    if (e.targetTouches.length == 3) {
-                        _this.onAbortSquat();
-                    }
-                    else if (e.targetTouches.length == 1) {
-                        _this.onAbortJump();
-                        _this.onAbortSquat();
-                    }
-                    else {
-                        _this.onAbortGrab();
-                        _this.onAbortJump();
-                        _this.onAbortSquat();
-                    }
+                    touchAbort_1(e.targetTouches.length);
                 });
                 window.addEventListener('deviceorientation', function (e) {
                     if (!_this._isSquat) {
