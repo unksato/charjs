@@ -1115,8 +1115,8 @@ var Charjs;
             if (callback)
                 callback();
         };
-        MarioWorld.prototype.toucheAbort = function (toucheLength) {
-            switch (toucheLength) {
+        MarioWorld.prototype.touchAbort = function (touchLength) {
+            switch (touchLength) {
                 case 3:
                     this.onAbortSquat();
                     break;
@@ -1131,8 +1131,8 @@ var Charjs;
                     this.onAbortSquat();
             }
         };
-        MarioWorld.prototype.touche = function (toucheLength) {
-            switch (toucheLength) {
+        MarioWorld.prototype.touch = function (touchLength) {
+            switch (touchLength) {
                 case 1:
                     this.onGrab();
                     break;
@@ -1165,13 +1165,13 @@ var Charjs;
                     this._deviceDirection = -1;
                 }
                 document.addEventListener('touchstart', function (e) {
-                    _this.touche(e.targetTouches.length);
+                    _this.touch(e.targetTouches.length);
                 });
                 document.addEventListener('touchend', function (e) {
-                    _this.toucheAbort(e.targetTouches.length);
+                    _this.touchAbort(e.targetTouches.length);
                 });
                 document.addEventListener('touchcancel', function (e) {
-                    _this.toucheAbort(e.targetTouches.length);
+                    _this.touchAbort(e.targetTouches.length);
                 });
                 window.addEventListener('deviceorientation', function (e) {
                     if (!_this._isSquat) {

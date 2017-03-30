@@ -405,8 +405,8 @@ namespace Charjs {
         private _screenModeForMobile: string = 'PORTRAIT';
         private _deviceDirection: number = 1;
 
-        private toucheAbort(toucheLength: number){
-            switch(toucheLength) {
+        private touchAbort(touchLength: number){
+            switch(touchLength) {
                 case 3:
                     this.onAbortSquat();
                     break;
@@ -422,8 +422,8 @@ namespace Charjs {
             }
         }
 
-        private touche(toucheLength: number){
-            switch(toucheLength){
+        private touch(touchLength: number){
+            switch(touchLength){
                 case 1:
                     this.onGrab();
                     break;
@@ -454,13 +454,13 @@ namespace Charjs {
                     this._deviceDirection = -1;
                 }
                 document.addEventListener('touchstart', (e)=>{
-                    this.touche(e.targetTouches.length);
+                    this.touch(e.targetTouches.length);
                 });
                 document.addEventListener('touchend', (e)=>{
-                    this.toucheAbort(e.targetTouches.length);
+                    this.touchAbort(e.targetTouches.length);
                 });
                 document.addEventListener('touchcancel', (e)=>{
-                    this.toucheAbort(e.targetTouches.length);
+                    this.touchAbort(e.targetTouches.length);
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
