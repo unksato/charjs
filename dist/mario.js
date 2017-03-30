@@ -1149,25 +1149,31 @@ var Charjs;
                     }
                 });
                 document.addEventListener('touchend', function (e) {
-                    if (e.targetTouches.length > 0) {
+                    if (e.targetTouches.length == 3) {
+                        _this.onAbortSquat();
+                    }
+                    else if (e.targetTouches.length == 1) {
                         _this.onAbortJump();
-                        _this.onSquat();
+                        _this.onAbortSquat();
                     }
                     else {
                         _this.onAbortGrab();
                         _this.onAbortJump();
-                        _this.onSquat();
+                        _this.onAbortSquat();
                     }
                 });
                 document.addEventListener('touchcancel', function (e) {
-                    if (e.targetTouches.length > 0) {
+                    if (e.targetTouches.length == 3) {
+                        _this.onAbortSquat();
+                    }
+                    else if (e.targetTouches.length == 1) {
                         _this.onAbortJump();
-                        _this.onSquat();
+                        _this.onAbortSquat();
                     }
                     else {
                         _this.onAbortGrab();
                         _this.onAbortJump();
-                        _this.onSquat();
+                        _this.onAbortSquat();
                     }
                 });
                 window.addEventListener('deviceorientation', function (e) {
