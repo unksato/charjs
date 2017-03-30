@@ -436,23 +436,27 @@ namespace Charjs {
                     }
                 });
                 document.addEventListener('touchend', (e)=>{
-                    if(e.targetTouches.length > 0){
+                    if(e.targetTouches.length == 3){
+                        this.onAbortSquat();
+                    }else if(e.targetTouches.length == 1){
                         this.onAbortJump();
-                        this.onSquat();
+                        this.onAbortSquat();
                     }else{
                         this.onAbortGrab();
                         this.onAbortJump();
-                        this.onSquat();
+                        this.onAbortSquat();
                     }
                 });
                 document.addEventListener('touchcancel', (e)=>{
-                    if(e.targetTouches.length > 0){
+                    if(e.targetTouches.length == 3){
+                        this.onAbortSquat();
+                    }else if(e.targetTouches.length == 1){
                         this.onAbortJump();
-                        this.onSquat();
+                        this.onAbortSquat();
                     }else{
                         this.onAbortGrab();
                         this.onAbortJump();
-                        this.onSquat();
+                        this.onAbortSquat();
                     }
                 });
 
