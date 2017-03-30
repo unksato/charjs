@@ -1386,7 +1386,7 @@ var Charjs;
                                 var circleSize_1 = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
                                 var circleAnimationCount_1 = 0;
                                 var circleTimer_1 = setInterval(function () {
-                                    circleSize_1 -= 40;
+                                    circleSize_1 -= 20;
                                     _this.drawBlackClipCircle(screen, pos_1, circleSize_1, circleAnimationCount_1);
                                     circleAnimationCount_1++;
                                     if (circleSize_1 <= 0) {
@@ -1396,7 +1396,7 @@ var Charjs;
                                 }, _this.frameInterval);
                             }
                             blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + backgroundOpacity + ";";
-                        }, _this.frameInterval);
+                        }, _this.frameInterval / 2);
                     });
                 }
                 blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + backgroundOpacity + ";";

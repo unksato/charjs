@@ -140,7 +140,7 @@ namespace Charjs {
                             let circleSize =  screen.clientWidth > screen.clientHeight ? screen.clientWidth  : screen.clientHeight ;
                             let circleAnimationCount = 0;
                             let circleTimer = setInterval(() => {
-                                circleSize-=40;
+                                circleSize-=20;
                                 this.drawBlackClipCircle(screen, pos, circleSize, circleAnimationCount);
                                 circleAnimationCount++;
                                 if(circleSize <= 0){
@@ -151,7 +151,7 @@ namespace Charjs {
                         }
                         blackScreen.style.cssText = `z-index: ${this._player.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${backgroundOpacity};`;
 
-                    }, this.frameInterval);
+                    }, this.frameInterval / 2);
 
 
                     });
