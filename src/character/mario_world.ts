@@ -194,11 +194,16 @@ namespace Charjs {
                 this.position.x -= this.pixSize * this._speed;            
             }
 
+            let runIndex = this._runIndex;
+
             if (this._isSquat) {
-                return {index:8, direction: this._direction};
+                if (this._grabedEnemy)
+                    runIndex = 14;
+                else 
+                    runIndex = 8;              
+                return {index:runIndex, direction: this._direction};
             }
 
-            let runIndex = this._runIndex;
 
             if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;

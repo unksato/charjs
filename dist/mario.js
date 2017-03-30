@@ -926,10 +926,14 @@ var Charjs;
             else {
                 this.position.x -= this.pixSize * this._speed;
             }
-            if (this._isSquat) {
-                return { index: 8, direction: this._direction };
-            }
             var runIndex = this._runIndex;
+            if (this._isSquat) {
+                if (this._grabedEnemy)
+                    runIndex = 14;
+                else
+                    runIndex = 8;
+                return { index: runIndex, direction: this._direction };
+            }
             if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;
             }
