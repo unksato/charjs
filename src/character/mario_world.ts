@@ -461,27 +461,29 @@ namespace Charjs {
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
-                    let motion = 0;
-                    switch(this._screenModeForMobile){
-                        case 'PORTRAIT':
-                            motion = Math.round(e.gamma);
-                            break;    
-                        case 'LANSCAPE':
-                            motion = Math.round(e.beta);
-                            break;                       
-                    }
-                    motion = motion * this._deviceDirection;
-                    if(Math.abs(motion) >= 20 && this._canSpeedUpForMobile){
-                        if(this._direction == Direction.left && motion < 0){
-                            this._canSpeedUpForMobile = false;
-                            this.onSpeedUp();
-                        }else if(this._direction == Direction.right && motion > 0){
-                            this._canSpeedUpForMobile = false;
-                            this.onSpeedUp();
+                    if(!this._isSquat){
+                        let motion = 0;
+                        switch(this._screenModeForMobile){
+                            case 'PORTRAIT':
+                                motion = Math.round(e.gamma);
+                                break;    
+                            case 'LANSCAPE':
+                                motion = Math.round(e.beta);
+                                break;                       
                         }
-                    }else if(Math.abs(motion) < 20 && !this._canSpeedUpForMobile){
-                        this.onAbortSpeedUp();
-                        this._canSpeedUpForMobile = true;
+                        motion = motion * this._deviceDirection;
+                        if(Math.abs(motion) >= 20 && this._canSpeedUpForMobile){
+                            if(this._direction == Direction.left && motion < 0){
+                                this._canSpeedUpForMobile = false;
+                                this.onSpeedUp();
+                            }else if(this._direction == Direction.right && motion > 0){
+                                this._canSpeedUpForMobile = false;
+                                this.onSpeedUp();
+                            }
+                        }else if(Math.abs(motion) < 20 && !this._canSpeedUpForMobile){
+                            this.onAbortSpeedUp();
+                            this._canSpeedUpForMobile = true;
+                        }
                     }
                 });
                 window.addEventListener('orientationchange', (e)=>{

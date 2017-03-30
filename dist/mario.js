@@ -1177,29 +1177,31 @@ var Charjs;
                     }
                 });
                 window.addEventListener('deviceorientation', function (e) {
-                    var motion = 0;
-                    switch (_this._screenModeForMobile) {
-                        case 'PORTRAIT':
-                            motion = Math.round(e.gamma);
-                            break;
-                        case 'LANSCAPE':
-                            motion = Math.round(e.beta);
-                            break;
-                    }
-                    motion = motion * _this._deviceDirection;
-                    if (Math.abs(motion) >= 20 && _this._canSpeedUpForMobile) {
-                        if (_this._direction == Charjs.Direction.left && motion < 0) {
-                            _this._canSpeedUpForMobile = false;
-                            _this.onSpeedUp();
+                    if (!_this._isSquat) {
+                        var motion = 0;
+                        switch (_this._screenModeForMobile) {
+                            case 'PORTRAIT':
+                                motion = Math.round(e.gamma);
+                                break;
+                            case 'LANSCAPE':
+                                motion = Math.round(e.beta);
+                                break;
                         }
-                        else if (_this._direction == Charjs.Direction.right && motion > 0) {
-                            _this._canSpeedUpForMobile = false;
-                            _this.onSpeedUp();
+                        motion = motion * _this._deviceDirection;
+                        if (Math.abs(motion) >= 20 && _this._canSpeedUpForMobile) {
+                            if (_this._direction == Charjs.Direction.left && motion < 0) {
+                                _this._canSpeedUpForMobile = false;
+                                _this.onSpeedUp();
+                            }
+                            else if (_this._direction == Charjs.Direction.right && motion > 0) {
+                                _this._canSpeedUpForMobile = false;
+                                _this.onSpeedUp();
+                            }
                         }
-                    }
-                    else if (Math.abs(motion) < 20 && !_this._canSpeedUpForMobile) {
-                        _this.onAbortSpeedUp();
-                        _this._canSpeedUpForMobile = true;
+                        else if (Math.abs(motion) < 20 && !_this._canSpeedUpForMobile) {
+                            _this.onAbortSpeedUp();
+                            _this._canSpeedUpForMobile = true;
+                        }
                     }
                 });
                 window.addEventListener('orientationchange', function (e) {
