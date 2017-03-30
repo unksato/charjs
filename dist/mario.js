@@ -1141,6 +1141,9 @@ var Charjs;
                         case 3:
                             _this.onSpecialJump();
                             break;
+                        case 4:
+                            _this.onSquat();
+                            break;
                         default:
                             _this.onJump();
                     }
@@ -1148,19 +1151,23 @@ var Charjs;
                 document.addEventListener('touchend', function (e) {
                     if (e.targetTouches.length > 0) {
                         _this.onAbortJump();
+                        _this.onSquat();
                     }
                     else {
                         _this.onAbortGrab();
                         _this.onAbortJump();
+                        _this.onSquat();
                     }
                 });
                 document.addEventListener('touchcancel', function (e) {
                     if (e.targetTouches.length > 0) {
                         _this.onAbortJump();
+                        _this.onSquat();
                     }
                     else {
                         _this.onAbortGrab();
                         _this.onAbortJump();
+                        _this.onSquat();
                     }
                 });
                 window.addEventListener('deviceorientation', function (e) {

@@ -428,6 +428,9 @@ namespace Charjs {
                         case 3:
                             this.onSpecialJump();
                             break;
+                        case 4:
+                            this.onSquat();
+                            break;
                         default:
                             this.onJump();                     
                     }
@@ -435,17 +438,21 @@ namespace Charjs {
                 document.addEventListener('touchend', (e)=>{
                     if(e.targetTouches.length > 0){
                         this.onAbortJump();
+                        this.onSquat();
                     }else{
                         this.onAbortGrab();
                         this.onAbortJump();
+                        this.onSquat();
                     }
                 });
                 document.addEventListener('touchcancel', (e)=>{
                     if(e.targetTouches.length > 0){
                         this.onAbortJump();
+                        this.onSquat();
                     }else{
                         this.onAbortGrab();
                         this.onAbortJump();
+                        this.onSquat();
                     }
                 });
 
