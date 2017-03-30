@@ -1,16 +1,16 @@
 <html>
     <head>
-        <meta name="viewport" content="width=1000,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
         <title>Charjs Sample</title>
         <script type="text/javascript" src="./dist/mario.js"></script>
         <script>
             window.onload = function(){
-                var controller = Charjs.GameMaster.GetController('sample' ,document.body,3);
+                var controller = Charjs.GameMaster.GetController('sample' ,document.body,2);
 
                 var mario = controller.CreateCharInstance(Charjs.MarioWorld, { x: 0, y: 0 });
                 controller.CreateCharInstance(Charjs.GoombaWorld, { x: 300, y: 0 }, true);
-                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 500, y: 0 }, true);
-                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 800, y: 0 }, true);
+                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 400, y: 0 }, true);
+                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 600, y: 0 }, true);
 
                 controller.init();
                 controller.start();
