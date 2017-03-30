@@ -1115,6 +1115,40 @@ var Charjs;
             if (callback)
                 callback();
         };
+        MarioWorld.prototype.toucheAbort = function (toucheLength) {
+            switch (toucheLength) {
+                case 3:
+                    this.onAbortSquat();
+                    break;
+                case 1:
+                case 2:
+                    this.onAbortJump();
+                    this.onAbortSquat();
+                    break;
+                default:
+                    this.onAbortGrab();
+                    this.onAbortJump();
+                    this.onAbortSquat();
+            }
+        };
+        MarioWorld.prototype.touche = function (toucheLength) {
+            switch (toucheLength) {
+                case 1:
+                    this.onGrab();
+                    break;
+                case 2:
+                    this.onJump();
+                    break;
+                case 3:
+                    this.onSpecialJump();
+                    break;
+                case 4:
+                    this.onSquat();
+                    break;
+                default:
+                    this.onJump();
+            }
+        };
         MarioWorld.prototype.registerActionCommand = function () {
             var _this = this;
             if (this.checkMobile()) {
@@ -1131,44 +1165,13 @@ var Charjs;
                     this._deviceDirection = -1;
                 }
                 document.addEventListener('touchstart', function (e) {
-                    switch (e.targetTouches.length) {
-                        case 1:
-                            _this.onGrab();
-                            break;
-                        case 2:
-                            _this.onJump();
-                            break;
-                        case 3:
-                            _this.onSpecialJump();
-                            break;
-                        case 4:
-                            _this.onSquat();
-                            break;
-                        default:
-                            _this.onJump();
-                    }
+                    _this.touche(e.targetTouches.length);
                 });
-                var touchAbort_1 = function (touchLength) {
-                    switch (touchLength) {
-                        case 3:
-                            this.onAbortSquat();
-                            break;
-                        case 1:
-                        case 2:
-                            this.onAbortJump();
-                            this.onAbortSquat();
-                            break;
-                        default:
-                            this.onAbortGrab();
-                            this.onAbortJump();
-                            this.onAbortSquat();
-                    }
-                };
                 document.addEventListener('touchend', function (e) {
-                    touchAbort_1(e.targetTouches.length);
+                    _this.toucheAbort(e.targetTouches.length);
                 });
                 document.addEventListener('touchcancel', function (e) {
-                    touchAbort_1(e.targetTouches.length);
+                    _this.toucheAbort(e.targetTouches.length);
                 });
                 window.addEventListener('deviceorientation', function (e) {
                     if (!_this._isSquat) {

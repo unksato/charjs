@@ -405,6 +405,42 @@ namespace Charjs {
         private _screenModeForMobile: string = 'PORTRAIT';
         private _deviceDirection: number = 1;
 
+        private toucheAbort(toucheLength: number){
+            switch(toucheLength) {
+                case 3:
+                    this.onAbortSquat();
+                    break;
+                case 1:
+                case 2:
+                    this.onAbortJump();
+                    this.onAbortSquat();
+                    break;
+                default:
+                    this.onAbortGrab();
+                    this.onAbortJump();
+                    this.onAbortSquat();
+            }
+        }
+
+        private touche(toucheLength: number){
+            switch(toucheLength){
+                case 1:
+                    this.onGrab();
+                    break;
+                case 2:
+                    this.onJump();                     
+                    break;
+                case 3:
+                    this.onSpecialJump();
+                    break;
+                case 4:
+                    this.onSquat();
+                    break;
+                default:
+                    this.onJump();                     
+            }            
+        }
+
         registerActionCommand(): void {
             if (this.checkMobile()) {
                 if(window.orientation == 0){
@@ -418,46 +454,13 @@ namespace Charjs {
                     this._deviceDirection = -1;
                 }
                 document.addEventListener('touchstart', (e)=>{
-                    switch(e.targetTouches.length){
-                        case 1:
-                            this.onGrab();
-                            break;
-                        case 2:
-                            this.onJump();                     
-                            break;
-                        case 3:
-                            this.onSpecialJump();
-                            break;
-                        case 4:
-                            this.onSquat();
-                            break;
-                        default:
-                            this.onJump();                     
-                    }
+                    this.touche(e.targetTouches.length);
                 });
-
-                let touchAbort = function(touchLength: number){
-                    switch(touchLength) {
-                        case 3:
-                            this.onAbortSquat();
-                            break;
-                        case 1:
-                        case 2:
-                            this.onAbortJump();
-                            this.onAbortSquat();
-                            break;
-                        default:
-                            this.onAbortGrab();
-                            this.onAbortJump();
-                            this.onAbortSquat();
-                    }
-                }
-
                 document.addEventListener('touchend', (e)=>{
-                    touchAbort(e.targetTouches.length);
+                    this.toucheAbort(e.targetTouches.length);
                 });
                 document.addEventListener('touchcancel', (e)=>{
-                    touchAbort(e.targetTouches.length);
+                    this.toucheAbort(e.targetTouches.length);
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
