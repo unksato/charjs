@@ -1,23 +1,24 @@
-namespace Character {
+namespace Charjs {
 
     enum HitStatus{
         none,
         dammage,
-        attack
+        attack,
+        grab
     }
 
-    export class Mario extends AbstractCharacter{
+    export class MarioWorld extends AbstractCharacter{
         private static STEP = 2;
         private static DEFAULT_SPEED = 2;
         private _runIndex = 0;
-        private _currentStep = Mario.STEP;
+        private _currentStep = MarioWorld.STEP;
 
         isEnemy = false;
         useVertical = false;
 
         private _yVector = 0;
         private _jumpPower = 18;
-        private _speed = Mario.DEFAULT_SPEED;
+        private _speed = MarioWorld.DEFAULT_SPEED;
         private _gameOverWaitCount = 0;
 
 
@@ -42,9 +43,17 @@ namespace Character {
                 case HitStatus.attack:
                     this.draw(11, null, this._attackDirection, Vertical.up, true);
                     this.stop();
-                    let waitTimer = setTimeout(() => {
+                    setTimeout(() => {
                         this.start();
                     }, this.frameInterval * 3);
+                    break;
+                case HitStatus.grab:
+                    this.updateGrabedEnemy();
+                    this.draw(14, null, this._direction, Vertical.up, true);                               
+                    this.stop();
+                    setTimeout(() => {
+                        this.start();
+                    }, this.frameInterval);
                     break;
                 default:
                     let action = this.executeRun();
@@ -53,13 +62,40 @@ namespace Character {
             }
         }
 
+        private checkGrabedEnemysAttack(enemy: IEnemy) {
+            if(this._grabedEnemy){
+                let ePos = enemy.getPosition();
+                let eSize = enemy.getCharSize()
+
+                let gEnemyPos = this._grabedEnemy.getPosition();
+                let gEnemySize = this._grabedEnemy.getCharSize()
+                if (gEnemyPos.y > ePos.y + eSize.height)
+                    return;
+                if(ePos.y > gEnemyPos.y + gEnemySize.height)
+                    return;
+                if(gEnemyPos.x > ePos.x + eSize.width)
+                    return;
+                if(ePos.x > gEnemyPos.x + gEnemySize.width)
+                    return;
+
+                let grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
+                let enemyCenter = ePos.x + eSize.width / 2;
+                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.right : Direction.left, this._speed * 3);
+                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.left : Direction.right, this._speed * 3)
+                this._grabedEnemy = null;
+            }
+        }
+
         private doHitTest(): HitStatus {
             if (this._gameMaster) {
                 let enemys = this._gameMaster.getEnemys();
                 for (let name in enemys) {
-                    if (!enemys[name].isKilled()) {
+                    if (!enemys[name].isKilled() && this._grabedEnemy != enemys[name]) {
                         let ePos = enemys[name].getPosition();
                         let eSize = enemys[name].getCharSize()
+
+                        this.checkGrabedEnemysAttack(enemys[name]);
+
                         if (this.position.y > ePos.y + eSize.height)
                             continue;
                         if (ePos.y > this.position.y + this.charHeight)
@@ -68,17 +104,17 @@ namespace Character {
                             continue;
                         if (ePos.x > this.position.x + this.charWidth)
                             continue;
-
+                        
                         if (enemys[name].isStepped()) {
                             if(!this._grabbing){
                                 let playerCenter = this.position.x + this.charWidth / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
+                                this._attackDirection = playerCenter <= enemyCenter ? Direction.right : Direction.left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
                                 return HitStatus.attack;
                             }else{
                                 this.grabEnemy(enemys[name]);
-                                continue;
+                                return HitStatus.grab;
                             }
                         }
 
@@ -86,7 +122,7 @@ namespace Character {
                             if(this._isSpecial){
                                 let playerCenter = this.position.x + this.charWidth / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? 1 : -1;
+                                this._attackDirection = playerCenter <= enemyCenter ? Direction.right : Direction.left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
                             }else{
                                 enemys[name].onStepped();
@@ -108,32 +144,44 @@ namespace Character {
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
                 this.position.y = this.position.y + this._yVector;
+                this.updateGrabedEnemy();
                 if (this.position.y <= 0) {
                     this._isJumping = false;
                     this._yVector = 0;
                     this.position.y = 0;
                     return null;
                 } else {
-                    if(!this._isSpecial) {
-                        if (this._speed > 8) {
-                            if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
-                                return null;
+                    if(!this._grabedEnemy){
+                        if(!this._isSpecial) {
+                            if (this._speed > 8) {
+                                if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
+                                    return null;
+                                } else {
+                                    return {index:7, direction:this._direction};
+                                }
                             } else {
-                                return {index:7, direction:this._direction};
+                                return {index:this._yVector > 0 ? 2 : 3, direction:this._direction};
                             }
-                        } else {
-                            return {index:this._yVector > 0 ? 2 : 3, direction:this._direction};
+                        }else{
+                            this._specialAnimationIndex++;
+                            if(this._specialAnimationIndex > this._specialAnimation.length)
+                                this._specialAnimationIndex=0;
+                            return this._specialAnimation[this._specialAnimationIndex];
                         }
-                    }else{
-                        this._specialAnimationIndex++;
-                        if(this._specialAnimationIndex > this._specialAnimation.length)
-                            this._specialAnimationIndex=0;
-                        return this._specialAnimation[this._specialAnimationIndex];
                     }
                 }
             } else {
                 return null;
             }   
+        }
+
+        private updateGrabedEnemy() {
+            if(this._grabedEnemy){
+                let grabXOffset = this._direction == Direction.right ? this.charWidth * 0.7 : this.charWidth * -1 * 0.7;
+                let grabYOffset = this.pixSize;
+                this._grabedEnemy.setPosition({x:this.position.x + grabXOffset ,y:this.position.y + grabYOffset});
+                this._grabedEnemy.drawAction();
+            }
         }
 
         private executeRun(): { index:number, direction: Direction} {
@@ -151,33 +199,39 @@ namespace Character {
 
             let runIndex = this._runIndex;
 
-            if (this._currentStep < Mario.STEP) {
+            if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;
             } else {
                 this._currentStep = 0;
                 this._runIndex = this._runIndex ^ 1;
             }
 
-            // Speed up action
-            if (this._speed > 8) {
-                runIndex = this._runIndex == 0 ? 4 : 5;
-            } else {
-                runIndex = this._runIndex;
-            }
-
-            // Braking action
-            if (!this._isJumping) {
-                if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                    if ((this._direction == Direction.left && this.position.x < this.charWidth * 3) ||
-                        (this._direction == Direction.right && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)
-                    ) {
-                        runIndex = 6;
-                        if (this._speed > 2)
-                            this._speed--;
-                        this._isBraking = true;
-                    }
+            // grabed action
+            if (this._grabedEnemy) {
+                runIndex = this._runIndex == 0 ? 15 : 16;
+                this.updateGrabedEnemy();
+            }else{
+                // Speed up action
+                if (this._speed > 8) {
+                    runIndex = this._runIndex == 0 ? 4 : 5;
                 } else {
-                    this._isBraking = false;
+                    runIndex = this._runIndex;
+                }
+
+                // Braking action
+                if (!this._isJumping) {
+                    if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
+                        if ((this._direction == Direction.left && this.position.x < this.charWidth * 3) ||
+                            (this._direction == Direction.right && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)
+                        ) {
+                            runIndex = 6;
+                            if (this._speed > 2)
+                                this._speed--;
+                            this._isBraking = true;
+                        }
+                    } else {
+                        this._isBraking = false;
+                    }
                 }
             }
             return {index:runIndex, direction: this._direction};;
@@ -187,8 +241,8 @@ namespace Character {
         private _grabbing = false;
 
         private grabEnemy(enemy: IEnemy) : void {
+            enemy.onGrabed();
             this._grabedEnemy = enemy;
-            enemy.stop();
         }
 
         private putEnemy() : void {
@@ -201,6 +255,15 @@ namespace Character {
 
         private onAbortGrab(): void {
             this._grabbing = false;
+            if(this._grabedEnemy){
+                this.draw(11, null, this._direction, Vertical.up, true);
+                this.stop();
+                setTimeout(() => {
+                    this.start();
+                }, this.frameInterval * 3);
+                this._grabedEnemy.onKicked(this._direction, this._speed * 3);
+                this._grabedEnemy = null;
+            }
         }
 
         private onJump(): void {
@@ -282,7 +345,7 @@ namespace Character {
                 clearInterval(this._squatTimer);
                 this._squatTimer = null;                
             }
-            this._speed = Mario.DEFAULT_SPEED;
+            this._speed = MarioWorld.DEFAULT_SPEED;
             this._isSquat = false;
         }
 
@@ -306,7 +369,7 @@ namespace Character {
                     return;
                 }
 
-                if (this._currentStep < Mario.STEP) {
+                if (this._currentStep < MarioWorld.STEP) {
                     this._currentStep++;
                 } else {
                     this._currentStep = 0;
@@ -346,14 +409,14 @@ namespace Character {
                             let circleSize = this.targetDom.clientWidth > this.targetDom.clientHeight ? this.targetDom.clientWidth  : this.targetDom.clientHeight ;
                             let circleAnimationCount = 0;
                             let circleTimer = setInterval(() => {
-                                circleSize-=5;
+                                circleSize-=40;
                                 this.drawBlackClipCircle(this.targetDom, this.position, circleSize, circleAnimationCount);
                                 circleAnimationCount++;
                                 if(circleSize <= 0){
                                     clearInterval(circleTimer);
                                     this.destroy();
                                 }
-                            }, 1);
+                            }, this.frameInterval);
                         }
                         blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
 
@@ -407,17 +470,35 @@ namespace Character {
                     this._deviceDirection = -1;
                 }
                 document.addEventListener('touchstart', (e)=>{
-                    if(e.targetTouches.length > 1) {
-                        this.onSpecialJump();
-                    }else{
-                        this.onJump();
+                    switch(e.targetTouches.length){
+                        case 1:
+                            this.onGrab();
+                            break;
+                        case 2:
+                            this.onJump();                     
+                            break;
+                        case 3:
+                            this.onSpecialJump();
+                            break;
+                        default:
+                            this.onJump();                     
                     }
                 });
                 document.addEventListener('touchend', (e)=>{
-                    this.onAbortJump();
+                    if(e.targetTouches.length > 0){
+                        this.onAbortJump();
+                    }else{
+                        this.onAbortGrab();
+                        this.onAbortJump();
+                    }
                 });
                 document.addEventListener('touchcancel', (e)=>{
-                    this.onAbortJump();
+                    if(e.targetTouches.length > 0){
+                        this.onAbortJump();
+                    }else{
+                        this.onAbortGrab();
+                        this.onAbortJump();
+                    }
                 });
 
                 window.addEventListener('deviceorientation',(e)=>{
@@ -475,7 +556,6 @@ namespace Character {
 
                     if (e.keyCode == 40 && !this._isJumping) {
                         this.onSquat();
-                        this.onAbortGrab();
                     }
 
                 });
@@ -488,6 +568,7 @@ namespace Character {
                     }
                     if (e.keyCode == 66) {
                         this.onAbortSpeedUp();
+                        this.onAbortGrab();
                     }
                     if (e.keyCode == 40) {
                         this.onAbortSquat();

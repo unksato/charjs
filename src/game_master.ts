@@ -1,4 +1,4 @@
-namespace Character {
+namespace Charjs {
     export class GameMaster {
 
         static GAME_MASTERS = {};
@@ -22,6 +22,8 @@ namespace Character {
 
         private _player: AbstractCharacter = null;
         
+        private _isStarting = false;
+
         public CreateCharInstance<C extends AbstractCharacter>(clz: { new (targetDom, pixSize, position, reverse): C }, position: Position, isReverse = false) : C {
 
             let char = new clz(this.targetDom, this.charSize, position, isReverse);
@@ -57,6 +59,25 @@ namespace Character {
             for (let name in this._enemys) {
                 this._enemys[name].init();
             }
+            this.registerCommand();
+        }
+
+        public isStarting(): boolean {
+            return this._isStarting;
+        }
+
+        public registerCommand(): void {
+            document.addEventListener('keypress', this.defaultCommand);
+        }
+
+        defaultCommand = (e:KeyboardEvent) => {
+            if (e.keyCode == 32) {
+                if (this._isStarting) {
+                    this.stop();
+                } else {
+                    this.start();
+                }
+            }
         }
 
         public start(): void {
@@ -66,7 +87,19 @@ namespace Character {
             if (this._player) {
                 this._player.start();
             }
-            
+
+            this._isStarting = true;
+        }
+
+        public stop(): void {
+            for (let name in this._enemys) {
+                this._enemys[name].stop();
+            }
+            if (this._player) {
+                this._player.stop();
+            }
+
+            this._isStarting = false;
         }
 
         public doGameOver(): void {

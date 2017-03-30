@@ -5,12 +5,12 @@
         <script type="text/javascript" src="./dist/mario.js"></script>
         <script>
             window.onload = function(){
-                var controller = Character.GameMaster.GetController('sample' ,document.body,3);
+                var controller = Charjs.GameMaster.GetController('sample' ,document.body,3);
 
-                var mario = controller.CreateCharInstance(Character.Mario, { x: 0, y: 0 });
-                controller.CreateCharInstance(Character.Goomba, { x: 300, y: 0 }, true);
-                controller.CreateCharInstance(Character.Goomba, { x: 500, y: 0 }, true);
-                controller.CreateCharInstance(Character.Goomba, { x: 800, y: 0 }, true);
+                var mario = controller.CreateCharInstance(Charjs.MarioWorld, { x: 0, y: 0 });
+                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 300, y: 0 }, true);
+                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 500, y: 0 }, true);
+                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 800, y: 0 }, true);
 
                 controller.init();
                 controller.start();

@@ -1,4 +1,4 @@
-namespace Character {
+namespace Charjs {
     export class Position {
         public x: number = 0;
         public y: number = 0;
@@ -27,9 +27,11 @@ namespace Character {
 
     export interface IEnemy extends ICharacter{
         onStepped(): void;
+        onGrabed(): void;
         onKicked(direction: number, kickPower: number): void;
         isKilled(): boolean;
         isStepped(): boolean; 
+        drawAction(): void;
     }
 
     export abstract class AbstractCharacter implements ICharacter{
@@ -62,6 +64,8 @@ namespace Character {
         }
 
         public init(): void{
+            if(this.isEnemy)
+                this.zIndex--;
              for (let charactor of this.chars) {
                 this._rightActions.push(this.createCharacterAction(charactor));
                 this._leftActions.push(this.createCharacterAction(charactor, true));
@@ -118,12 +122,19 @@ namespace Character {
                 this.currentAction = direction == Direction.right ? this._verticalRightActions[index] : this._verticalLeftActions[index];                 
             }
             this.currentAction.style.left = position.x + 'px';
-            this.currentAction.style.bottom = this.position.y + 'px';
+            this.currentAction.style.bottom = position.y + 'px';
             this.targetDom.appendChild(this.currentAction);
         }
 
+        public refresh() {
+            this.currentAction.style.left = this.position.x + 'px';
+            this.currentAction.style.bottom = this.position.y + 'px';            
+        }
+
         public registerCommand(): void {
-            document.addEventListener('keypress', this.defaultCommand);
+            if(!this._gameMaster){
+                document.addEventListener('keypress', this.defaultCommand);
+            }
             this.registerActionCommand();
         }
 
@@ -192,6 +203,5 @@ namespace Character {
                 return false;
             }
         }
-
     }
 }
