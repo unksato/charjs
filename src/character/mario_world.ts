@@ -7,7 +7,7 @@ namespace Charjs {
         grab
     }
 
-    export class MarioWorld extends AbstractCharacter{
+    export class MarioWorld extends AbstractCharacter implements IPlayer{
         private static STEP = 2;
         private static DEFAULT_SPEED = 2;
         private _runIndex = 0;
@@ -48,7 +48,7 @@ namespace Charjs {
                     }, this.frameInterval * 3);
                     break;
                 case HitStatus.grab:
-                    this.updateGrabedEnemy();
+                    this.moveGrabedEnemy();
                     this.draw(14, null, this._direction, Vertical.up, true);                               
                     this.stop();
                     setTimeout(() => {
@@ -144,7 +144,7 @@ namespace Charjs {
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
                 this.position.y = this.position.y + this._yVector;
-                this.updateGrabedEnemy();
+                this.moveGrabedEnemy();
                 if (this.position.y <= 0) {
                     this._isJumping = false;
                     this._yVector = 0;
@@ -175,10 +175,11 @@ namespace Charjs {
             }   
         }
 
-        private updateGrabedEnemy() {
+        private moveGrabedEnemy() {
             if(this._grabedEnemy){
                 let grabXOffset = this._direction == Direction.right ? this.charWidth * 0.7 : this.charWidth * -1 * 0.7;
                 let grabYOffset = this.pixSize;
+                this._grabedEnemy.zIndex = this.zIndex - 1;
                 this._grabedEnemy.setPosition({x:this.position.x + grabXOffset ,y:this.position.y + grabYOffset});
                 this._grabedEnemy.drawAction();
             }
@@ -208,8 +209,15 @@ namespace Charjs {
 
             // grabed action
             if (this._grabedEnemy) {
-                runIndex = this._runIndex == 0 ? 15 : 16;
-                this.updateGrabedEnemy();
+                if(directionUpdated){
+                    runIndex = 12;
+                    this._grabedEnemy.setPosition({x:this.position.x,y:this.position.y});
+                    this._grabedEnemy.zIndex = this.zIndex + 1;
+                    this._grabedEnemy.drawAction();
+                }else{
+                    runIndex = this._runIndex == 0 ? 15 : 16;
+                    this.moveGrabedEnemy();
+                }
             }else{
                 // Speed up action
                 if (this._speed > 8) {
@@ -383,74 +391,9 @@ namespace Charjs {
 
         private _backgroundOpacity = 0;
 
-        public gool(): void {
-            if (this._gameMaster) this._gameMaster.doGool();
-
-            this._speed = 1;
-
-            let blackScreen = document.createElement('div');
-            if (this.targetDom == document.body)
-                this.targetDom.style.cssText = 'margin: 0px;'; // only document body 
-
-            let goolDimTimer = setInterval(() => {
-                if (Math.floor(this._backgroundOpacity) != 1) {
-                    this._backgroundOpacity += 0.01;
-                } else {
-                    this.stop();
-                    this.draw(10, null, Direction.right, Vertical.up, true);
-                    clearInterval(goolDimTimer);
-                    let goolDimOffTimer = setInterval(() => {
-                        if (Math.ceil(this._backgroundOpacity) != 0) {
-                            this._backgroundOpacity -= 0.02;
-                        } else {
-                            clearInterval(goolDimOffTimer);
-                            this.start();
-
-                            let circleSize = this.targetDom.clientWidth > this.targetDom.clientHeight ? this.targetDom.clientWidth  : this.targetDom.clientHeight ;
-                            let circleAnimationCount = 0;
-                            let circleTimer = setInterval(() => {
-                                circleSize-=40;
-                                this.drawBlackClipCircle(this.targetDom, this.position, circleSize, circleAnimationCount);
-                                circleAnimationCount++;
-                                if(circleSize <= 0){
-                                    clearInterval(circleTimer);
-                                    this.destroy();
-                                }
-                            }, this.frameInterval);
-                        }
-                        blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
-
-                    }, this.frameInterval);
-                }
-                blackScreen.style.cssText = `z-index: ${this.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${this._backgroundOpacity};`;
-
-            }, this.frameInterval);
-
-            this.targetDom.appendChild(blackScreen);
-        }
-
-        private drawBlackClipCircle(targetDom, position: Position, size: number, count: number): void {
-            let element = document.createElement("canvas");
-            element.id = `blackout_circle_${count}`;
-            let ctx = element.getContext("2d");
-            let width = this.targetDom.clientWidth;
-            let height = this.targetDom.clientHeight;
-            element.setAttribute("width", width.toString());
-            element.setAttribute("height", height.toString());
-            element.style.cssText = `z-index: ${this.zIndex + 1}; position: absolute;`;
-            ctx.fillStyle = "black";
-            ctx.fillRect(0,0,width,height);
-
-            if(size > 0){
-                ctx.globalCompositeOperation = "destination-out";
-                ctx.beginPath();
-                ctx.arc(position.x + this.charWidth / 2, height - position.y - this.charHeight / 2, size, 0, Math.PI * 2, false);
-            }
-            ctx.fill();
-
-            targetDom.appendChild(element);
-            if (count != 0)
-                targetDom.removeChild(document.getElementById(`brackout_circle_${count - 1}`));
+        public onGool(callback?:Function): void {
+            this.draw(10, null, Direction.right, Vertical.up, true);
+            if(callback) callback();
         }
 
         private _canSpeedUpForMobile: boolean = true;

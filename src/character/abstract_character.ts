@@ -16,6 +16,7 @@ namespace Charjs {
 
     export interface ICharacter {
         _name: string;
+        zIndex: number;
         init(): void;
         start(): void;
         stop(): void;
@@ -23,6 +24,10 @@ namespace Charjs {
         getPosition(): Position;
         setPosition(position: Position): void;
         getCharSize(): { height: number, width: number };
+    }
+
+    export interface IPlayer extends ICharacter{
+        onGool(callback?: Function): void;
     }
 
     export interface IEnemy extends ICharacter{
@@ -60,7 +65,7 @@ namespace Charjs {
         private _frameTimer: number = null;
         protected _gravity = 2;
 
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, protected zIndex = 2147483645, protected frameInterval = 45) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, protected frameInterval = 45, public zIndex = 2147483640) {
         }
 
         public init(): void{
@@ -123,6 +128,7 @@ namespace Charjs {
             }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = position.y + 'px';
+            this.currentAction.style.zIndex = this.zIndex.toString();
             this.targetDom.appendChild(this.currentAction);
         }
 

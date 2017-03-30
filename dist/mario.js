@@ -29,19 +29,19 @@ var Charjs;
         Vertical[Vertical["down"] = 1] = "down";
     })(Vertical = Charjs.Vertical || (Charjs.Vertical = {}));
     var AbstractCharacter = (function () {
-        function AbstractCharacter(targetDom, pixSize, position, _direction, zIndex, frameInterval) {
+        function AbstractCharacter(targetDom, pixSize, position, _direction, frameInterval, zIndex) {
             if (pixSize === void 0) { pixSize = 2; }
             if (position === void 0) { position = { x: 0, y: 0 }; }
             if (_direction === void 0) { _direction = Direction.right; }
-            if (zIndex === void 0) { zIndex = 2147483645; }
             if (frameInterval === void 0) { frameInterval = 45; }
+            if (zIndex === void 0) { zIndex = 2147483640; }
             var _this = this;
             this.targetDom = targetDom;
             this.pixSize = pixSize;
             this.position = position;
             this._direction = _direction;
-            this.zIndex = zIndex;
             this.frameInterval = frameInterval;
+            this.zIndex = zIndex;
             this._name = '';
             this.cssTextTemplate = "z-index: " + this.zIndex + "; position: absolute; bottom: 0;";
             this.currentAction = null;
@@ -131,6 +131,7 @@ var Charjs;
             }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = position.y + 'px';
+            this.currentAction.style.zIndex = this.zIndex.toString();
             this.targetDom.appendChild(this.currentAction);
         };
         AbstractCharacter.prototype.refresh = function () {
@@ -787,7 +788,7 @@ var Charjs;
                     }, this.frameInterval * 3);
                     break;
                 case HitStatus.grab:
-                    this.updateGrabedEnemy();
+                    this.moveGrabedEnemy();
                     this.draw(14, null, this._direction, Charjs.Vertical.up, true);
                     this.stop();
                     setTimeout(function () {
@@ -873,7 +874,7 @@ var Charjs;
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
                 this.position.y = this.position.y + this._yVector;
-                this.updateGrabedEnemy();
+                this.moveGrabedEnemy();
                 if (this.position.y <= 0) {
                     this._isJumping = false;
                     this._yVector = 0;
@@ -908,10 +909,11 @@ var Charjs;
                 return null;
             }
         };
-        MarioWorld.prototype.updateGrabedEnemy = function () {
+        MarioWorld.prototype.moveGrabedEnemy = function () {
             if (this._grabedEnemy) {
                 var grabXOffset = this._direction == Charjs.Direction.right ? this.charWidth * 0.7 : this.charWidth * -1 * 0.7;
                 var grabYOffset = this.pixSize;
+                this._grabedEnemy.zIndex = this.zIndex - 1;
                 this._grabedEnemy.setPosition({ x: this.position.x + grabXOffset, y: this.position.y + grabYOffset });
                 this._grabedEnemy.drawAction();
             }
@@ -936,8 +938,16 @@ var Charjs;
                 this._runIndex = this._runIndex ^ 1;
             }
             if (this._grabedEnemy) {
-                runIndex = this._runIndex == 0 ? 15 : 16;
-                this.updateGrabedEnemy();
+                if (directionUpdated) {
+                    runIndex = 12;
+                    this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
+                    this._grabedEnemy.zIndex = this.zIndex + 1;
+                    this._grabedEnemy.drawAction();
+                }
+                else {
+                    runIndex = this._runIndex == 0 ? 15 : 16;
+                    this.moveGrabedEnemy();
+                }
             }
             else {
                 if (this._speed > 8) {
@@ -1096,68 +1106,10 @@ var Charjs;
                 _this.draw(9, null, _this._runIndex == 0 ? Charjs.Direction.left : Charjs.Direction.right, Charjs.Vertical.up, true);
             }, this.frameInterval);
         };
-        MarioWorld.prototype.gool = function () {
-            var _this = this;
-            if (this._gameMaster)
-                this._gameMaster.doGool();
-            this._speed = 1;
-            var blackScreen = document.createElement('div');
-            if (this.targetDom == document.body)
-                this.targetDom.style.cssText = 'margin: 0px;';
-            var goolDimTimer = setInterval(function () {
-                if (Math.floor(_this._backgroundOpacity) != 1) {
-                    _this._backgroundOpacity += 0.01;
-                }
-                else {
-                    _this.stop();
-                    _this.draw(10, null, Charjs.Direction.right, Charjs.Vertical.up, true);
-                    clearInterval(goolDimTimer);
-                    var goolDimOffTimer_1 = setInterval(function () {
-                        if (Math.ceil(_this._backgroundOpacity) != 0) {
-                            _this._backgroundOpacity -= 0.02;
-                        }
-                        else {
-                            clearInterval(goolDimOffTimer_1);
-                            _this.start();
-                            var circleSize_1 = _this.targetDom.clientWidth > _this.targetDom.clientHeight ? _this.targetDom.clientWidth : _this.targetDom.clientHeight;
-                            var circleAnimationCount_1 = 0;
-                            var circleTimer_1 = setInterval(function () {
-                                circleSize_1 -= 40;
-                                _this.drawBlackClipCircle(_this.targetDom, _this.position, circleSize_1, circleAnimationCount_1);
-                                circleAnimationCount_1++;
-                                if (circleSize_1 <= 0) {
-                                    clearInterval(circleTimer_1);
-                                    _this.destroy();
-                                }
-                            }, _this.frameInterval);
-                        }
-                        blackScreen.style.cssText = "z-index: " + (_this.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + _this._backgroundOpacity + ";";
-                    }, _this.frameInterval);
-                }
-                blackScreen.style.cssText = "z-index: " + (_this.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + _this._backgroundOpacity + ";";
-            }, this.frameInterval);
-            this.targetDom.appendChild(blackScreen);
-        };
-        MarioWorld.prototype.drawBlackClipCircle = function (targetDom, position, size, count) {
-            var element = document.createElement("canvas");
-            element.id = "blackout_circle_" + count;
-            var ctx = element.getContext("2d");
-            var width = this.targetDom.clientWidth;
-            var height = this.targetDom.clientHeight;
-            element.setAttribute("width", width.toString());
-            element.setAttribute("height", height.toString());
-            element.style.cssText = "z-index: " + (this.zIndex + 1) + "; position: absolute;";
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, width, height);
-            if (size > 0) {
-                ctx.globalCompositeOperation = "destination-out";
-                ctx.beginPath();
-                ctx.arc(position.x + this.charWidth / 2, height - position.y - this.charHeight / 2, size, 0, Math.PI * 2, false);
-            }
-            ctx.fill();
-            targetDom.appendChild(element);
-            if (count != 0)
-                targetDom.removeChild(document.getElementById("brackout_circle_" + (count - 1)));
+        MarioWorld.prototype.onGool = function (callback) {
+            this.draw(10, null, Charjs.Direction.right, Charjs.Vertical.up, true);
+            if (callback)
+                callback();
         };
         MarioWorld.prototype.registerActionCommand = function () {
             var _this = this;
@@ -1295,10 +1247,12 @@ var Charjs;
 var Charjs;
 (function (Charjs) {
     var GameMaster = (function () {
-        function GameMaster(targetDom, charSize) {
+        function GameMaster(targetDom, charSize, frameInterval) {
+            if (frameInterval === void 0) { frameInterval = 45; }
             var _this = this;
             this.targetDom = targetDom;
             this.charSize = charSize;
+            this.frameInterval = frameInterval;
             this._enemys = {};
             this._enemyCount = 0;
             this._player = null;
@@ -1323,9 +1277,9 @@ var Charjs;
             GameMaster.GAME_MASTERS[gameName] = master;
             return master;
         };
-        GameMaster.prototype.CreateCharInstance = function (clz, position, isReverse) {
-            if (isReverse === void 0) { isReverse = false; }
-            var char = new clz(this.targetDom, this.charSize, position, isReverse);
+        GameMaster.prototype.CreateCharInstance = function (clz, position, direction) {
+            if (direction === void 0) { direction = Charjs.Direction.right; }
+            var char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
             if (char.isEnemy) {
                 char._name = 'enemy_' + this._enemyCount;
                 this._enemyCount++;
@@ -1341,7 +1295,7 @@ var Charjs;
         GameMaster.prototype.deleteEnemy = function (char) {
             delete this._enemys[char._name];
             if (Object.keys(this._enemys).length == 0) {
-                this._player.gool();
+                this.doGool();
             }
         };
         GameMaster.prototype.getEnemys = function () {
@@ -1386,9 +1340,71 @@ var Charjs;
             }
         };
         GameMaster.prototype.doGool = function () {
+            var _this = this;
             for (var name_7 in this._enemys) {
                 this._enemys[name_7].stop();
             }
+            var screen = document.body;
+            var blackScreen = document.createElement('div');
+            screen.style.margin = "0px";
+            var backgroundOpacity = 0;
+            var goolDimTimer = setInterval(function () {
+                if (Math.floor(backgroundOpacity) != 1) {
+                    backgroundOpacity += 0.01;
+                }
+                else {
+                    clearInterval(goolDimTimer);
+                    _this._player.stop();
+                    _this._player.onGool(function () {
+                        var goolDimOffTimer = setInterval(function () {
+                            if (Math.ceil(backgroundOpacity) != 0) {
+                                backgroundOpacity -= 0.02;
+                            }
+                            else {
+                                clearInterval(goolDimOffTimer);
+                                _this._player.start();
+                                var pos_1 = _this._player.getPosition();
+                                var circleSize_1 = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
+                                var circleAnimationCount_1 = 0;
+                                var circleTimer_1 = setInterval(function () {
+                                    circleSize_1 -= 40;
+                                    _this.drawBlackClipCircle(screen, pos_1, circleSize_1, circleAnimationCount_1);
+                                    circleAnimationCount_1++;
+                                    if (circleSize_1 <= 0) {
+                                        clearInterval(circleTimer_1);
+                                        _this._player.destroy();
+                                    }
+                                }, _this.frameInterval);
+                            }
+                            blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + backgroundOpacity + ";";
+                        }, _this.frameInterval);
+                    });
+                }
+                blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + backgroundOpacity + ";";
+            }, this.frameInterval);
+            document.body.appendChild(blackScreen);
+        };
+        GameMaster.prototype.drawBlackClipCircle = function (targetDom, position, size, count) {
+            var element = document.createElement("canvas");
+            element.id = "bkout_circle_" + count;
+            var ctx = element.getContext("2d");
+            var width = this.targetDom.clientWidth;
+            var height = this.targetDom.clientHeight;
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
+            element.style.cssText = "z-index: " + (this._player.zIndex + 1) + "; position: absolute;";
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, width, height);
+            if (size > 0) {
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                var charSize = this._player.getCharSize();
+                ctx.arc(position.x + charSize.width / 2, height - position.y - charSize.height / 2, size, 0, Math.PI * 2, false);
+            }
+            ctx.fill();
+            targetDom.appendChild(element);
+            if (count != 0)
+                targetDom.removeChild(document.getElementById("bkout_circle_" + (count - 1)));
         };
         return GameMaster;
     }());
