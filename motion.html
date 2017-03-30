@@ -3,8 +3,8 @@
         <title>Charjs Sample</title>
         <script>
             window.onload = function(){
-                window.addEventListener('orientationchange',function(e){
-                    document.body.innerText = "### orientation:" + window.orientation;
+                document.addEventListener('touchstart',function(e){
+                    document.body.innerText = "### touch-length:" + e.targetTouches.length;
                 })
 
             }
