@@ -8,9 +8,9 @@
                 var controller = Charjs.GameMaster.GetController('sample' ,document.body,2);
 
                 var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 300, y: 0 }, Charjs.Direction.left);
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 350, y: 200 }, Charjs.Direction.right);
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 600, y: 0 }, Charjs.Direction.left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 250, y: 200 }, Charjs.Direction.right);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 400, y: 0 }, Charjs.Direction.left);
 
                 controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 236, y: 100 });
                 controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 268, y: 100 });
