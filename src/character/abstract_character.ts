@@ -1,9 +1,4 @@
 namespace Charjs {
-    export class Position {
-        public x: number = 0;
-        public y: number = 0;
-    }
-
     export enum Direction {
         right,
         left
@@ -14,16 +9,39 @@ namespace Charjs {
         down
     }
 
-    export interface ICharacter {
+    export class Position {
+        public x: number = 0;
+        public y: number = 0;
+    }
+
+    export class Size {
+        public width: number = 0;
+        public height: number = 0;
+        public widthOffset: number = 0;
+        public heightOffset: number = 0;
+    }
+
+    export class Environment {
+        public ground: number = null;
+        public ceiling: number = null;
+        public right: number = null;
+        public left: number = null;
+    }
+
+    export interface IObject {
         _name: string;
         zIndex: number;
         init(): void;
-        start(): void;
-        stop(): void;
         destroy(): void;
         getPosition(): Position;
         setPosition(position: Position): void;
-        getCharSize(): { height: number, width: number };
+        getCharSize(): Size;        
+    }
+
+    export interface ICharacter extends IObject{
+        start(): void;
+        stop(): void;
+        onAction(): void;
     }
 
     export interface IPlayer extends ICharacter{
@@ -39,56 +57,45 @@ namespace Charjs {
         drawAction(): void;
     }
 
-    export abstract class AbstractCharacter implements ICharacter{
+    export abstract class AbstractObject implements IObject {
+        public _name = '';
         abstract chars: number[][][];
         abstract colors: string[];
-        abstract onAction(): void;        
-        abstract registerActionCommand(): void;
-        abstract isEnemy: boolean;
-        abstract useVertical: boolean;
-
-        public _name = '';
-
         protected cssTextTemplate = `z-index: ${this.zIndex}; position: absolute; bottom: 0;`;
+
         protected currentAction: HTMLCanvasElement = null;
         protected _rightActions : HTMLCanvasElement[] = [];
         protected _leftActions : HTMLCanvasElement[]  = [];
         protected _verticalRightActions : HTMLCanvasElement[]  = [];
         protected _verticalLeftActions : HTMLCanvasElement[]  = [];
 
-        protected charWidth: number = null;
-        protected charHeight: number = null;
+        protected size : Size = {height:0, width:0, widthOffset:0, heightOffset:0};
+        protected env: Environment = {ground:null, ceiling:null, right: null, left:null};
 
-        public _gameMaster: GameMaster = null;
-
-        private _isStarting = false;
-        private _frameTimer: number = null;
-        protected _gravity = 2;
-
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, protected frameInterval = 45, public zIndex = 2147483640) {
+        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, private useLeft = true, private  useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
         }
 
-        public init(): void{
-            if(this.isEnemy)
-                this.zIndex--;
-             for (let charactor of this.chars) {
+        init(): void{
+            for (let charactor of this.chars) {
                 this._rightActions.push(this.createCharacterAction(charactor));
-                this._leftActions.push(this.createCharacterAction(charactor, true));
+                if(this.useLeft)
+                    this._leftActions.push(this.createCharacterAction(charactor, true));
                 if (this.useVertical) {
                     this._verticalRightActions.push(this.createCharacterAction(charactor, false, true));
-                    this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
+                    if(this.useLeft)
+                        this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
                 }
-             }           
+            }           
         }
 
         private createCharacterAction(charactorMap: number[][], isReverse:boolean = false, isVerticalRotation:boolean = false) : HTMLCanvasElement{
             let element = document.createElement("canvas");
             let ctx = element.getContext("2d");
-            this.charWidth = this.pixSize * charactorMap[0].length + 1;
-            this.charHeight = this.pixSize * charactorMap.length;
+            this.size.width = this.pixSize * charactorMap[0].length;
+            this.size.height = this.pixSize * charactorMap.length;
 
-            element.setAttribute("width", this.charWidth.toString());
-            element.setAttribute("height", this.charHeight.toString());
+            element.setAttribute("width", this.size.width.toString());
+            element.setAttribute("height", this.size.height.toString());
             element.style.cssText = this.cssTextTemplate;
             AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
             return element;
@@ -137,6 +144,33 @@ namespace Charjs {
             this.currentAction.style.bottom = this.position.y + 'px';            
         }
 
+        public destroy(): void {
+            this.removeCharacter();
+        }
+
+        public getPosition(): Position {
+            return this.position;
+        }
+
+        public setPosition(pos: Position): void {
+            this.position = pos;
+        }
+
+        public getCharSize(): Size {
+            return this.size;
+        }
+    }
+
+    export abstract class AbstractCharacter extends AbstractObject implements ICharacter{
+        abstract onAction(): void;        
+        abstract registerActionCommand(): void;
+
+        public _gameMaster: GameMaster = null;
+
+        private _isStarting = false;
+        private _frameTimer: number = null;
+        protected _gravity = 2;
+
         public registerCommand(): void {
             if(!this._gameMaster){
                 document.addEventListener('keypress', this.defaultCommand);
@@ -170,44 +204,117 @@ namespace Charjs {
 
         public destroy(): void {
             this.stop();
-            this.removeCharacter();
-            if(this._gameMaster && this.isEnemy){
+            if(this._gameMaster && this instanceof AbstractEnemy){
                 this._gameMaster.deleteEnemy(<any>this);
             }
             document.removeEventListener('keypress', this.defaultCommand);
+            super.destroy();
         }
 
-        public getPosition(): Position {
-            return this.position;
-        }
+        protected upperObject: IOtherObject = null;
+        protected underObject: IOtherObject = null;
+        protected rightObject: IOtherObject = null;
+        protected leftObject: IOtherObject = null;
 
-        public setPosition(pos: Position): void {
-            this.position = pos;
-        }
+        protected updateEnvironment(): void {
+            if(this._gameMaster){
+                let objs = this._gameMaster.getApproachedObjects(this.position, this.size.width * 3);
+                this.env.ground = null;
+                this.env.ceiling = null;
+                this.env.right = null;
+                this.env.left = null;
+                this.upperObject = null;
+                this.underObject = null;
+                this.rightObject = null;
+                this.leftObject = null;
+                for(let obj of objs){
+                    let oPos = obj.getPosition();
+                    let oSize = obj.getCharSize();
 
-        public getCharSize(): { height: number, width: number } {
-            return { height: this.charHeight, width: this.charWidth };
+                    let oPosLeft = oPos.x + oSize.widthOffset;
+                    let oPosRight = oPos.x + oSize.width - oSize.widthOffset;
+                    let oPosUnder = oPos.y + /*Magic number*/this.pixSize * 3;
+                    let oPosUpper = oPos.y + oSize.height - oSize.heightOffset;
+
+                    let cPosLeft = this.position.x + this.size.widthOffset;
+                    let cPosRight = this.position.x + this.size.width - this.size.widthOffset;
+                    let cPosUnder = this.position.y;
+                    let cPosUpper = this.position.y + this.size.height - this.size.heightOffset;
+
+                    if(cPosLeft >= oPosLeft && cPosLeft <= oPosRight  || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
+                        // ground update
+                        if(cPosUnder >= oPosUpper && ( this.env.ground === null || this.env.ground > oPosUpper)){
+                            this.underObject = obj;
+                            this.env.ground = oPosUpper;
+                            continue;
+                        }
+                        // ceiling update
+                        if(cPosUpper <= oPosUnder && (this.env.ceiling === null || this.env.ceiling > oPosUnder)){
+                            this.upperObject = obj;
+                            this.env.ceiling = oPosUnder;
+                            continue;
+                        }
+                        continue;
+                   }
+
+                    if(cPosUnder > oPosUnder && cPosUnder < oPosUpper  || cPosUpper > oPosUnder && cPosUpper < oPosUpper) {
+                        // left update
+                        if(cPosLeft >= oPosRight && ( this.env.left === null || this.env.left < oPosRight)){
+                            this.leftObject = obj;
+                            this.env.left = oPosRight;
+                            continue;
+                        }
+                        // right update
+                        if(cPosRight <= oPosLeft && (this.env.right === null || this.env.right > oPosLeft)){
+                            this.rightObject = obj;
+                            this.env.right = oPosLeft;  
+                            continue;
+                        }
+                        continue;
+                   }
+
+                } 
+            }
         }
 
         protected updateDirection(): boolean{
             let currentDirection = this._direction;
+            let right = this.env.right === null ? this.targetDom.clientWidth - this.size.width - (/*Magic offset*/ this.pixSize * 2) : this.env.right;
+            let left = this.env.left === null ? 0 : this.env.left;
 
-            if (this.position.x > this.targetDom.clientWidth - this.charWidth - (/*Magic offset*/ this.pixSize * 2) && this._direction == Direction.right) {
+            if (this.position.x >  right && this._direction == Direction.right) {
                 this._direction = Direction.left;
             }
-            if (this.position.x < 0 && this._direction == Direction.left) {
+            if (this.position.x < left && this._direction == Direction.left) {
                 this._direction = Direction.right;
             }
 
             return currentDirection != this._direction;
         }
+    }
 
-        public checkMobile(): boolean {
-            if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+    export abstract class AbstractPlayer extends AbstractCharacter implements IPlayer {
+        abstract onGool(callback?: Function): void;
+    }
+
+    export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
+        abstract onStepped(): void;
+        abstract onGrabed(): void;
+        abstract onKicked(direction: number, kickPower: number): void;
+        abstract isKilled(): boolean;
+        abstract isStepped(): boolean; 
+        abstract drawAction(): void;
+    }
+
+    export interface IOtherObject extends IObject{
+        onPushedUp(): void;
+        onTrampled(): void;
+        isActive: boolean;
+    }
+
+    export abstract class AbstractOtherObject extends AbstractObject implements IOtherObject {
+        abstract onPushedUp(): void;
+        abstract onTrampled(): void;
+        isActive = true;
     }
 }
