@@ -19,25 +19,35 @@ namespace Charjs {
 
         private _enemys: {[key:string]:IEnemy} = {}
         private _enemyCount = 0;
+        private _objects: {[key:string]:IOtherObject} = {}
+        private _objectCount = 0;
 
         private _player: IPlayer = null;
         
         private _isStarting = false;
 
-        public CreateCharInstance<C extends AbstractCharacter>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.right) : C {
-
+        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.right) : C {
             let char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
-
-            if (char.isEnemy) {
-                char._name = 'enemy_' + this._enemyCount;
-                this._enemyCount++;
-                this._enemys[char._name] = <any>char;
-            } else {
-                char._name = 'player';
-                this._player = <any>char;
-            }
+            char._name = 'player';
+            this._player = <any>char;
             char._gameMaster = this;
+            return char;
+        }
 
+        public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.right) : C {
+            let char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
+            char._name = 'enemy_' + this._enemyCount;
+            this._enemyCount++;
+            this._enemys[char._name] = <any>char;
+            char._gameMaster = this;
+            return char;
+        }
+
+        public CreateObjectInstance<C extends AbstractOtherObject>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position) : C {
+            let char = new clz(this.targetDom, this.charSize, position, Direction.left, this.frameInterval);
+            char._name = 'obj_' + this._objectCount;
+            this._objectCount++;
+            this._objects[char._name] = <any>char;
             return char;
         }
 
@@ -52,6 +62,21 @@ namespace Charjs {
             return this._enemys;
         }
 
+        public getApproachedObjects(pos: Position, radius: number): IOtherObject[] {
+            let objs = [];
+
+            for(let name in this._objects){
+                if(this._objects[name].isActive){
+                    let objPos = this._objects[name].getPosition();
+                    if( pos.x - radius < objPos.x && objPos.x < pos.x + radius &&
+                        pos.y - radius < objPos.y && objPos.y < pos.y + radius){
+                            objs.push(this._objects[name]);
+                        }
+                }
+            }
+            return objs;
+        }
+
         public init(): void {
             if (this._player) {
                 this._player.init();
@@ -59,6 +84,10 @@ namespace Charjs {
             for (let name in this._enemys) {
                 this._enemys[name].init();
             }
+            for (let name in this._objects) {
+                this._objects[name].init();
+            }
+
             this.registerCommand();
         }
 
@@ -129,7 +158,8 @@ namespace Charjs {
                     this._player.onGool(() => {
 
                     let goolDimOffTimer = setInterval(() => {
-                        if (Math.ceil(backgroundOpacity) != 0) {
+
+                        if (backgroundOpacity.toFixed(2) != "0.20") {
                             backgroundOpacity -= 0.02;
                         } else {
                             clearInterval(goolDimOffTimer);
@@ -156,7 +186,7 @@ namespace Charjs {
 
                     });
                 }
-                blackScreen.style.cssText = `z-index: ${this._player.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${backgroundOpacity};`;
+                blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${backgroundOpacity};`;
             }, this.frameInterval);  
 
             document.body.appendChild(blackScreen);
@@ -187,5 +217,14 @@ namespace Charjs {
                 targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
         }
 
-    }
+        public static checkMobile(): boolean {
+            if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+
+    }   
 }

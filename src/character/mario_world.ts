@@ -7,14 +7,11 @@ namespace Charjs {
         grab
     }
 
-    export class MarioWorld extends AbstractCharacter implements IPlayer{
+    export class MarioWorld extends AbstractPlayer {
         private static STEP = 2;
         private static DEFAULT_SPEED = 2;
         private _runIndex = 0;
         private _currentStep = MarioWorld.STEP;
-
-        isEnemy = false;
-        useVertical = false;
 
         private _yVector = 0;
         private _jumpPower = 18;
@@ -34,8 +31,12 @@ namespace Charjs {
         private _isSquat = false;
         private _attackDirection : Direction = Direction.right;
 
+        constructor(targetDom, pixSize:number, position: Position, direction: Direction = Direction.right, zIndex = 2147483640, frameInterval = 45){
+            super(targetDom, pixSize,position, direction, true, false, zIndex, frameInterval);
+        }
 
         onAction(): void {
+            this.updateEnvironment();
             switch (this.doHitTest()) {
                 case HitStatus.dammage:
                     this.gameOver();
@@ -58,6 +59,13 @@ namespace Charjs {
                 default:
                     let action = this.executeRun();
                     action = this.executeJump() || action;
+
+                    if(action.index === 0){
+                        this.size.widthOffset = 4 * this.pixSize;
+                    } else {
+                        this.size.widthOffset = 0;
+                    }
+
                     this.draw(action.index, null, action.direction, Vertical.up, true);
             }
         }
@@ -98,16 +106,16 @@ namespace Charjs {
 
                         if (this.position.y > ePos.y + eSize.height)
                             continue;
-                        if (ePos.y > this.position.y + this.charHeight)
+                        if (ePos.y > this.position.y + this.size.height)
                             continue;
                         if (this.position.x > ePos.x + eSize.width)
                             continue;
-                        if (ePos.x > this.position.x + this.charWidth)
+                        if (ePos.x > this.position.x + this.size.width)
                             continue;
                         
                         if (enemys[name].isStepped()) {
                             if(!this._grabbing){
-                                let playerCenter = this.position.x + this.charWidth / 2;
+                                let playerCenter = this.position.x + this.size.width / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
                                 this._attackDirection = playerCenter <= enemyCenter ? Direction.right : Direction.left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
@@ -120,7 +128,7 @@ namespace Charjs {
 
                         if (this._isJumping && this._yVector < 0) {
                             if(this._isSpecial){
-                                let playerCenter = this.position.x + this.charWidth / 2;
+                                let playerCenter = this.position.x + this.size.width / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
                                 this._attackDirection = playerCenter <= enemyCenter ? Direction.right : Direction.left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
@@ -141,20 +149,30 @@ namespace Charjs {
         private _specialAnimation = [{index:0, direction:Direction.right},{index:12, direction:Direction.right},{index:0, direction:Direction.left},{index:13, direction:Direction.right}]
 
         private executeJump(): {index:number, direction: Direction} {
+            let ground = this.env.ground || 0;
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
-                this.position.y = this.position.y + this._yVector;
+                if(this.env.ceiling != null){
+                    this.position.y = Math.min(this.position.y + this._yVector, this.env.ceiling - this.size.height + this.size.heightOffset);
+                    if(this.position.y == this.env.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0){
+                        this.upperObject.onPushedUp();
+                        this._yVector = 0;
+                    }
+                }else{
+                    this.position.y = this.position.y + this._yVector;
+                }
+            
                 this.moveGrabedEnemy();
-                if (this.position.y <= 0) {
+                if (this.position.y <= ground) {
                     this._isJumping = false;
                     this._yVector = 0;
-                    this.position.y = 0;
+                    this.position.y = ground;
                     return null;
                 } else {
                     if(!this._grabedEnemy){
                         if(!this._isSpecial) {
                             if (this._speed > 8) {
-                                if (this._yVector > 0 && this.position.y < this.charHeight * 3) {
+                                if (this._yVector > 0 && this.position.y < this.size.height * 3) {
                                     return null;
                                 } else {
                                     return {index:7, direction:this._direction};
@@ -171,13 +189,22 @@ namespace Charjs {
                     }
                 }
             } else {
+                if(this.position.y > ground){
+                    this._yVector-= this._gravity*this.pixSize;
+                    this.position.y+=this._yVector;
+                    if(this.position.y < ground){
+                        this.position.y = ground;
+                    }
+                }else{
+                    this._yVector = 0;
+                }                
                 return null;
             }   
         }
 
         private moveGrabedEnemy() {
             if(this._grabedEnemy){
-                let grabXOffset = this._direction == Direction.right ? this.charWidth * 0.7 : this.charWidth * -1 * 0.7;
+                let grabXOffset = this._direction == Direction.right ? this.size.width * 0.7 : this.size.width * -1 * 0.7;
                 let grabYOffset = this.pixSize;
                 this._grabedEnemy.zIndex = this.zIndex - 1;
                 this._grabedEnemy.setPosition({x:this.position.x + grabXOffset ,y:this.position.y + grabYOffset});
@@ -234,8 +261,8 @@ namespace Charjs {
                 // Braking action
                 if (!this._isJumping) {
                     if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                        if ((this._direction == Direction.left && this.position.x < this.charWidth * 3) ||
-                            (this._direction == Direction.right && this.position.x > this.targetDom.clientWidth - this.charWidth * 4)
+                        if ((this._direction == Direction.left && this.position.x < this.size.width * 3) ||
+                            (this._direction == Direction.right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)
                         ) {
                             runIndex = 6;
                             if (this._speed > 2)
@@ -376,7 +403,7 @@ namespace Charjs {
                 this._yVector -= this._gravity * this.pixSize;
                 this.position.y = this.position.y + this._yVector;
 
-                if (this.position.y < this.charHeight * 5 * -1) {
+                if (this.position.y < this.size.height * 5 * -1) {
                     clearInterval(this._gameOverTimer);
                     this.destroy();
                     return;
@@ -442,7 +469,7 @@ namespace Charjs {
         }
 
         registerActionCommand(): void {
-            if (this.checkMobile()) {
+            if (GameMaster.checkMobile()) {
                 if(window.orientation == 0){
                     this._screenModeForMobile = 'PORTRAIT';
                     this._deviceDirection = 1;

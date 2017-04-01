@@ -1,5 +1,5 @@
 namespace Charjs {
-    export class GoombaWorld extends AbstractCharacter implements IEnemy {
+    export class GoombaWorld extends AbstractEnemy {
         colors = ['','#000000','#ffffff','#b82800','#f88800','#f87800','#f8c000','#f8f800'];
         chars = [[
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -37,17 +37,19 @@ namespace Charjs {
             [0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0]
             ]];
 
-        useVertical = true;
-        isEnemy = true;
-
         private _speed = 1;
         private static STEP = 2;
         private _currentStep = 0;
         private _actionIndex = 0;
         private _isKilled = false;
         private _isGrabed = false;
+        private _yVector = 0;
 
         private _vertical : Vertical = Vertical.up;
+
+        constructor(targetDom, pixSize:number, position: Position, direction: Direction = Direction.right, zIndex = 2147483640, frameInterval = 45){
+            super(targetDom, pixSize,position, direction, true, true, zIndex-1, frameInterval);
+        }
 
         isKilled(): boolean{
             return this._isKilled;
@@ -59,6 +61,20 @@ namespace Charjs {
 
                 if (this.doHitTestWithOtherEnemy()) {
                     this._direction = this._direction == Direction.right ? Direction.left : Direction.right;
+                }
+
+                this.updateEnvironment();
+                
+                let ground = this.env.ground || 0;
+
+                if(this.position.y > ground){
+                    this._yVector-= this._gravity*this.pixSize;
+                    this.position.y+=this._yVector;
+                    if(this.position.y < ground){
+                        this.position.y = ground;
+                    }
+                }else{
+                    this._yVector = 0;
                 }
 
                 if (this._direction == Direction.right) {
@@ -107,7 +123,7 @@ namespace Charjs {
                 this.position.y = this.position.y + yVector;
                 this.position.x += kickPower * direction;
 
-                if (this.position.y < this.charHeight * 5 * -1) {
+                if (this.position.y < this.size.height * 5 * -1) {
                     clearInterval(killTimer);
                     this.destroy();
                     return;
@@ -134,11 +150,11 @@ namespace Charjs {
                         let eSize = enemys[name].getCharSize()
                         if (this.position.y > ePos.y + eSize.height)
                             continue;
-                        if (ePos.y > this.position.y + this.charHeight)
+                        if (ePos.y > this.position.y + this.size.height)
                             continue;
                         if (this.position.x > ePos.x + eSize.width)
                             continue;
-                        if (ePos.x > this.position.x + this.charWidth)
+                        if (ePos.x > this.position.x + this.size.width)
                             continue;
                         return true;
                     }
