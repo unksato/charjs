@@ -145,7 +145,8 @@ namespace Charjs {
             let screen = document.body;
 
             let blackScreen = document.createElement('div');
-            screen.style.margin = "0px";
+            blackScreen.setAttribute("width", screen.clientWidth.toString());
+            blackScreen.setAttribute("height", screen.clientHeight.toString());
 
             let backgroundOpacity = 0;
 
@@ -157,49 +158,47 @@ namespace Charjs {
                     this._player.stop();
                     this._player.onGool(() => {
 
-                    let goolDimOffTimer = setInterval(() => {
+                        let goolDimOffTimer = setInterval(() => {
 
-                        if (backgroundOpacity.toFixed(2) != "0.20") {
-                            backgroundOpacity -= 0.02;
-                        } else {
-                            clearInterval(goolDimOffTimer);
+                            if (backgroundOpacity.toFixed(2) != "0.20") {
+                                backgroundOpacity -= 0.05;
+                            } else {
+                                clearInterval(goolDimOffTimer);
 
-                            this._player.start();
+                                this._player.start();
 
-                            let pos = this._player.getPosition();
-                            let circleSize =  screen.clientWidth > screen.clientHeight ? screen.clientWidth  : screen.clientHeight ;
-                            let circleAnimationCount = 0;
-                            let circleTimer = setInterval(() => {
-                                circleSize-=20;
-                                this.drawBlackClipCircle(screen, pos, circleSize, circleAnimationCount);
-                                circleAnimationCount++;
-                                if(circleSize <= 0){
-                                    clearInterval(circleTimer);
-                                    this._player.destroy();
-                                }
-                            }, this.frameInterval);
-                        }
-                        blackScreen.style.cssText = `z-index: ${this._player.zIndex - 3}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${backgroundOpacity};`;
+                                let circleSize =  screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
+                                let circleAnimationCount = 0;
+                                let circleTimer = setInterval(() => {
+                                    circleSize-=20;
+                                    let rect = this._player.getCurrntElement().getBoundingClientRect();
+                                    this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
+                                    circleAnimationCount++;
+                                    if(circleSize <= 0){
+                                        clearInterval(circleTimer);
+                                        this._player.destroy();
+                                    }
+                                }, this.frameInterval / 2);
+                            }
+                            blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
 
-                    }, this.frameInterval / 2);
-
-
+                        }, this.frameInterval);
                     });
                 }
-                blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: ${backgroundOpacity};`;
-            }, this.frameInterval);  
+                blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
+            }, this.frameInterval * 1.5);  
 
-            document.body.appendChild(blackScreen);
+            this.targetDom.appendChild(blackScreen);
         }
 
-        private drawBlackClipCircle(targetDom, position: Position, size: number, count: number): void {
+        private drawBlackClipCircle(targetDom, rect: ClientRect, size: number, count: number): void {
             let element = document.createElement("canvas");
-            element.id = `bkout_circle_${count}`;
             let ctx = element.getContext("2d");
-            let width = this.targetDom.clientWidth;
-            let height = this.targetDom.clientHeight;
-            element.setAttribute("width", width.toString());
-            element.setAttribute("height", height.toString());
+            let width = targetDom.clientWidth;
+            let height = targetDom.clientHeight;
+            element.id = `bkout_circle_${count}`;
+            element.setAttribute("width",width);
+            element.setAttribute("height",height);
             element.style.cssText = `z-index: ${this._player.zIndex + 1}; position: absolute;`;
             ctx.fillStyle = "black";
             ctx.fillRect(0,0,width,height);
@@ -207,14 +206,13 @@ namespace Charjs {
             if(size > 0){
                 ctx.globalCompositeOperation = "destination-out";
                 ctx.beginPath();
-                let charSize = this._player.getCharSize()
-                ctx.arc(position.x + charSize.width / 2, height - position.y - charSize.height / 2, size, 0, Math.PI * 2, false);
+                ctx.arc(rect.left + rect.width / 2 , rect.top + rect.height / 2 , size, 0, Math.PI * 2, false);
             }
             ctx.fill();
 
-            targetDom.appendChild(element);
+            this.targetDom.appendChild(element);
             if (count != 0)
-                targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
+                this.targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
         }
 
         public static checkMobile(): boolean {

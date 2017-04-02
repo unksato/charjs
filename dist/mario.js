@@ -159,6 +159,9 @@ var Charjs;
         AbstractObject.prototype.getCharSize = function () {
             return this.size;
         };
+        AbstractObject.prototype.getCurrntElement = function () {
+            return this.currentAction;
+        };
         return AbstractObject;
     }());
     Charjs.AbstractObject = AbstractObject;
@@ -1693,7 +1696,8 @@ var Charjs;
             }
             var screen = document.body;
             var blackScreen = document.createElement('div');
-            screen.style.margin = "0px";
+            blackScreen.setAttribute("width", screen.clientWidth.toString());
+            blackScreen.setAttribute("height", screen.clientHeight.toString());
             var backgroundOpacity = 0;
             var goolDimTimer = setInterval(function () {
                 if (Math.floor(backgroundOpacity) != 1) {
@@ -1705,53 +1709,52 @@ var Charjs;
                     _this._player.onGool(function () {
                         var goolDimOffTimer = setInterval(function () {
                             if (backgroundOpacity.toFixed(2) != "0.20") {
-                                backgroundOpacity -= 0.02;
+                                backgroundOpacity -= 0.05;
                             }
                             else {
                                 clearInterval(goolDimOffTimer);
                                 _this._player.start();
-                                var pos_1 = _this._player.getPosition();
                                 var circleSize_1 = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
                                 var circleAnimationCount_1 = 0;
                                 var circleTimer_1 = setInterval(function () {
                                     circleSize_1 -= 20;
-                                    _this.drawBlackClipCircle(screen, pos_1, circleSize_1, circleAnimationCount_1);
+                                    var rect = _this._player.getCurrntElement().getBoundingClientRect();
+                                    _this.drawBlackClipCircle(screen, rect, circleSize_1, circleAnimationCount_1);
                                     circleAnimationCount_1++;
                                     if (circleSize_1 <= 0) {
                                         clearInterval(circleTimer_1);
                                         _this._player.destroy();
                                     }
-                                }, _this.frameInterval);
+                                }, _this.frameInterval / 2);
                             }
-                            blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 3) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + backgroundOpacity + ";";
-                        }, _this.frameInterval / 2);
+                            blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 1) + "; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: " + backgroundOpacity + ";";
+                        }, _this.frameInterval);
                     });
                 }
-                blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 1) + "; position: absolute; background-color:black; width: 100%; height: 100%; border: 0;opacity: " + backgroundOpacity + ";";
-            }, this.frameInterval);
-            document.body.appendChild(blackScreen);
+                blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 1) + "; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: " + backgroundOpacity + ";";
+            }, this.frameInterval * 1.5);
+            this.targetDom.appendChild(blackScreen);
         };
-        GameMaster.prototype.drawBlackClipCircle = function (targetDom, position, size, count) {
+        GameMaster.prototype.drawBlackClipCircle = function (targetDom, rect, size, count) {
             var element = document.createElement("canvas");
-            element.id = "bkout_circle_" + count;
             var ctx = element.getContext("2d");
-            var width = this.targetDom.clientWidth;
-            var height = this.targetDom.clientHeight;
-            element.setAttribute("width", width.toString());
-            element.setAttribute("height", height.toString());
+            var width = targetDom.clientWidth;
+            var height = targetDom.clientHeight;
+            element.id = "bkout_circle_" + count;
+            element.setAttribute("width", width);
+            element.setAttribute("height", height);
             element.style.cssText = "z-index: " + (this._player.zIndex + 1) + "; position: absolute;";
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, width, height);
             if (size > 0) {
                 ctx.globalCompositeOperation = "destination-out";
                 ctx.beginPath();
-                var charSize = this._player.getCharSize();
-                ctx.arc(position.x + charSize.width / 2, height - position.y - charSize.height / 2, size, 0, Math.PI * 2, false);
+                ctx.arc(rect.left + rect.width / 2, rect.top + rect.height / 2, size, 0, Math.PI * 2, false);
             }
             ctx.fill();
-            targetDom.appendChild(element);
+            this.targetDom.appendChild(element);
             if (count != 0)
-                targetDom.removeChild(document.getElementById("bkout_circle_" + (count - 1)));
+                this.targetDom.removeChild(document.getElementById("bkout_circle_" + (count - 1)));
         };
         GameMaster.checkMobile = function () {
             if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {

@@ -5,7 +5,7 @@
         <script type="text/javascript" src="./dist/mario.js"></script>
         <script>
             window.onload = function(){
-                var controller = Charjs.GameMaster.GetController('sample' ,document.body,2);
+                var controller = Charjs.GameMaster.GetController('sample' ,document.getElementById('world'),2);
 
                 var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
                 controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.left);
@@ -39,8 +39,43 @@
                 // mario.draw(16, {x:800, y:0});
             }
         </script>
+        <style type="text/css">
+        <!--
+            body {
+                margin: 0px;
+                overflow: hidden;
+                background-color: #e3fce4;
+            }
+            div#container {
+                margin: 0px;
+                z-index: 2;
+            }
+            div#world {
+                height: calc(100vh - 120px);
+                width: 100%;
+                background-color: #e3fce4;
+                position: absolute;
+                z-index: 2;
+            }
+            div#ground {
+                bottom: 0;
+                height: 100px;
+                width: calc(100vw - 40px);
+                -webkit-border-image:url(ground_border.png) 20 repeat;
+                border-image: url(ground_border.png) 20 fill round;
+                border-style: solid;
+                border-width: 20px 20px 0px 20px;
+                background-color: white;
+                z-index: 1;
+                position: absolute;
+            }
+        -->
+        </style>
     </head>
     <body>
-        
+        <div id="container">
+            <div id="world"></div>
+            <div id="ground"></div>
+        </div>
     </body>
 </html>

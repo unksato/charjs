@@ -35,7 +35,8 @@ namespace Charjs {
         destroy(): void;
         getPosition(): Position;
         setPosition(position: Position): void;
-        getCharSize(): Size;        
+        getCharSize(): Size;   
+        getCurrntElement(): HTMLCanvasElement;     
     }
 
     export interface ICharacter extends IObject{
@@ -158,6 +159,10 @@ namespace Charjs {
 
         public getCharSize(): Size {
             return this.size;
+        }
+
+        public getCurrntElement(): HTMLCanvasElement {
+            return this.currentAction;
         }
     }
 
