@@ -9,13 +9,18 @@
 
                 var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
                 controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.left);
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 220, y: 200 }, Charjs.Direction.right);
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 400, y: 0 }, Charjs.Direction.left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.right);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 250, y: 0 }, Charjs.Direction.left);
 
                 controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 168, y: 100 });
                 controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 200, y: 100 });
                 controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 232, y: 100 });
-                
+
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 68, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 100, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 132, y: 200 });
+
+
                 controller.init();
                 controller.start();
 
