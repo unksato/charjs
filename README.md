@@ -1,6 +1,6 @@
-#charjs (bookmarklet)
+#　charjs (bookmarklet)
 
-# Sample
+## Sample
 https://unksato.github.io/charjs/
 
 # How to use
@@ -10,7 +10,7 @@ Add the following code to your bookmark
 ## Super Mario
 - for non CSP setting site
 ```javascript
-javascript:(function(){var s=document.createElement("script");s.charset="UTF-8";s.src="https://unksato.github.io/charjs/mario.min.js";document.body.appendChild(s)})(); 
+javascript:(function(){var s=document.createElement("script");s.charset="UTF-8";s.src="https://unksato.github.io/charjs/bookmarklet/mario.min.js";document.body.appendChild(s)})(); 
 ```
 - for all site (include v0.0.1 code)
 ```javascript
@@ -26,7 +26,7 @@ g=null);var b;if(a)b=3;else switch(m){case 0:b=1;break;case 1:b=0==r?2:0;break;d
 ## Super Mario World
 - for non CSP setting site
 ```javascript
-javascript:(function(){var s=document.createElement("script");s.charset="UTF-8";s.src="https://unksato.github.io/charjs/mario_world.min.js";document.body.appendChild(s)})(); 
+javascript:(function(){var s=document.createElement("script");s.charset="UTF-8";s.src="https://unksato.github.io/charjs/bookmarklet/mario_world.min.js";document.body.appendChild(s)})(); 
 ```
 - for all site (include v0.0.1 code)
 ```javascript
