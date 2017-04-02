@@ -1,6 +1,4 @@
-#　charjs (bookmarklet)
-
-## Sample
+# Sample
 https://unksato.github.io/charjs/
 
 # How to use
