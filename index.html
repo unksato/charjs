@@ -6,6 +6,7 @@
         <script>
             window.onload = function(){
                 var controller = Charjs.GameMaster.GetController('sample' ,document.getElementById('world'),2);
+                controller.CreateGround(Charjs.NormalGroundWorld,document.getElementById('ground'));
 
                 var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
                 controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.left);
@@ -63,13 +64,8 @@
             }
             div#ground {
                 top: 80vh;
-                height: calc(20vh - 20px);
-                width: calc(100vw - 40px);
-                -webkit-border-image:url(ground_border.png) 20 round;
-                border-image: url(ground_border.png) 20 fill round;
-                border-style: solid;
-                border-width: 20px 20px 0px 20px;
-                background-color: white;
+                height: calc(20vh - 32px);
+                width: calc(100vw - 64px);
                 z-index: 1;
                 position: absolute;
             }

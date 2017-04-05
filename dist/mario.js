@@ -309,6 +309,14 @@ var Charjs;
         return AbstractOtherObject;
     }(AbstractObject));
     Charjs.AbstractOtherObject = AbstractOtherObject;
+    var AbstractGround = (function (_super) {
+        __extends(AbstractGround, _super);
+        function AbstractGround() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return AbstractGround;
+    }(AbstractObject));
+    Charjs.AbstractGround = AbstractGround;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
@@ -1569,6 +1577,121 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
+    var NormalGroundWorld = (function (_super) {
+        __extends(NormalGroundWorld, _super);
+        function NormalGroundWorld() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.colors = ['', '#000000', '#2ec720', '#177848', '#78681a', '#c7995c', '#e0c057'];
+            _this.chars = [[
+                    [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                    [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                    [0, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 3, 3],
+                    [1, 2, 2, 2, 2, 3, 3, 1, 1, 1, 1, 3, 3, 3, 1, 1],
+                    [1, 2, 2, 2, 3, 3, 1, 4, 4, 4, 4, 1, 1, 1, 4, 4],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                    [1, 2, 2, 3, 3, 1, 4, 5, 5, 5, 5, 4, 4, 4, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+                ], [
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                    [3, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2, 3, 3],
+                    [1, 3, 3, 2, 2, 2, 3, 3, 1, 1, 1, 3, 3, 3, 1, 1],
+                    [4, 1, 1, 3, 3, 3, 1, 1, 4, 4, 4, 1, 1, 1, 4, 4],
+                    [4, 4, 4, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+                    [5, 5, 4, 4, 4, 4, 4, 5, 5, 5, 5, 4, 4, 4, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [5, 5, 5, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [5, 5, 5, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [5, 5, 5, 6, 6, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+                ], [
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 6, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 2, 2, 3, 1, 4, 5, 6, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 2, 2, 3, 1, 4, 5, 6, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 2, 2, 3, 1, 4, 5, 5, 5, 5, 6, 5, 5, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 6, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 6, 6, 5, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 6, 6, 5, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 6, 6, 5, 5],
+                    [1, 2, 2, 2, 3, 1, 4, 4, 5, 6, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 4, 5, 6, 5, 5, 5, 5, 5, 5],
+                    [1, 2, 2, 3, 1, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+                ], [
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 6, 6, 5, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 6, 6, 5, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 6, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 6, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [5, 5, 5, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 5],
+                    [5, 5, 5, 6, 6, 5, 5, 5, 5, 5, 6, 5, 5, 6, 6, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+                    [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+                ]];
+            return _this;
+        }
+        NormalGroundWorld.prototype.setBorderImage = function () {
+            var charSize = this.pixSize * this.chars[0].length;
+            var url = "url(" + this.createBorderImage() + ")";
+            this.targetDom.style.borderImage = url + " " + charSize + " fill round";
+            this.targetDom.style.borderStyle = 'solid';
+            this.targetDom.style.borderWidth = charSize + "px " + charSize + "px 0px " + charSize + "px";
+        };
+        NormalGroundWorld.prototype.createBorderImage = function () {
+            var element = document.createElement("canvas");
+            var ctx = element.getContext("2d");
+            var size = this.pixSize * this.chars[0].length * 3;
+            element.setAttribute("width", size.toString());
+            element.setAttribute("height", size.toString());
+            var offsetSize = this.pixSize * this.chars[0].length;
+            ctx.drawImage(this.createImage(this.chars[0], false, false), 0, 0);
+            ctx.drawImage(this.createImage(this.chars[1], false, false), offsetSize, 0);
+            ctx.drawImage(this.createImage(this.chars[0], true, false), offsetSize * 2, 0);
+            ctx.drawImage(this.createImage(this.chars[2], false, false), 0, offsetSize);
+            ctx.drawImage(this.createImage(this.chars[3], false, false), offsetSize, offsetSize);
+            ctx.drawImage(this.createImage(this.chars[2], true, false), offsetSize * 2, offsetSize);
+            ctx.drawImage(this.createImage(this.chars[0], false, true), 0, offsetSize * 2);
+            ctx.drawImage(this.createImage(this.chars[1], false, true), offsetSize, offsetSize * 2);
+            ctx.drawImage(this.createImage(this.chars[0], true, true), offsetSize * 2, offsetSize * 2);
+            return element.toDataURL();
+        };
+        NormalGroundWorld.prototype.createImage = function (map, reverse, vertical) {
+            var element = document.createElement('canvas');
+            var ctx = element.getContext("2d");
+            Charjs.AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
+            var img = new Image();
+            img.src = element.toDataURL();
+            return img;
+        };
+        return NormalGroundWorld;
+    }(Charjs.AbstractGround));
+    Charjs.NormalGroundWorld = NormalGroundWorld;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
     var GameMaster = (function () {
         function GameMaster(targetDom, charSize, frameInterval) {
             if (frameInterval === void 0) { frameInterval = 45; }
@@ -1625,6 +1748,10 @@ var Charjs;
             this._objectCount++;
             this._objects[char._name] = char;
             return char;
+        };
+        GameMaster.prototype.CreateGround = function (clz, groundDom) {
+            var ground = new clz(groundDom, this.charSize);
+            ground.setBorderImage();
         };
         GameMaster.prototype.deleteEnemy = function (char) {
             delete this._enemys[char._name];

@@ -73,7 +73,7 @@ namespace Charjs {
         protected size : Size = {height:0, width:0, widthOffset:0, heightOffset:0};
         protected env: Environment = {ground:null, ceiling:null, right: null, left:null};
 
-        constructor(protected targetDom,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, private useLeft = true, private  useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
+        constructor(protected targetDom : HTMLElement ,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, private useLeft = true, private  useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
         }
 
         init(): void{
@@ -102,7 +102,7 @@ namespace Charjs {
             return element;
         }    
 
-        private static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, reverse: boolean, vertical: boolean) : void {
+        protected static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, reverse: boolean, vertical: boolean) : void {
             if (reverse)
                 ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
             if (vertical)
@@ -324,6 +324,6 @@ namespace Charjs {
     }
 
     export abstract class AbstractGround extends AbstractObject {
-        
+        abstract setBorderImage() : void;
     }
 }
