@@ -51,6 +51,11 @@ namespace Charjs {
             return char;
         }
 
+        public CreateGround<C extends AbstractGround>(clz: { new (targetDom, pixSize): C }, groundDom:HTMLElement) : void {
+            let ground = <AbstractGround>new clz(groundDom, this.charSize);
+            ground.setBorderImage();
+        }
+
         public deleteEnemy(char : IEnemy) {
             delete this._enemys[char._name];
             if(Object.keys(this._enemys).length == 0){
