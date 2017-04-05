@@ -322,4 +322,8 @@ namespace Charjs {
         abstract onTrampled(): void;
         isActive = true;
     }
+
+    export abstract class AbstractGround extends AbstractObject {
+        
+    }
 }
