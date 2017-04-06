@@ -75,7 +75,7 @@ namespace Charjs{
             let charSize = this.pixSize * this.chars[0].length;
             let url = `url(${this.createBorderImage()})`;
 
-//            this.targetDom.style.webkitBorderImage = `${url} ${charSize} round`;
+            this.targetDom.style.webkitBorderImage = `${url} ${charSize} round`;
             this.targetDom.style.borderImage = `${url} ${charSize} fill round`;
             this.targetDom.style.borderStyle = 'solid';
             this.targetDom.style.borderWidth = `${charSize}px ${charSize}px 0px ${charSize}px`;
