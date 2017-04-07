@@ -1656,10 +1656,10 @@ var Charjs;
         NormalGroundWorld.prototype.setBorderImage = function () {
             var charSize = this.pixSize * this.chars[0].length;
             var url = "url(" + this.createBorderImage() + ")";
-            this.targetDom.style.webkitBorderImage = url + " " + charSize + " round";
             this.targetDom.style.borderImage = url + " " + charSize + " fill round";
             this.targetDom.style.borderStyle = 'solid';
             this.targetDom.style.borderWidth = charSize + "px " + charSize + "px 0px " + charSize + "px";
+            this.targetDom.style.webkitBorderImage = url + " " + charSize + " round";
         };
         NormalGroundWorld.prototype.createBorderImage = function () {
             var element = document.createElement("canvas");
