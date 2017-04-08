@@ -71,7 +71,7 @@ namespace Charjs {
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]            
         ]];
 
-        constructor(targetDom, pixSize:number, position: Position, direction: Direction = Direction.right, zIndex = 2147483640, frameInterval = 45){
+        constructor(targetDom, pixSize:number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45){
             super(targetDom, pixSize,position, direction, false, true, zIndex-2, frameInterval);
         }
 
@@ -128,10 +128,10 @@ namespace Charjs {
                         this.isActive = true;
                         return;
                     }
-                    let pos : Position = {x:this.position.x, y: this.position.y};
+                    let pos : IPosition = {x:this.position.x, y: this.position.y};
                     if(animation[animationIndex].yOffset)
                         pos.y+=animation[animationIndex].yOffset;
-                    this.draw(animation[animationIndex].index, pos, Direction.right, Vertical.up, true);
+                    this.draw(animation[animationIndex].index, pos, Direction.Right, Vertical.Up, true);
                     if(animation[animationIndex].wait){
                         animation[animationIndex].wait--;
                     }else{

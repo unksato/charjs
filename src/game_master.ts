@@ -26,7 +26,7 @@ namespace Charjs {
         
         private _isStarting = false;
 
-        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.right) : C {
+        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.Right) : C {
             let char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
             char._name = 'player';
             this._player = <any>char;
@@ -34,7 +34,7 @@ namespace Charjs {
             return char;
         }
 
-        public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.right) : C {
+        public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.Right) : C {
             let char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
             char._name = 'enemy_' + this._enemyCount;
             this._enemyCount++;
@@ -44,7 +44,7 @@ namespace Charjs {
         }
 
         public CreateObjectInstance<C extends AbstractOtherObject>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position) : C {
-            let char = new clz(this.targetDom, this.charSize, position, Direction.left, this.frameInterval);
+            let char = new clz(this.targetDom, this.charSize, position, Direction.Right, this.frameInterval);
             char._name = 'obj_' + this._objectCount;
             this._objectCount++;
             this._objects[char._name] = <any>char;
@@ -67,7 +67,7 @@ namespace Charjs {
             return this._enemys;
         }
 
-        public getApproachedObjects(pos: Position, radius: number): IOtherObject[] {
+        public getApproachedObjects(pos: IPosition, radius: number): IOtherObject[] {
             let objs = [];
 
             for(let name in this._objects){

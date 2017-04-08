@@ -29,9 +29,9 @@ namespace Charjs {
 
         private _isBraking = false;
         private _isSquat = false;
-        private _attackDirection : Direction = Direction.right;
+        private _attackDirection : Direction = Direction.Right;
 
-        constructor(targetDom, pixSize:number, position: Position, direction: Direction = Direction.right, zIndex = 2147483640, frameInterval = 45){
+        constructor(targetDom, pixSize:number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45){
             super(targetDom, pixSize,position, direction, true, false, zIndex, frameInterval);
         }
 
@@ -42,7 +42,7 @@ namespace Charjs {
                     this.gameOver();
                     break;
                 case HitStatus.attack:
-                    this.draw(11, null, this._attackDirection, Vertical.up, true);
+                    this.draw(11, null, this._attackDirection, Vertical.Up, true);
                     this.stop();
                     setTimeout(() => {
                         this.start();
@@ -50,7 +50,7 @@ namespace Charjs {
                     break;
                 case HitStatus.grab:
                     this.moveGrabedEnemy();
-                    this.draw(14, null, this._direction, Vertical.up, true);                               
+                    this.draw(14, null, this._direction, Vertical.Up, true);                               
                     this.stop();
                     setTimeout(() => {
                         this.start();
@@ -66,7 +66,7 @@ namespace Charjs {
                         this.size.widthOffset = 0;
                     }
 
-                    this.draw(action.index, null, action.direction, Vertical.up, true);
+                    this.draw(action.index, null, action.direction, Vertical.Up, true);
             }
         }
 
@@ -88,8 +88,8 @@ namespace Charjs {
 
                 let grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
                 let enemyCenter = ePos.x + eSize.width / 2;
-                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.right : Direction.left, this._speed * 3);
-                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.left : Direction.right, this._speed * 3)
+                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, this._speed * 3);
+                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3)
                 this._grabedEnemy = null;
             }
         }
@@ -117,7 +117,7 @@ namespace Charjs {
                             if(!this._grabbing){
                                 let playerCenter = this.position.x + this.size.width / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Direction.right : Direction.left;
+                                this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
                                 return HitStatus.attack;
                             }else{
@@ -130,7 +130,7 @@ namespace Charjs {
                             if(this._isSpecial){
                                 let playerCenter = this.position.x + this.size.width / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Direction.right : Direction.left;
+                                this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
                             }else{
                                 enemys[name].onStepped();
@@ -146,15 +146,15 @@ namespace Charjs {
         }
 
         private _specialAnimationIndex = 0;
-        private _specialAnimation = [{index:0, direction:Direction.right},{index:12, direction:Direction.right},{index:0, direction:Direction.left},{index:13, direction:Direction.right}]
+        private _specialAnimation = [{index:0, direction:Direction.Right},{index:12, direction:Direction.Right},{index:0, direction:Direction.Left},{index:13, direction:Direction.Right}]
 
         private executeJump(): {index:number, direction: Direction} {
-            let ground = this.env.ground || 0;
+            let ground = this.entity.ground || 0;
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
-                if(this.env.ceiling != null){
-                    this.position.y = Math.min(this.position.y + this._yVector, this.env.ceiling - this.size.height + this.size.heightOffset);
-                    if(this.position.y == this.env.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0){
+                if(this.entity.ceiling != null){
+                    this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
+                    if(this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0){
                         this.upperObject.onPushedUp();
                         this._yVector = 0;
                     }
@@ -204,7 +204,7 @@ namespace Charjs {
 
         private moveGrabedEnemy() {
             if(this._grabedEnemy){
-                let grabXOffset = this._direction == Direction.right ? this.size.width * 0.7 : this.size.width * -1 * 0.7;
+                let grabXOffset = this._direction == Direction.Right ? this.size.width * 0.7 : this.size.width * -1 * 0.7;
                 let grabYOffset = this.pixSize;
                 this._grabedEnemy.zIndex = this.zIndex - 1;
                 this._grabedEnemy.setPosition({x:this.position.x + grabXOffset ,y:this.position.y + grabYOffset});
@@ -215,7 +215,7 @@ namespace Charjs {
         private executeRun(): { index:number, direction: Direction} {
             let directionUpdated = this.updateDirection();
 
-            if (this._direction == Direction.right) {
+            if (this._direction == Direction.Right) {
                 this.position.x += this.pixSize * this._speed;
             } else {
                 this.position.x -= this.pixSize * this._speed;            
@@ -261,8 +261,8 @@ namespace Charjs {
                 // Braking action
                 if (!this._isJumping) {
                     if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                        if ((this._direction == Direction.left && this.position.x < this.size.width * 3) ||
-                            (this._direction == Direction.right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)
+                        if ((this._direction == Direction.Left && this.position.x < this.size.width * 3) ||
+                            (this._direction == Direction.Right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)
                         ) {
                             runIndex = 6;
                             if (this._speed > 2)
@@ -296,7 +296,7 @@ namespace Charjs {
         private onAbortGrab(): void {
             this._grabbing = false;
             if(this._grabedEnemy){
-                this.draw(11, null, this._direction, Vertical.up, true);
+                this.draw(11, null, this._direction, Vertical.Up, true);
                 this.stop();
                 setTimeout(() => {
                     this.start();
@@ -395,7 +395,7 @@ namespace Charjs {
             this._gameOverTimer = setInterval(() => {
                 if (this._gameOverWaitCount < 20) {
                     this._gameOverWaitCount++;
-                    this.draw(9, null, Direction.right, Vertical.up, true);
+                    this.draw(9, null, Direction.Right, Vertical.Up, true);
                     this._yVector = this._jumpPower * this.pixSize;
                     return;
                 }
@@ -416,7 +416,7 @@ namespace Charjs {
                     this._runIndex = this._runIndex ^ 1;
                 }
 
-                this.draw(9, null, this._runIndex == 0 ? Direction.left : Direction.right, Vertical.up, true);
+                this.draw(9, null, this._runIndex == 0 ? Direction.Left : Direction.Right, Vertical.Up, true);
 
             }, this.frameInterval);
         }
@@ -424,7 +424,7 @@ namespace Charjs {
         private _backgroundOpacity = 0;
 
         public onGool(callback?:Function): void {
-            this.draw(10, null, Direction.right, Vertical.up, true);
+            this.draw(10, null, Direction.Right, Vertical.Up, true);
             if(callback) callback();
         }
 
@@ -503,10 +503,10 @@ namespace Charjs {
                         }
                         motion = motion * this._deviceDirection;
                         if(Math.abs(motion) >= 20 && this._canSpeedUpForMobile){
-                            if(this._direction == Direction.left && motion < 0){
+                            if(this._direction == Direction.Left && motion < 0){
                                 this._canSpeedUpForMobile = false;
                                 this.onSpeedUp();
-                            }else if(this._direction == Direction.right && motion > 0){
+                            }else if(this._direction == Direction.Right && motion > 0){
                                 this._canSpeedUpForMobile = false;
                                 this.onSpeedUp();
                             }

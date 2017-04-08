@@ -1,27 +1,27 @@
 namespace Charjs {
     export enum Direction {
-        right,
-        left
+        Right,
+        Left
     }
 
     export enum Vertical {
-        up,
-        down
+        Up,
+        Down
     }
 
-    export class Position {
-        public x: number = 0;
-        public y: number = 0;
+    export interface IPosition {
+        x: number;
+        y: number;
     }
 
-    export class Size {
-        public width: number = 0;
-        public height: number = 0;
-        public widthOffset: number = 0;
-        public heightOffset: number = 0;
+    export interface ISize {
+        width: number;
+        height: number;
+        widthOffset: number;
+        heightOffset: number;
     }
 
-    export class Environment {
+    export class Entity {
         public ground: number = null;
         public ceiling: number = null;
         public right: number = null;
@@ -33,9 +33,9 @@ namespace Charjs {
         zIndex: number;
         init(): void;
         destroy(): void;
-        getPosition(): Position;
-        setPosition(position: Position): void;
-        getCharSize(): Size;   
+        getPosition(): IPosition;
+        setPosition(position: IPosition): void;
+        getCharSize(): ISize;   
         getCurrntElement(): HTMLCanvasElement;     
     }
 
@@ -70,10 +70,10 @@ namespace Charjs {
         protected _verticalRightActions : HTMLCanvasElement[]  = [];
         protected _verticalLeftActions : HTMLCanvasElement[]  = [];
 
-        protected size : Size = {height:0, width:0, widthOffset:0, heightOffset:0};
-        protected env: Environment = {ground:null, ceiling:null, right: null, left:null};
+        protected size : ISize = {height:0, width:0, widthOffset:0, heightOffset:0};
+        protected entity: Entity = {ground:null, ceiling:null, right: null, left:null};
 
-        constructor(protected targetDom : HTMLElement ,protected pixSize = 2, protected position: Position = {x: 0, y:0}, protected _direction = Direction.right, private useLeft = true, private  useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
+        constructor(protected targetDom : HTMLElement ,protected pixSize = 2, protected position: IPosition = {x: 0, y:0}, protected _direction = Direction.Right, private useLeft = true, private  useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
         }
 
         init(): void{
@@ -126,13 +126,13 @@ namespace Charjs {
             }
         }
 
-        public draw(index: number = 0, position: Position = null, direction: Direction = Direction.right, vertical: Vertical = Vertical.up, removeCurrent = false): void {
+        public draw(index: number = 0, position: IPosition = null, direction: Direction = Direction.Right, vertical: Vertical = Vertical.Up, removeCurrent = false): void {
             if (removeCurrent) this.removeCharacter();
             position = position || this.position;
-            if (vertical == Vertical.up) {
-                this.currentAction = direction == Direction.right ? this._rightActions[index] : this._leftActions[index]; 
+            if (vertical == Vertical.Up) {
+                this.currentAction = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index]; 
             } else {
-                this.currentAction = direction == Direction.right ? this._verticalRightActions[index] : this._verticalLeftActions[index];                 
+                this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];                 
             }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = position.y + 'px';
@@ -149,15 +149,15 @@ namespace Charjs {
             this.removeCharacter();
         }
 
-        public getPosition(): Position {
+        public getPosition(): IPosition {
             return this.position;
         }
 
-        public setPosition(pos: Position): void {
+        public setPosition(pos: IPosition): void {
             this.position = pos;
         }
 
-        public getCharSize(): Size {
+        public getCharSize(): ISize {
             return this.size;
         }
 
@@ -224,10 +224,10 @@ namespace Charjs {
         protected updateEnvironment(): void {
             if(this._gameMaster){
                 let objs = this._gameMaster.getApproachedObjects(this.position, this.size.width * 3);
-                this.env.ground = null;
-                this.env.ceiling = null;
-                this.env.right = null;
-                this.env.left = null;
+                this.entity.ground = null;
+                this.entity.ceiling = null;
+                this.entity.right = null;
+                this.entity.left = null;
                 this.upperObject = null;
                 this.underObject = null;
                 this.rightObject = null;
@@ -248,15 +248,15 @@ namespace Charjs {
 
                     if(cPosLeft >= oPosLeft && cPosLeft <= oPosRight  || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
                         // ground update
-                        if(cPosUnder >= oPosUpper && ( this.env.ground === null || this.env.ground > oPosUpper)){
+                        if(cPosUnder >= oPosUpper && ( this.entity.ground === null || this.entity.ground > oPosUpper)){
                             this.underObject = obj;
-                            this.env.ground = oPosUpper;
+                            this.entity.ground = oPosUpper;
                             continue;
                         }
                         // ceiling update
-                        if(cPosUpper <= oPosUnder && (this.env.ceiling === null || this.env.ceiling > oPosUnder)){
+                        if(cPosUpper <= oPosUnder && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder)){
                             this.upperObject = obj;
-                            this.env.ceiling = oPosUnder;
+                            this.entity.ceiling = oPosUnder;
                             continue;
                         }
                         continue;
@@ -264,15 +264,15 @@ namespace Charjs {
 
                     if(cPosUnder > oPosUnder && cPosUnder < oPosUpper  || cPosUpper > oPosUnder && cPosUpper < oPosUpper) {
                         // left update
-                        if(cPosLeft >= oPosRight && ( this.env.left === null || this.env.left < oPosRight)){
+                        if(cPosLeft >= oPosRight && ( this.entity.left === null || this.entity.left < oPosRight)){
                             this.leftObject = obj;
-                            this.env.left = oPosRight;
+                            this.entity.left = oPosRight;
                             continue;
                         }
                         // right update
-                        if(cPosRight <= oPosLeft && (this.env.right === null || this.env.right > oPosLeft)){
+                        if(cPosRight <= oPosLeft && (this.entity.right === null || this.entity.right > oPosLeft)){
                             this.rightObject = obj;
-                            this.env.right = oPosLeft;  
+                            this.entity.right = oPosLeft;  
                             continue;
                         }
                         continue;
@@ -284,14 +284,14 @@ namespace Charjs {
 
         protected updateDirection(): boolean{
             let currentDirection = this._direction;
-            let right = this.env.right === null ? this.targetDom.clientWidth - this.size.width - (/*Magic offset*/ this.pixSize * 2) : this.env.right;
-            let left = this.env.left === null ? 0 : this.env.left;
+            let right = this.entity.right === null ? this.targetDom.clientWidth - this.size.width - (/*Magic offset*/ this.pixSize * 2) : this.entity.right;
+            let left = this.entity.left === null ? 0 : this.entity.left;
 
-            if (this.position.x >  right && this._direction == Direction.right) {
-                this._direction = Direction.left;
+            if (this.position.x >  right && this._direction == Direction.Right) {
+                this._direction = Direction.Left;
             }
-            if (this.position.x < left && this._direction == Direction.left) {
-                this._direction = Direction.right;
+            if (this.position.x < left && this._direction == Direction.Left) {
+                this._direction = Direction.Right;
             }
 
             return currentDirection != this._direction;
@@ -325,5 +325,68 @@ namespace Charjs {
 
     export abstract class AbstractGround extends AbstractObject {
         abstract setBorderImage() : void;
+
+        protected createBorderImage() : MyQ.Promise<string> {
+            let q = MyQ.Deferred.defer<string>();
+
+            let element = document.createElement("canvas");
+
+            let ctx = element.getContext("2d");
+            let size = this.pixSize * this.chars[0].length * 3;
+
+            element.setAttribute("width", size.toString());
+            element.setAttribute("height", size.toString());
+
+            let offsetSize = this.pixSize * this.chars[0].length;
+
+            let drawProcess: MyQ.Promise<{}>[] = [];
+
+            drawProcess.push(this.drawImage(ctx,this.chars[0],false,false, 0,              0));
+            drawProcess.push(this.drawImage(ctx,this.chars[1],false,false, offsetSize,     0));
+            drawProcess.push(this.drawImage(ctx,this.chars[0],true,false,  offsetSize * 2, 0));
+            drawProcess.push(this.drawImage(ctx,this.chars[2],false,false, 0,              offsetSize));
+            drawProcess.push(this.drawImage(ctx,this.chars[3],false,false, offsetSize,     offsetSize));
+            drawProcess.push(this.drawImage(ctx,this.chars[2],true,false,  offsetSize * 2, offsetSize));
+            drawProcess.push(this.drawImage(ctx,this.chars[0],false,true,  0,              offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx,this.chars[1],false,true,  offsetSize,     offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx,this.chars[0],true,true,   offsetSize * 2, offsetSize * 2));
+
+            MyQ.Promise.all(drawProcess).then(()=>{
+                q.resolve(element.toDataURL());
+            });
+
+            return q.promise;
+        }
+
+        private drawImage(ctx: CanvasRenderingContext2D, map:number[][], reverse: boolean, vertical: boolean, offsetX:number, offsetY:number) : MyQ.Promise<{}>  {
+            let q = MyQ.Deferred.defer();
+            this.createImage(map,reverse, vertical).then((img) => {
+                ctx.drawImage(img,offsetX,offsetY);
+                q.resolve({});
+            });
+            return q.promise;
+        }
+
+        private createImage(map:number[][], reverse: boolean, vertical: boolean) : MyQ.Promise<HTMLImageElement> {
+            let q = MyQ.Deferred.defer<HTMLImageElement>();
+
+            let element = document.createElement('canvas');
+            let ctx = element.getContext("2d");
+
+            let size = this.pixSize * map.length;
+
+            element.setAttribute("width", size.toString());
+            element.setAttribute("height", size.toString());
+
+            AbstractCharacter.drawCharacter(ctx,map,this.colors,this.pixSize,reverse,vertical);
+            let img = new Image();
+            
+            img.onload = () => {
+                q.resolve(img);
+            }
+            img.src = element.toDataURL();
+            return q.promise;
+        }
+
     }
 }

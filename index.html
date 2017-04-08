@@ -9,9 +9,9 @@
                 controller.CreateGround(Charjs.NormalGroundWorld,document.getElementById('ground'));
 
                 var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.left);
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.right);
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 250, y: 0 }, Charjs.Direction.left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.Left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.Right);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 250, y: 0 }, Charjs.Direction.Left);
 
                 controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 168, y: 100 });
                 controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 200, y: 100 });

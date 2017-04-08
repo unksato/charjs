@@ -45,10 +45,10 @@ namespace Charjs {
         private _isGrabed = false;
         private _yVector = 0;
 
-        private _vertical : Vertical = Vertical.up;
+        private _vertical : Vertical = Vertical.Up;
 
-        constructor(targetDom, pixSize:number, position: Position, direction: Direction = Direction.right, zIndex = 2147483640, frameInterval = 45){
-            super(targetDom, pixSize,position, direction, true, true, zIndex-1, frameInterval);
+        constructor(targetDom, pixSize:number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45){
+            super(targetDom, pixSize, position, direction, true, true, zIndex-1, frameInterval);
         }
 
         isKilled(): boolean{
@@ -60,12 +60,12 @@ namespace Charjs {
                 let directionUpdated = this.updateDirection();
 
                 if (this.doHitTestWithOtherEnemy()) {
-                    this._direction = this._direction == Direction.right ? Direction.left : Direction.right;
+                    this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
                 }
 
                 this.updateEnvironment();
                 
-                let ground = this.env.ground || 0;
+                let ground = this.entity.ground || 0;
 
                 if(this.position.y > ground){
                     this._yVector-= this._gravity*this.pixSize;
@@ -77,7 +77,7 @@ namespace Charjs {
                     this._yVector = 0;
                 }
 
-                if (this._direction == Direction.right) {
+                if (this._direction == Direction.Right) {
                     this.position.x += this.pixSize * this._speed;
                 } else {
                     this.position.x -= this.pixSize * this._speed;            
@@ -99,11 +99,11 @@ namespace Charjs {
         }
 
         isStepped(): boolean{
-            return this._vertical == Vertical.down;
+            return this._vertical == Vertical.Down;
         }
 
         onStepped(): void {
-            this._vertical = Vertical.down;
+            this._vertical = Vertical.Down;
             this._speed = 0;
         }
 
@@ -116,7 +116,7 @@ namespace Charjs {
             this.stop();
             this._isKilled = true;
             let yVector = 10 * this.pixSize;
-            let direction = kickDirection == Direction.right ? 1 : -1;
+            let direction = kickDirection == Direction.Right ? 1 : -1;
             let killTimer = setInterval(() => {
 
                 yVector -= this._gravity * this.pixSize;
@@ -136,7 +136,7 @@ namespace Charjs {
                     this._actionIndex = this._actionIndex ^ 1;
                 }
 
-                this.draw(this._actionIndex, null, this._direction, Vertical.down, true);
+                this.draw(this._actionIndex, null, this._direction, Vertical.Down, true);
 
             }, this.frameInterval);
         }

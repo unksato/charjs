@@ -12,47 +12,29 @@ var Charjs;
 (function (Charjs) {
     var Direction;
     (function (Direction) {
-        Direction[Direction["right"] = 0] = "right";
-        Direction[Direction["left"] = 1] = "left";
+        Direction[Direction["Right"] = 0] = "Right";
+        Direction[Direction["Left"] = 1] = "Left";
     })(Direction = Charjs.Direction || (Charjs.Direction = {}));
     var Vertical;
     (function (Vertical) {
-        Vertical[Vertical["up"] = 0] = "up";
-        Vertical[Vertical["down"] = 1] = "down";
+        Vertical[Vertical["Up"] = 0] = "Up";
+        Vertical[Vertical["Down"] = 1] = "Down";
     })(Vertical = Charjs.Vertical || (Charjs.Vertical = {}));
-    var Position = (function () {
-        function Position() {
-            this.x = 0;
-            this.y = 0;
-        }
-        return Position;
-    }());
-    Charjs.Position = Position;
-    var Size = (function () {
-        function Size() {
-            this.width = 0;
-            this.height = 0;
-            this.widthOffset = 0;
-            this.heightOffset = 0;
-        }
-        return Size;
-    }());
-    Charjs.Size = Size;
-    var Environment = (function () {
-        function Environment() {
+    var Entity = (function () {
+        function Entity() {
             this.ground = null;
             this.ceiling = null;
             this.right = null;
             this.left = null;
         }
-        return Environment;
+        return Entity;
     }());
-    Charjs.Environment = Environment;
+    Charjs.Entity = Entity;
     var AbstractObject = (function () {
         function AbstractObject(targetDom, pixSize, position, _direction, useLeft, useVertical, zIndex, frameInterval) {
             if (pixSize === void 0) { pixSize = 2; }
             if (position === void 0) { position = { x: 0, y: 0 }; }
-            if (_direction === void 0) { _direction = Direction.right; }
+            if (_direction === void 0) { _direction = Direction.Right; }
             if (useLeft === void 0) { useLeft = true; }
             if (useVertical === void 0) { useVertical = true; }
             if (zIndex === void 0) { zIndex = 2147483640; }
@@ -73,7 +55,7 @@ var Charjs;
             this._verticalRightActions = [];
             this._verticalLeftActions = [];
             this.size = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
-            this.env = { ground: null, ceiling: null, right: null, left: null };
+            this.entity = { ground: null, ceiling: null, right: null, left: null };
         }
         AbstractObject.prototype.init = function () {
             for (var _i = 0, _a = this.chars; _i < _a.length; _i++) {
@@ -126,17 +108,17 @@ var Charjs;
         AbstractObject.prototype.draw = function (index, position, direction, vertical, removeCurrent) {
             if (index === void 0) { index = 0; }
             if (position === void 0) { position = null; }
-            if (direction === void 0) { direction = Direction.right; }
-            if (vertical === void 0) { vertical = Vertical.up; }
+            if (direction === void 0) { direction = Direction.Right; }
+            if (vertical === void 0) { vertical = Vertical.Up; }
             if (removeCurrent === void 0) { removeCurrent = false; }
             if (removeCurrent)
                 this.removeCharacter();
             position = position || this.position;
-            if (vertical == Vertical.up) {
-                this.currentAction = direction == Direction.right ? this._rightActions[index] : this._leftActions[index];
+            if (vertical == Vertical.Up) {
+                this.currentAction = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index];
             }
             else {
-                this.currentAction = direction == Direction.right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
+                this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
             }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = position.y + 'px';
@@ -219,10 +201,10 @@ var Charjs;
         AbstractCharacter.prototype.updateEnvironment = function () {
             if (this._gameMaster) {
                 var objs = this._gameMaster.getApproachedObjects(this.position, this.size.width * 3);
-                this.env.ground = null;
-                this.env.ceiling = null;
-                this.env.right = null;
-                this.env.left = null;
+                this.entity.ground = null;
+                this.entity.ceiling = null;
+                this.entity.right = null;
+                this.entity.left = null;
                 this.upperObject = null;
                 this.underObject = null;
                 this.rightObject = null;
@@ -240,27 +222,27 @@ var Charjs;
                     var cPosUnder = this.position.y;
                     var cPosUpper = this.position.y + this.size.height - this.size.heightOffset;
                     if (cPosLeft >= oPosLeft && cPosLeft <= oPosRight || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
-                        if (cPosUnder >= oPosUpper && (this.env.ground === null || this.env.ground > oPosUpper)) {
+                        if (cPosUnder >= oPosUpper && (this.entity.ground === null || this.entity.ground > oPosUpper)) {
                             this.underObject = obj;
-                            this.env.ground = oPosUpper;
+                            this.entity.ground = oPosUpper;
                             continue;
                         }
-                        if (cPosUpper <= oPosUnder && (this.env.ceiling === null || this.env.ceiling > oPosUnder)) {
+                        if (cPosUpper <= oPosUnder && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder)) {
                             this.upperObject = obj;
-                            this.env.ceiling = oPosUnder;
+                            this.entity.ceiling = oPosUnder;
                             continue;
                         }
                         continue;
                     }
                     if (cPosUnder > oPosUnder && cPosUnder < oPosUpper || cPosUpper > oPosUnder && cPosUpper < oPosUpper) {
-                        if (cPosLeft >= oPosRight && (this.env.left === null || this.env.left < oPosRight)) {
+                        if (cPosLeft >= oPosRight && (this.entity.left === null || this.entity.left < oPosRight)) {
                             this.leftObject = obj;
-                            this.env.left = oPosRight;
+                            this.entity.left = oPosRight;
                             continue;
                         }
-                        if (cPosRight <= oPosLeft && (this.env.right === null || this.env.right > oPosLeft)) {
+                        if (cPosRight <= oPosLeft && (this.entity.right === null || this.entity.right > oPosLeft)) {
                             this.rightObject = obj;
-                            this.env.right = oPosLeft;
+                            this.entity.right = oPosLeft;
                             continue;
                         }
                         continue;
@@ -270,13 +252,13 @@ var Charjs;
         };
         AbstractCharacter.prototype.updateDirection = function () {
             var currentDirection = this._direction;
-            var right = this.env.right === null ? this.targetDom.clientWidth - this.size.width - (this.pixSize * 2) : this.env.right;
-            var left = this.env.left === null ? 0 : this.env.left;
-            if (this.position.x > right && this._direction == Direction.right) {
-                this._direction = Direction.left;
+            var right = this.entity.right === null ? this.targetDom.clientWidth - this.size.width - (this.pixSize * 2) : this.entity.right;
+            var left = this.entity.left === null ? 0 : this.entity.left;
+            if (this.position.x > right && this._direction == Direction.Right) {
+                this._direction = Direction.Left;
             }
-            if (this.position.x < left && this._direction == Direction.left) {
-                this._direction = Direction.right;
+            if (this.position.x < left && this._direction == Direction.Left) {
+                this._direction = Direction.Right;
             }
             return currentDirection != this._direction;
         };
@@ -314,6 +296,52 @@ var Charjs;
         function AbstractGround() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
+        AbstractGround.prototype.createBorderImage = function () {
+            var q = MyQ.Deferred.defer();
+            var element = document.createElement("canvas");
+            var ctx = element.getContext("2d");
+            var size = this.pixSize * this.chars[0].length * 3;
+            element.setAttribute("width", size.toString());
+            element.setAttribute("height", size.toString());
+            var offsetSize = this.pixSize * this.chars[0].length;
+            var drawProcess = [];
+            drawProcess.push(this.drawImage(ctx, this.chars[0], false, false, 0, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[1], false, false, offsetSize, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], true, false, offsetSize * 2, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[2], false, false, 0, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[3], false, false, offsetSize, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[2], true, false, offsetSize * 2, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], false, true, 0, offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx, this.chars[1], false, true, offsetSize, offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], true, true, offsetSize * 2, offsetSize * 2));
+            MyQ.Promise.all(drawProcess).then(function () {
+                q.resolve(element.toDataURL());
+            });
+            return q.promise;
+        };
+        AbstractGround.prototype.drawImage = function (ctx, map, reverse, vertical, offsetX, offsetY) {
+            var q = MyQ.Deferred.defer();
+            this.createImage(map, reverse, vertical).then(function (img) {
+                ctx.drawImage(img, offsetX, offsetY);
+                q.resolve({});
+            });
+            return q.promise;
+        };
+        AbstractGround.prototype.createImage = function (map, reverse, vertical) {
+            var q = MyQ.Deferred.defer();
+            var element = document.createElement('canvas');
+            var ctx = element.getContext("2d");
+            var size = this.pixSize * map.length;
+            element.setAttribute("width", size.toString());
+            element.setAttribute("height", size.toString());
+            AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
+            var img = new Image();
+            img.onload = function () {
+                q.resolve(img);
+            };
+            img.src = element.toDataURL();
+            return q.promise;
+        };
         return AbstractGround;
     }(AbstractObject));
     Charjs.AbstractGround = AbstractGround;
@@ -323,7 +351,7 @@ var Charjs;
     var NormalBlockWorld = (function (_super) {
         __extends(NormalBlockWorld, _super);
         function NormalBlockWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
-            if (direction === void 0) { direction = Charjs.Direction.right; }
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
             if (zIndex === void 0) { zIndex = 2147483640; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this, targetDom, pixSize, position, direction, false, true, zIndex - 2, frameInterval) || this;
@@ -453,7 +481,7 @@ var Charjs;
                     var pos = { x: _this.position.x, y: _this.position.y };
                     if (animation[animationIndex].yOffset)
                         pos.y += animation[animationIndex].yOffset;
-                    _this.draw(animation[animationIndex].index, pos, Charjs.Direction.right, Charjs.Vertical.up, true);
+                    _this.draw(animation[animationIndex].index, pos, Charjs.Direction.Right, Charjs.Vertical.Up, true);
                     if (animation[animationIndex].wait) {
                         animation[animationIndex].wait--;
                     }
@@ -474,7 +502,7 @@ var Charjs;
     var GoombaWorld = (function (_super) {
         __extends(GoombaWorld, _super);
         function GoombaWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
-            if (direction === void 0) { direction = Charjs.Direction.right; }
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
             if (zIndex === void 0) { zIndex = 2147483640; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
@@ -520,7 +548,7 @@ var Charjs;
             _this._isKilled = false;
             _this._isGrabed = false;
             _this._yVector = 0;
-            _this._vertical = Charjs.Vertical.up;
+            _this._vertical = Charjs.Vertical.Up;
             return _this;
         }
         GoombaWorld.prototype.isKilled = function () {
@@ -530,10 +558,10 @@ var Charjs;
             if (!this._isGrabed) {
                 var directionUpdated = this.updateDirection();
                 if (this.doHitTestWithOtherEnemy()) {
-                    this._direction = this._direction == Charjs.Direction.right ? Charjs.Direction.left : Charjs.Direction.right;
+                    this._direction = this._direction == Charjs.Direction.Right ? Charjs.Direction.Left : Charjs.Direction.Right;
                 }
                 this.updateEnvironment();
-                var ground = this.env.ground || 0;
+                var ground = this.entity.ground || 0;
                 if (this.position.y > ground) {
                     this._yVector -= this._gravity * this.pixSize;
                     this.position.y += this._yVector;
@@ -544,7 +572,7 @@ var Charjs;
                 else {
                     this._yVector = 0;
                 }
-                if (this._direction == Charjs.Direction.right) {
+                if (this._direction == Charjs.Direction.Right) {
                     this.position.x += this.pixSize * this._speed;
                 }
                 else {
@@ -564,10 +592,10 @@ var Charjs;
             this.draw(this._actionIndex, null, this._direction, this._vertical, true);
         };
         GoombaWorld.prototype.isStepped = function () {
-            return this._vertical == Charjs.Vertical.down;
+            return this._vertical == Charjs.Vertical.Down;
         };
         GoombaWorld.prototype.onStepped = function () {
-            this._vertical = Charjs.Vertical.down;
+            this._vertical = Charjs.Vertical.Down;
             this._speed = 0;
         };
         GoombaWorld.prototype.onGrabed = function () {
@@ -579,7 +607,7 @@ var Charjs;
             this.stop();
             this._isKilled = true;
             var yVector = 10 * this.pixSize;
-            var direction = kickDirection == Charjs.Direction.right ? 1 : -1;
+            var direction = kickDirection == Charjs.Direction.Right ? 1 : -1;
             var killTimer = setInterval(function () {
                 yVector -= _this._gravity * _this.pixSize;
                 _this.position.y = _this.position.y + yVector;
@@ -596,7 +624,7 @@ var Charjs;
                     _this._currentStep = 0;
                     _this._actionIndex = _this._actionIndex ^ 1;
                 }
-                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.down, true);
+                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
             }, this.frameInterval);
         };
         GoombaWorld.prototype.doHitTestWithOtherEnemy = function () {
@@ -639,7 +667,7 @@ var Charjs;
     var MarioWorld = (function (_super) {
         __extends(MarioWorld, _super);
         function MarioWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
-            if (direction === void 0) { direction = Charjs.Direction.right; }
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
             if (zIndex === void 0) { zIndex = 2147483640; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this, targetDom, pixSize, position, direction, true, false, zIndex, frameInterval) || this;
@@ -657,9 +685,9 @@ var Charjs;
             _this._isSpecial = false;
             _this._isBraking = false;
             _this._isSquat = false;
-            _this._attackDirection = Charjs.Direction.right;
+            _this._attackDirection = Charjs.Direction.Right;
             _this._specialAnimationIndex = 0;
-            _this._specialAnimation = [{ index: 0, direction: Charjs.Direction.right }, { index: 12, direction: Charjs.Direction.right }, { index: 0, direction: Charjs.Direction.left }, { index: 13, direction: Charjs.Direction.right }];
+            _this._specialAnimation = [{ index: 0, direction: Charjs.Direction.Right }, { index: 12, direction: Charjs.Direction.Right }, { index: 0, direction: Charjs.Direction.Left }, { index: 13, direction: Charjs.Direction.Right }];
             _this._grabedEnemy = null;
             _this._grabbing = false;
             _this._backgroundOpacity = 0;
@@ -1070,7 +1098,7 @@ var Charjs;
                     this.gameOver();
                     break;
                 case HitStatus.attack:
-                    this.draw(11, null, this._attackDirection, Charjs.Vertical.up, true);
+                    this.draw(11, null, this._attackDirection, Charjs.Vertical.Up, true);
                     this.stop();
                     setTimeout(function () {
                         _this.start();
@@ -1078,7 +1106,7 @@ var Charjs;
                     break;
                 case HitStatus.grab:
                     this.moveGrabedEnemy();
-                    this.draw(14, null, this._direction, Charjs.Vertical.up, true);
+                    this.draw(14, null, this._direction, Charjs.Vertical.Up, true);
                     this.stop();
                     setTimeout(function () {
                         _this.start();
@@ -1093,7 +1121,7 @@ var Charjs;
                     else {
                         this.size.widthOffset = 0;
                     }
-                    this.draw(action.index, null, action.direction, Charjs.Vertical.up, true);
+                    this.draw(action.index, null, action.direction, Charjs.Vertical.Up, true);
             }
         };
         MarioWorld.prototype.checkGrabedEnemysAttack = function (enemy) {
@@ -1112,8 +1140,8 @@ var Charjs;
                     return;
                 var grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
                 var enemyCenter = ePos.x + eSize.width / 2;
-                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.right : Charjs.Direction.left, this._speed * 3);
-                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.left : Charjs.Direction.right, this._speed * 3);
+                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left, this._speed * 3);
+                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, this._speed * 3);
                 this._grabedEnemy = null;
             }
         };
@@ -1137,7 +1165,7 @@ var Charjs;
                             if (!this._grabbing) {
                                 var playerCenter = this.position.x + this.size.width / 2;
                                 var enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.right : Charjs.Direction.left;
+                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left;
                                 enemys[name_2].onKicked(this._attackDirection, this._speed * 3);
                                 return HitStatus.attack;
                             }
@@ -1150,7 +1178,7 @@ var Charjs;
                             if (this._isSpecial) {
                                 var playerCenter = this.position.x + this.size.width / 2;
                                 var enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.right : Charjs.Direction.left;
+                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left;
                                 enemys[name_2].onKicked(this._attackDirection, this._speed * 3);
                             }
                             else {
@@ -1166,12 +1194,12 @@ var Charjs;
             return HitStatus.none;
         };
         MarioWorld.prototype.executeJump = function () {
-            var ground = this.env.ground || 0;
+            var ground = this.entity.ground || 0;
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
-                if (this.env.ceiling != null) {
-                    this.position.y = Math.min(this.position.y + this._yVector, this.env.ceiling - this.size.height + this.size.heightOffset);
-                    if (this.position.y == this.env.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0) {
+                if (this.entity.ceiling != null) {
+                    this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
+                    if (this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0) {
                         this.upperObject.onPushedUp();
                         this._yVector = 0;
                     }
@@ -1226,7 +1254,7 @@ var Charjs;
         };
         MarioWorld.prototype.moveGrabedEnemy = function () {
             if (this._grabedEnemy) {
-                var grabXOffset = this._direction == Charjs.Direction.right ? this.size.width * 0.7 : this.size.width * -1 * 0.7;
+                var grabXOffset = this._direction == Charjs.Direction.Right ? this.size.width * 0.7 : this.size.width * -1 * 0.7;
                 var grabYOffset = this.pixSize;
                 this._grabedEnemy.zIndex = this.zIndex - 1;
                 this._grabedEnemy.setPosition({ x: this.position.x + grabXOffset, y: this.position.y + grabYOffset });
@@ -1235,7 +1263,7 @@ var Charjs;
         };
         MarioWorld.prototype.executeRun = function () {
             var directionUpdated = this.updateDirection();
-            if (this._direction == Charjs.Direction.right) {
+            if (this._direction == Charjs.Direction.Right) {
                 this.position.x += this.pixSize * this._speed;
             }
             else {
@@ -1277,8 +1305,8 @@ var Charjs;
                 }
                 if (!this._isJumping) {
                     if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                        if ((this._direction == Charjs.Direction.left && this.position.x < this.size.width * 3) ||
-                            (this._direction == Charjs.Direction.right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)) {
+                        if ((this._direction == Charjs.Direction.Left && this.position.x < this.size.width * 3) ||
+                            (this._direction == Charjs.Direction.Right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)) {
                             runIndex = 6;
                             if (this._speed > 2)
                                 this._speed--;
@@ -1306,7 +1334,7 @@ var Charjs;
             var _this = this;
             this._grabbing = false;
             if (this._grabedEnemy) {
-                this.draw(11, null, this._direction, Charjs.Vertical.up, true);
+                this.draw(11, null, this._direction, Charjs.Vertical.Up, true);
                 this.stop();
                 setTimeout(function () {
                     _this.start();
@@ -1404,7 +1432,7 @@ var Charjs;
             this._gameOverTimer = setInterval(function () {
                 if (_this._gameOverWaitCount < 20) {
                     _this._gameOverWaitCount++;
-                    _this.draw(9, null, Charjs.Direction.right, Charjs.Vertical.up, true);
+                    _this.draw(9, null, Charjs.Direction.Right, Charjs.Vertical.Up, true);
                     _this._yVector = _this._jumpPower * _this.pixSize;
                     return;
                 }
@@ -1422,11 +1450,11 @@ var Charjs;
                     _this._currentStep = 0;
                     _this._runIndex = _this._runIndex ^ 1;
                 }
-                _this.draw(9, null, _this._runIndex == 0 ? Charjs.Direction.left : Charjs.Direction.right, Charjs.Vertical.up, true);
+                _this.draw(9, null, _this._runIndex == 0 ? Charjs.Direction.Left : Charjs.Direction.Right, Charjs.Vertical.Up, true);
             }, this.frameInterval);
         };
         MarioWorld.prototype.onGool = function (callback) {
-            this.draw(10, null, Charjs.Direction.right, Charjs.Vertical.up, true);
+            this.draw(10, null, Charjs.Direction.Right, Charjs.Vertical.Up, true);
             if (callback)
                 callback();
         };
@@ -1501,11 +1529,11 @@ var Charjs;
                         }
                         motion = motion * _this._deviceDirection;
                         if (Math.abs(motion) >= 20 && _this._canSpeedUpForMobile) {
-                            if (_this._direction == Charjs.Direction.left && motion < 0) {
+                            if (_this._direction == Charjs.Direction.Left && motion < 0) {
                                 _this._canSpeedUpForMobile = false;
                                 _this.onSpeedUp();
                             }
-                            else if (_this._direction == Charjs.Direction.right && motion > 0) {
+                            else if (_this._direction == Charjs.Direction.Right && motion > 0) {
                                 _this._canSpeedUpForMobile = false;
                                 _this.onSpeedUp();
                             }
@@ -1664,52 +1692,6 @@ var Charjs;
                 _this.targetDom.style.webkitBorderImage = url + " " + charSize + " round";
             });
         };
-        NormalGroundWorld.prototype.createBorderImage = function () {
-            var q = MyQ.Deferred.defer();
-            var element = document.createElement("canvas");
-            var ctx = element.getContext("2d");
-            var size = this.pixSize * this.chars[0].length * 3;
-            element.setAttribute("width", size.toString());
-            element.setAttribute("height", size.toString());
-            var offsetSize = this.pixSize * this.chars[0].length;
-            var drawProcess = [];
-            drawProcess.push(this.drawImage(ctx, this.chars[0], false, false, 0, 0));
-            drawProcess.push(this.drawImage(ctx, this.chars[1], false, false, offsetSize, 0));
-            drawProcess.push(this.drawImage(ctx, this.chars[0], true, false, offsetSize * 2, 0));
-            drawProcess.push(this.drawImage(ctx, this.chars[2], false, false, 0, offsetSize));
-            drawProcess.push(this.drawImage(ctx, this.chars[3], false, false, offsetSize, offsetSize));
-            drawProcess.push(this.drawImage(ctx, this.chars[2], true, false, offsetSize * 2, offsetSize));
-            drawProcess.push(this.drawImage(ctx, this.chars[0], false, true, 0, offsetSize * 2));
-            drawProcess.push(this.drawImage(ctx, this.chars[1], false, true, offsetSize, offsetSize * 2));
-            drawProcess.push(this.drawImage(ctx, this.chars[0], true, true, offsetSize * 2, offsetSize * 2));
-            MyQ.Promise.all(drawProcess).then(function () {
-                q.resolve(element.toDataURL());
-            });
-            return q.promise;
-        };
-        NormalGroundWorld.prototype.drawImage = function (ctx, map, reverse, vertical, offsetX, offsetY) {
-            var q = MyQ.Deferred.defer();
-            this.createImage(map, reverse, vertical).then(function (img) {
-                ctx.drawImage(img, offsetX, offsetY);
-                q.resolve({});
-            });
-            return q.promise;
-        };
-        NormalGroundWorld.prototype.createImage = function (map, reverse, vertical) {
-            var q = MyQ.Deferred.defer();
-            var element = document.createElement('canvas');
-            var ctx = element.getContext("2d");
-            var size = this.pixSize * map.length;
-            element.setAttribute("width", size.toString());
-            element.setAttribute("height", size.toString());
-            Charjs.AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
-            var img = new Image();
-            img.onload = function () {
-                q.resolve(img);
-            };
-            img.src = element.toDataURL();
-            return q.promise;
-        };
         return NormalGroundWorld;
     }(Charjs.AbstractGround));
     Charjs.NormalGroundWorld = NormalGroundWorld;
@@ -1750,7 +1732,7 @@ var Charjs;
             return master;
         };
         GameMaster.prototype.CreatePlayerInstance = function (clz, position, direction) {
-            if (direction === void 0) { direction = Charjs.Direction.right; }
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
             var char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
             char._name = 'player';
             this._player = char;
@@ -1758,7 +1740,7 @@ var Charjs;
             return char;
         };
         GameMaster.prototype.CreateEnemyInstance = function (clz, position, direction) {
-            if (direction === void 0) { direction = Charjs.Direction.right; }
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
             var char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
             char._name = 'enemy_' + this._enemyCount;
             this._enemyCount++;
@@ -1767,7 +1749,7 @@ var Charjs;
             return char;
         };
         GameMaster.prototype.CreateObjectInstance = function (clz, position) {
-            var char = new clz(this.targetDom, this.charSize, position, Charjs.Direction.left, this.frameInterval);
+            var char = new clz(this.targetDom, this.charSize, position, Charjs.Direction.Right, this.frameInterval);
             char._name = 'obj_' + this._objectCount;
             this._objectCount++;
             this._objects[char._name] = char;
@@ -2090,4 +2072,51 @@ var MyQ;
     }());
     MyQ.Promise = Promise;
 })(MyQ || (MyQ = {}));
+var Util;
+(function (Util) {
+    var Compression = (function () {
+        function Compression() {
+        }
+        Compression.RLE = function (map) {
+            var newMap = [];
+            for (var i = 0; i < map.length; i++) {
+                var row = [];
+                var prev = null;
+                var prevCount = 0;
+                for (var j = 0; j < map[i].length; j++) {
+                    if (prev !== map[i][j]) {
+                        if (prev !== null) {
+                            row.push(prev);
+                            row.push(prevCount);
+                        }
+                        prev = map[i][j];
+                        prevCount = 1;
+                    }
+                    else {
+                        prevCount++;
+                    }
+                }
+                row.push(prev);
+                row.push(prevCount);
+                newMap.push(row);
+            }
+            return newMap;
+        };
+        Compression.RLD = function (map) {
+            var newMap = [];
+            for (var i = 0; i < map.length; i++) {
+                var row = [];
+                for (var j = 0; j < map[i].length; j += 2) {
+                    for (var k = 0; k < map[i][j + 1]; k++) {
+                        row.push(map[i][j]);
+                    }
+                }
+                newMap.push(row);
+            }
+            return newMap;
+        };
+        return Compression;
+    }());
+    Util.Compression = Compression;
+})(Util || (Util = {}));
 //# sourceMappingURL=mario.js.map
