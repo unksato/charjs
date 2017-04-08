@@ -1689,7 +1689,7 @@ var Charjs;
         };
         NormalGroundWorld.prototype.drawImage = function (ctx, map, reverse, vertical, offsetX, offsetY) {
             var q = MyQ.Deferred.defer();
-            this.createImage(map, false, false).then(function (img) {
+            this.createImage(map, reverse, vertical).then(function (img) {
                 ctx.drawImage(img, offsetX, offsetY);
                 q.resolve({});
             });

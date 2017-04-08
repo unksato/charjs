@@ -116,7 +116,7 @@ namespace Charjs{
 
         private drawImage(ctx: CanvasRenderingContext2D, map:number[][], reverse: boolean, vertical: boolean, offsetX:number, offsetY:number) : MyQ.Promise<{}>  {
             let q = MyQ.Deferred.defer();
-            this.createImage(map,false, false).then((img) => {
+            this.createImage(map,reverse, vertical).then((img) => {
                 ctx.drawImage(img,offsetX,offsetY);
                 q.resolve({});
             });
