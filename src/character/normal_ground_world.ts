@@ -72,16 +72,19 @@ namespace Charjs{
         ]];
 
         public setBorderImage() : void {
-            let charSize = this.pixSize * this.chars[0].length;
-            let url = `url(${this.createBorderImage()})`;
-
-            this.targetDom.style.borderImage = `${url} ${charSize} fill round`;
-            this.targetDom.style.borderStyle = 'solid';
-            this.targetDom.style.borderWidth = `${charSize}px ${charSize}px 0px ${charSize}px`;
-            this.targetDom.style.webkitBorderImage = `${url} ${charSize} round`;
+            this.createBorderImage().then((url)=> {
+                let charSize = this.pixSize * this.chars[0].length;
+                url = `url(${url})`;
+                this.targetDom.style.borderImage = `${url} ${charSize} fill round`;
+                this.targetDom.style.borderStyle = 'solid';
+                this.targetDom.style.borderWidth = `${charSize}px ${charSize}px 0px ${charSize}px`;
+                this.targetDom.style.webkitBorderImage = `${url} ${charSize} round`;
+            })
         }        
 
-        private createBorderImage() : string {
+        private createBorderImage() : MyQ.Promise<string> {
+            let q = MyQ.Deferred.defer<string>();
+
             let element = document.createElement("canvas");
 
             let ctx = element.getContext("2d");
@@ -92,27 +95,53 @@ namespace Charjs{
 
             let offsetSize = this.pixSize * this.chars[0].length;
 
-            ctx.drawImage(this.createImage(this.chars[0],false, false),0,0);
-            ctx.drawImage(this.createImage(this.chars[1],false, false),offsetSize,0);
-            ctx.drawImage(this.createImage(this.chars[0],true, false),offsetSize * 2,0);
-            ctx.drawImage(this.createImage(this.chars[2],false, false),0,offsetSize);
-            ctx.drawImage(this.createImage(this.chars[3],false, false),offsetSize,offsetSize);
-            ctx.drawImage(this.createImage(this.chars[2],true, false),offsetSize * 2,offsetSize);
-            ctx.drawImage(this.createImage(this.chars[0],false, true),0,offsetSize * 2);
-            ctx.drawImage(this.createImage(this.chars[1],false, true),offsetSize,offsetSize * 2);
-            ctx.drawImage(this.createImage(this.chars[0],true, true),offsetSize * 2,offsetSize * 2);
+            let drawProcess: MyQ.Promise<{}>[] = [];
 
-            return element.toDataURL();   
+            drawProcess.push(this.drawImage(ctx,this.chars[0],false,false, 0,              0));
+            drawProcess.push(this.drawImage(ctx,this.chars[1],false,false, offsetSize,     0));
+            drawProcess.push(this.drawImage(ctx,this.chars[0],true,false,  offsetSize * 2, 0));
+            drawProcess.push(this.drawImage(ctx,this.chars[2],false,false, 0,              offsetSize));
+            drawProcess.push(this.drawImage(ctx,this.chars[3],false,false, offsetSize,     offsetSize));
+            drawProcess.push(this.drawImage(ctx,this.chars[2],true,false,  offsetSize * 2, offsetSize));
+            drawProcess.push(this.drawImage(ctx,this.chars[0],false,true,  0,              offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx,this.chars[1],false,true,  offsetSize,     offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx,this.chars[0],true,true,   offsetSize * 2, offsetSize * 2));
+
+            MyQ.Promise.all(drawProcess).then(()=>{
+                q.resolve(element.toDataURL());
+            });
+
+            return q.promise;
         }
 
-        private createImage(map:number[][], reverse: boolean, vertical: boolean) : HTMLImageElement {
+        private drawImage(ctx: CanvasRenderingContext2D, map:number[][], reverse: boolean, vertical: boolean, offsetX:number, offsetY:number) : MyQ.Promise<{}>  {
+            let q = MyQ.Deferred.defer();
+            this.createImage(map,false, false).then((img) => {
+                ctx.drawImage(img,offsetX,offsetY);
+                q.resolve({});
+            });
+            return q.promise;
+        }
+
+        private createImage(map:number[][], reverse: boolean, vertical: boolean) : MyQ.Promise<HTMLImageElement> {
+            let q = MyQ.Deferred.defer<HTMLImageElement>();
+
             let element = document.createElement('canvas');
             let ctx = element.getContext("2d");
 
+            let size = this.pixSize * map.length;
+
+            element.setAttribute("width", size.toString());
+            element.setAttribute("height", size.toString());
+
             AbstractCharacter.drawCharacter(ctx,map,this.colors,this.pixSize,reverse,vertical);
             let img = new Image();
+            
+            img.onload = () => {
+                q.resolve(img);
+            }
             img.src = element.toDataURL();
-            return img;
+            return q.promise;
         }
     }
 }

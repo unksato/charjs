@@ -1654,38 +1654,61 @@ var Charjs;
             return _this;
         }
         NormalGroundWorld.prototype.setBorderImage = function () {
-            var charSize = this.pixSize * this.chars[0].length;
-            var url = "url(" + this.createBorderImage() + ")";
-            this.targetDom.style.borderImage = url + " " + charSize + " fill round";
-            this.targetDom.style.borderStyle = 'solid';
-            this.targetDom.style.borderWidth = charSize + "px " + charSize + "px 0px " + charSize + "px";
-            this.targetDom.style.webkitBorderImage = url + " " + charSize + " round";
+            var _this = this;
+            this.createBorderImage().then(function (url) {
+                var charSize = _this.pixSize * _this.chars[0].length;
+                url = "url(" + url + ")";
+                _this.targetDom.style.borderImage = url + " " + charSize + " fill round";
+                _this.targetDom.style.borderStyle = 'solid';
+                _this.targetDom.style.borderWidth = charSize + "px " + charSize + "px 0px " + charSize + "px";
+                _this.targetDom.style.webkitBorderImage = url + " " + charSize + " round";
+            });
         };
         NormalGroundWorld.prototype.createBorderImage = function () {
+            var q = MyQ.Deferred.defer();
             var element = document.createElement("canvas");
             var ctx = element.getContext("2d");
             var size = this.pixSize * this.chars[0].length * 3;
             element.setAttribute("width", size.toString());
             element.setAttribute("height", size.toString());
             var offsetSize = this.pixSize * this.chars[0].length;
-            ctx.drawImage(this.createImage(this.chars[0], false, false), 0, 0);
-            ctx.drawImage(this.createImage(this.chars[1], false, false), offsetSize, 0);
-            ctx.drawImage(this.createImage(this.chars[0], true, false), offsetSize * 2, 0);
-            ctx.drawImage(this.createImage(this.chars[2], false, false), 0, offsetSize);
-            ctx.drawImage(this.createImage(this.chars[3], false, false), offsetSize, offsetSize);
-            ctx.drawImage(this.createImage(this.chars[2], true, false), offsetSize * 2, offsetSize);
-            ctx.drawImage(this.createImage(this.chars[0], false, true), 0, offsetSize * 2);
-            ctx.drawImage(this.createImage(this.chars[1], false, true), offsetSize, offsetSize * 2);
-            ctx.drawImage(this.createImage(this.chars[0], true, true), offsetSize * 2, offsetSize * 2);
-            return element.toDataURL();
+            var drawProcess = [];
+            drawProcess.push(this.drawImage(ctx, this.chars[0], false, false, 0, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[1], false, false, offsetSize, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], true, false, offsetSize * 2, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[2], false, false, 0, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[3], false, false, offsetSize, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[2], true, false, offsetSize * 2, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], false, true, 0, offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx, this.chars[1], false, true, offsetSize, offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], true, true, offsetSize * 2, offsetSize * 2));
+            MyQ.Promise.all(drawProcess).then(function () {
+                q.resolve(element.toDataURL());
+            });
+            return q.promise;
+        };
+        NormalGroundWorld.prototype.drawImage = function (ctx, map, reverse, vertical, offsetX, offsetY) {
+            var q = MyQ.Deferred.defer();
+            this.createImage(map, false, false).then(function (img) {
+                ctx.drawImage(img, offsetX, offsetY);
+                q.resolve({});
+            });
+            return q.promise;
         };
         NormalGroundWorld.prototype.createImage = function (map, reverse, vertical) {
+            var q = MyQ.Deferred.defer();
             var element = document.createElement('canvas');
             var ctx = element.getContext("2d");
+            var size = this.pixSize * map.length;
+            element.setAttribute("width", size.toString());
+            element.setAttribute("height", size.toString());
             Charjs.AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
             var img = new Image();
+            img.onload = function () {
+                q.resolve(img);
+            };
             img.src = element.toDataURL();
-            return img;
+            return q.promise;
         };
         return NormalGroundWorld;
     }(Charjs.AbstractGround));
@@ -1897,4 +1920,174 @@ var Charjs;
     GameMaster.GAME_MASTERS = {};
     Charjs.GameMaster = GameMaster;
 })(Charjs || (Charjs = {}));
+var MyQ;
+(function (MyQ) {
+    var Deferred = (function () {
+        function Deferred() {
+            this.promise = new MyQ.Promise();
+        }
+        Deferred.defer = function () {
+            return new Deferred();
+        };
+        Deferred.prototype.resolve = function (arg) {
+            var _this = this;
+            setTimeout(function () {
+                _this.promise.resolve(arg);
+            }, 0);
+        };
+        Deferred.prototype.reject = function (e) {
+            var _this = this;
+            setTimeout(function () {
+                _this.promise.reject(e);
+            }, 0);
+        };
+        return Deferred;
+    }());
+    MyQ.Deferred = Deferred;
+})(MyQ || (MyQ = {}));
+var MyQ;
+(function (MyQ) {
+    var Promise = (function () {
+        function Promise() {
+            this._ok = null;
+            this._ng = null;
+            this._final = null;
+            this._next = null;
+            this._finallyCalled = false;
+        }
+        Promise.prototype.resolve = function (arg) {
+            if (this._ok) {
+                try {
+                    var ret = this._ok(arg);
+                    this._next.resolve(ret);
+                }
+                catch (e) {
+                    this.reject(e);
+                }
+                finally {
+                    this.final();
+                }
+            }
+        };
+        Promise.prototype.reject = function (e) {
+            try {
+                if (this._next)
+                    this._next.reject(e);
+                else if (this._ng)
+                    this._ng(e);
+            }
+            catch (e) {
+                throw e;
+            }
+            finally {
+                this.final();
+            }
+        };
+        Promise.prototype.final = function () {
+            if (this._next) {
+                this._next.final();
+            }
+            else if (this._final) {
+                if (!this._finallyCalled) {
+                    this._finallyCalled = true;
+                    this._final();
+                }
+            }
+        };
+        Promise.prototype.then = function (func) {
+            this._ok = func;
+            this._next = new Promise();
+            return this._next;
+        };
+        Promise.prototype.catch = function (func) {
+            this._ng = func;
+            return this;
+        };
+        Promise.prototype.finally = function (func) {
+            this._final = func;
+            return this;
+        };
+        Promise.when = function (arg) {
+            var Promise = new Promise();
+            setTimeout(function () {
+                Promise.resolve(arg);
+            }, 0);
+            return Promise;
+        };
+        Promise.all = function (Promises) {
+            var PromiseLength = Promises.length;
+            var callbackCount = 0;
+            var PromisesArgs = [];
+            var allPromise = new Promise();
+            var resolve = function (index) {
+                return function (arg) {
+                    callbackCount++;
+                    PromisesArgs[index] = arg;
+                    if (PromiseLength == callbackCount) {
+                        allPromise.resolve(PromisesArgs);
+                    }
+                };
+            };
+            var reject = function (index) {
+                return function (e) {
+                    allPromise.reject(e);
+                };
+            };
+            for (var i = 0; i < Promises.length; i++) {
+                Promises[i].then(resolve(i)).catch(reject(i));
+            }
+            return allPromise;
+        };
+        Promise.allSettled = function (Promises) {
+            var PromiseLength = Promises.length;
+            var callbackCount = 0;
+            var results = [];
+            var allPromise = new Promise();
+            var resolve = function (index) {
+                return function (arg) {
+                    callbackCount++;
+                    results[index] = { state: 'fulfilled', value: arg };
+                    if (PromiseLength == callbackCount) {
+                        allPromise.resolve(results);
+                    }
+                };
+            };
+            var reject = function (index) {
+                return function (e) {
+                    callbackCount++;
+                    results[index] = { state: 'rejected', reason: e };
+                    if (PromiseLength == callbackCount) {
+                        allPromise.resolve(results);
+                    }
+                };
+            };
+            for (var i = 0; i < Promises.length; i++) {
+                Promises[i].then(resolve(i)).catch(reject(i));
+            }
+            return allPromise;
+        };
+        Promise.race = function (Promises) {
+            var racePromise = new Promise();
+            var raceCalled = false;
+            var resolve = function (arg) {
+                if (!raceCalled) {
+                    raceCalled = true;
+                    racePromise.resolve(arg);
+                }
+            };
+            var reject = function (e) {
+                if (!raceCalled) {
+                    raceCalled = true;
+                    racePromise.reject(e);
+                }
+            };
+            for (var i = 0; i < Promises.length; i++) {
+                Promises[i].then(resolve).catch(reject);
+            }
+            return racePromise;
+        };
+        return Promise;
+    }());
+    MyQ.Promise = Promise;
+})(MyQ || (MyQ = {}));
 //# sourceMappingURL=mario.js.map
