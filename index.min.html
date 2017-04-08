@@ -5,36 +5,58 @@
         <script type="text/javascript" src="./dist/mario.min.js"></script>
         <script>
             window.onload = function(){
-                var controller = Charjs.GameMaster.GetController('sample' ,document.body,3);
+                var controller = Charjs.GameMaster.GetController('sample' ,document.getElementById('world'),2);
+                controller.CreateGround(Charjs.NormalGroundWorld,document.getElementById('ground'));
 
-                var mario = controller.CreateCharInstance(Charjs.MarioWorld, { x: 0, y: 0 });
-                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 300, y: 0 }, true);
-                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 500, y: 0 }, true);
-                controller.CreateCharInstance(Charjs.GoombaWorld, { x: 800, y: 0 }, true);
+                var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.right);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 250, y: 0 }, Charjs.Direction.left);
+
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 168, y: 100 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 200, y: 100 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 232, y: 100 });
+
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 68, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 100, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 132, y: 200 });
 
                 controller.init();
                 controller.start();
-
-                // mario.draw(0, {x:0, y:0});
-                // mario.draw(1, {x:50, y:0});
-                // mario.draw(2, {x:100, y:0});
-                // mario.draw(3, {x:150, y:0});
-                // mario.draw(4, {x:200, y:0});
-                // mario.draw(5, {x:250, y:0});
-                // mario.draw(6, {x:300, y:0});
-                // mario.draw(7, {x:350, y:0});
-                // mario.draw(8, {x:400, y:0});
-                // mario.draw(9, {x:450, y:0});
-                // mario.draw(10, {x:500, y:0});
-                // mario.draw(11, {x:550, y:0});
-                // mario.draw(12, {x:600, y:0});
-                // mario.draw(13, {x:650, y:0});
-                // mario.draw(14, {x:700, y:0});
-                // mario.draw(15, {x:750, y:0});
-                // mario.draw(16, {x:800, y:0});
             }
         </script>
+        <style type="text/css">
+        <!--
+            body {
+                margin: 0px;
+                overflow: hidden;
+                background-color: #e3fce4;
+            }
+            div#container {
+                margin: 0px;
+                z-index: 2;
+            }
+            div#world {
+                height: 80vh;
+                width: 100vw;
+                background-color: #e3fce4;
+                position: absolute;
+                z-index: 2;
+            }
+            div#ground {
+                top: 80vh;
+                height: calc(20vh - 32px);
+                width: calc(100vw - 64px);
+                z-index: 1;
+                position: absolute;
+            }
+        -->
+        </style>
     </head>
     <body>
+        <div id="container">
+            <div id="world"></div>
+            <div id="ground"></div>
+        </div>
     </body>
 </html>
