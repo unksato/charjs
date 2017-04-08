@@ -61,6 +61,7 @@ namespace Charjs {
     export abstract class AbstractObject implements IObject {
         public _name = '';
         abstract chars: number[][][];
+        abstract cchars: number[][][];
         abstract colors: string[];
         protected cssTextTemplate = `z-index: ${this.zIndex}; position: absolute; bottom: 0;`;
 
@@ -76,7 +77,23 @@ namespace Charjs {
         constructor(protected targetDom : HTMLElement ,protected pixSize = 2, protected position: IPosition = {x: 0, y:0}, protected _direction = Direction.Right, private useLeft = true, private  useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
         }
 
+        protected uncompress() {
+            if(this.cchars && this.cchars.length > 0){
+                this.chars = [];
+                for(let cchar of this.cchars){
+                    this.chars.push(Util.Compression.RLD(cchar));
+                }
+            }else{
+                //// for debbuging code
+                // this.cchars = [];
+                // for(let char of this.chars){
+                //     this.cchars.push(Util.Compression.RLE(char));
+                // }
+            }
+        }
+
         init(): void{
+            this.uncompress();
             for (let charactor of this.chars) {
                 this._rightActions.push(this.createCharacterAction(charactor));
                 if(this.useLeft)
@@ -327,6 +344,8 @@ namespace Charjs {
         abstract setBorderImage() : void;
 
         protected createBorderImage() : MyQ.Promise<string> {
+            this.uncompress();
+
             let q = MyQ.Deferred.defer<string>();
 
             let element = document.createElement("canvas");
