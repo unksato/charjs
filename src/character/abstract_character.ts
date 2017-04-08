@@ -47,11 +47,12 @@ namespace Charjs {
 
     export interface IPlayer extends ICharacter{
         onGool(callback?: Function): void;
+        releaseEnemy(): void;
     }
 
     export interface IEnemy extends ICharacter{
         onStepped(): void;
-        onGrabed(): void;
+        onGrabed(player: IPlayer): void;
         onKicked(direction: number, kickPower: number): void;
         isKilled(): boolean;
         isStepped(): boolean; 
@@ -317,11 +318,12 @@ namespace Charjs {
 
     export abstract class AbstractPlayer extends AbstractCharacter implements IPlayer {
         abstract onGool(callback?: Function): void;
+        abstract releaseEnemy(): void;
     }
 
     export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
         abstract onStepped(): void;
-        abstract onGrabed(): void;
+        abstract onGrabed(player:IPlayer): void;
         abstract onKicked(direction: number, kickPower: number): void;
         abstract isKilled(): boolean;
         abstract isStepped(): boolean; 
