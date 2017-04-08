@@ -196,14 +196,14 @@ namespace Charjs {
             this.targetDom.appendChild(blackScreen);
         }
 
-        private drawBlackClipCircle(targetDom, rect: ClientRect, size: number, count: number): void {
+        private drawBlackClipCircle(targetDom: HTMLElement, rect: ClientRect, size: number, count: number): void {
             let element = document.createElement("canvas");
             let ctx = element.getContext("2d");
-            let width = targetDom.clientWidth;
-            let height = targetDom.clientHeight;
+            let width = targetDom.scrollWidth;
+            let height = targetDom.scrollHeight;
             element.id = `bkout_circle_${count}`;
-            element.setAttribute("width",width);
-            element.setAttribute("height",height);
+            element.setAttribute("width",width.toString());
+            element.setAttribute("height",height.toString());
             element.style.cssText = `z-index: ${this._player.zIndex + 1}; position: absolute;`;
             ctx.fillStyle = "black";
             ctx.fillRect(0,0,width,height);

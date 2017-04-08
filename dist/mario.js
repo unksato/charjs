@@ -1326,11 +1326,11 @@ var Charjs;
         GameMaster.prototype.drawBlackClipCircle = function (targetDom, rect, size, count) {
             var element = document.createElement("canvas");
             var ctx = element.getContext("2d");
-            var width = targetDom.clientWidth;
-            var height = targetDom.clientHeight;
+            var width = targetDom.scrollWidth;
+            var height = targetDom.scrollHeight;
             element.id = "bkout_circle_" + count;
-            element.setAttribute("width", width);
-            element.setAttribute("height", height);
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
             element.style.cssText = "z-index: " + (this._player.zIndex + 1) + "; position: absolute;";
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, width, height);
