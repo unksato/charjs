@@ -36,7 +36,7 @@ module.exports = function(grunt){
 
         clean: {
             default: {
-                src: ['dist/*']
+                src: ['dist/*', 'src/**/*.js', 'src/**/*.js.map' ]
             }
         }
     });
