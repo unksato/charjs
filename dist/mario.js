@@ -1340,9 +1340,9 @@ var Charjs;
                 ctx.arc(rect.left + rect.width / 2, rect.top + rect.height / 2, size, 0, Math.PI * 2, false);
             }
             ctx.fill();
-            this.targetDom.appendChild(element);
+            targetDom.appendChild(element);
             if (count != 0)
-                this.targetDom.removeChild(document.getElementById("bkout_circle_" + (count - 1)));
+                targetDom.removeChild(document.getElementById("bkout_circle_" + (count - 1)));
         };
         GameMaster.checkMobile = function () {
             if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {

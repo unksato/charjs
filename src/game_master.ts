@@ -215,9 +215,9 @@ namespace Charjs {
             }
             ctx.fill();
 
-            this.targetDom.appendChild(element);
+            targetDom.appendChild(element);
             if (count != 0)
-                this.targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
+                targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
         }
 
         public static checkMobile(): boolean {
