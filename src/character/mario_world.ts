@@ -281,8 +281,12 @@ namespace Charjs {
         private _grabbing = false;
 
         private grabEnemy(enemy: IEnemy) : void {
-            enemy.onGrabed();
+            enemy.onGrabed(this);
             this._grabedEnemy = enemy;
+        }
+
+        releaseEnemy(): void {
+            this._grabedEnemy = null;
         }
 
         private putEnemy() : void {

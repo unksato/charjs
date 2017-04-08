@@ -39,13 +39,18 @@ namespace Charjs {
             [0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0]
             ]];*/
 
-        private _speed = 1;
+        private static DEFAULT_SPEED = 1;
+        private _speed = GoombaWorld.DEFAULT_SPEED;
         private static STEP = 2;
+        private _step = GoombaWorld.STEP;
         private _currentStep = 0;
         private _actionIndex = 0;
         private _isKilled = false;
-        private _isGrabed = false;
         private _yVector = 0;
+        private _jumpPower = 12;
+        private _isJumping = false;
+        private _grabbedPlayer : IPlayer = null;
+
 
         private _vertical : Vertical = Vertical.Up;
 
@@ -57,18 +62,31 @@ namespace Charjs {
             return this._isKilled;
         }
 
-        onAction(): void {
-            if(!this._isGrabed) {
-                let directionUpdated = this.updateDirection();
+        private executeJump() : void {
+            let ground = this.entity.ground || 0;
 
-                if (this.doHitTestWithOtherEnemy()) {
-                    this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
+            if (this._isJumping) {
+                this._yVector -= this._gravity * this.pixSize;
+                if(this.entity.ceiling != null){
+                    this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
+                    if(this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0){
+                        this._yVector = 0;
+                    }
+                }else{
+                    this.position.y = this.position.y + this._yVector;
                 }
 
-                this.updateEnvironment();
-                
-                let ground = this.entity.ground || 0;
-
+                if (this.position.y <= ground) {
+                    this._isJumping = false;
+                    this._yVector = 0;
+                    this.position.y = ground;
+                    this._speed = GoombaWorld.DEFAULT_SPEED;
+                } else {
+                    if(this._yVector <= 0) {
+                        this._vertical = Vertical.Up;
+                    };
+                }
+            }else{
                 if(this.position.y > ground){
                     this._yVector-= this._gravity*this.pixSize;
                     this.position.y+=this._yVector;
@@ -78,6 +96,49 @@ namespace Charjs {
                 }else{
                     this._yVector = 0;
                 }
+            }
+        }
+
+        private _steppedTimeout = 0;
+        private _revivedTimeout = 0;
+
+        onAction(): void {
+            if(this._steppedTimeout > 0){
+                this._steppedTimeout-=this.frameInterval;
+                if(this._steppedTimeout <= 0){
+                    this._step = 1;
+                    this._revivedTimeout = 2000;
+                    this._steppedTimeout = 0;
+                }
+            }
+            if(this._revivedTimeout > 0){
+                this._revivedTimeout-=this.frameInterval;
+                if(this._revivedTimeout <= 0){
+                    if(this._grabbedPlayer){
+                        this._step = GoombaWorld.STEP;
+                        this._vertical = Vertical.Up;
+                        if(this._grabbedPlayer){
+                            this._grabbedPlayer.releaseEnemy();
+                            this._grabbedPlayer = null;
+                        }
+                    }else{
+                        this._step = GoombaWorld.STEP;
+                        this._isJumping = true;
+                        this._yVector = this._jumpPower * this.pixSize;
+                    }  
+                }
+            }
+
+            if(!this._grabbedPlayer) {
+                let directionUpdated = this.updateDirection();
+
+                if (this.doHitTestWithOtherEnemy()) {
+                    this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
+                }
+
+                this.updateEnvironment();                
+
+                this.executeJump();
 
                 if (this._direction == Direction.Right) {
                     this.position.x += this.pixSize * this._speed;
@@ -90,7 +151,7 @@ namespace Charjs {
         }
 
         drawAction(): void {
-            if (this._currentStep < GoombaWorld.STEP) {
+            if (this._currentStep < this._step) {
                 this._currentStep++;
             } else {
                 this._currentStep = 0;
@@ -104,14 +165,15 @@ namespace Charjs {
             return this._vertical == Vertical.Down;
         }
 
+
         onStepped(): void {
             this._vertical = Vertical.Down;
             this._speed = 0;
+            this._steppedTimeout = 5000;
         }
 
-        onGrabed(): void {
-            this._isGrabed = true;
-            this.stop();
+        onGrabed(player:IPlayer): void {
+            this._grabbedPlayer = player;
         }
 
         onKicked(kickDirection:Direction, kickPower: number): void {
@@ -119,6 +181,7 @@ namespace Charjs {
             this._isKilled = true;
             let yVector = 10 * this.pixSize;
             let direction = kickDirection == Direction.Right ? 1 : -1;
+
             let killTimer = setInterval(() => {
 
                 yVector -= this._gravity * this.pixSize;
