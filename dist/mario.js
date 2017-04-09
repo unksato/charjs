@@ -372,24 +372,28 @@ var Charjs;
             _this.colors = ['', '#000000', '#ffffff', '#fee13d', '#ddae50'];
             _this.cchars = [[[0, 2, 1, 12, 0, 2], [0, 1, 1, 1, 2, 3, 4, 9, 1, 1, 0, 1], [1, 1, 2, 2, 3, 9, 4, 3, 1, 1], [1, 1, 2, 1, 3, 11, 4, 2, 1, 1], [1, 1, 2, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 2, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 2, 3, 9, 4, 3, 1, 1], [1, 1, 4, 14, 1, 1], [0, 1, 1, 1, 4, 12, 1, 1, 0, 1], [0, 2, 1, 12, 0, 2]], [[0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 2, 2, 3, 4, 9, 1, 2], [1, 1, 2, 1, 1, 12, 4, 1, 1, 1], [1, 2, 3, 11, 4, 1, 1, 2], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 10, 4, 3, 1, 1], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 1, 4, 14, 1, 1], [1, 1, 4, 14, 1, 1], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 2, 2, 10, 3, 1, 2, 1, 1, 2], [1, 1, 2, 8, 3, 1, 2, 1, 3, 1, 2, 1, 3, 2, 1, 1], [1, 1, 2, 4, 4, 1, 2, 2, 3, 1, 2, 1, 4, 1, 3, 4, 1, 1], [1, 1, 2, 4, 4, 1, 2, 1, 3, 1, 2, 1, 3, 1, 4, 1, 3, 4, 1, 1], [1, 1, 2, 1, 3, 1, 2, 1, 3, 1, 2, 1, 3, 1, 2, 1, 3, 7, 1, 1], [1, 2, 3, 12, 1, 2], [1, 1, 3, 1, 1, 12, 4, 1, 1, 1], [1, 2, 3, 9, 4, 3, 1, 2], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16]]];
             _this.chars = null;
+            _this.animation = null;
+            _this._animationIndex = null;
+            _this._isStarting = false;
             _this._pushedUpTimer = null;
+            _this.defaultCommand = function (e) {
+                if (e.keyCode == 32) {
+                    if (_this._isStarting) {
+                        _this.stop();
+                    }
+                    else {
+                        _this.start();
+                    }
+                }
+            };
             return _this;
         }
-        NormalBlockWorld.prototype.init = function () {
-            _super.prototype.init.call(this);
-            this.draw(0);
-        };
-        NormalBlockWorld.prototype.onPushedUp = function () {
-            var _this = this;
-            for (var _i = 0, _a = this.entityEnemies; _i < _a.length; _i++) {
-                var enemy = _a[_i];
-                enemy.onKicked(Charjs.Direction.Right, 0);
-            }
-            var animation = [
-                { yOffset: this.pixSize * 4, index: 0, wait: 0 },
-                { yOffset: this.pixSize * 8, index: 0, wait: 0 },
-                { yOffset: this.pixSize * 10, index: 0, wait: 2 },
-                { yOffset: this.pixSize * 8, index: 0, wait: 0 },
+        NormalBlockWorld.getAnimation = function (size) {
+            return [
+                { yOffset: size * 4, index: 0, wait: 0 },
+                { yOffset: size * 8, index: 0, wait: 0 },
+                { yOffset: size * 10, index: 0, wait: 2 },
+                { yOffset: size * 8, index: 0, wait: 0 },
                 { yOffset: 0, index: 2, wait: 2 },
                 { yOffset: 0, index: 3, wait: 2 },
                 { yOffset: 0, index: 0, wait: 2 },
@@ -418,31 +422,64 @@ var Charjs;
                 { yOffset: 0, index: 3, wait: 2 },
                 { yOffset: 0, index: 0, wait: 2 }
             ];
-            var animationIndex = 0;
-            var currnetAnimation = null;
-            if (!this._pushedUpTimer) {
+        };
+        NormalBlockWorld.prototype.init = function () {
+            _super.prototype.init.call(this);
+            this.draw(0);
+        };
+        NormalBlockWorld.prototype.start = function () {
+            var _this = this;
+            if (this._animationIndex !== null && this.animation != null) {
                 this.isActive = false;
+                this._isStarting = true;
                 this._pushedUpTimer = setInterval(function () {
-                    if (animationIndex >= animation.length) {
-                        clearInterval(_this._pushedUpTimer);
-                        _this._pushedUpTimer = null;
+                    if (_this._animationIndex >= _this.animation.length) {
+                        _this.animation = null;
                         _this.isActive = true;
+                        _this._animationIndex = null;
+                        _this.removeCommand();
+                        _this.stop();
                         return;
                     }
                     var pos = { x: _this.position.x, y: _this.position.y };
-                    if (animation[animationIndex].yOffset)
-                        pos.y += animation[animationIndex].yOffset;
-                    _this.draw(animation[animationIndex].index, pos, Charjs.Direction.Right, Charjs.Vertical.Up, true);
-                    if (animation[animationIndex].wait) {
-                        animation[animationIndex].wait--;
+                    if (_this.animation[_this._animationIndex].yOffset)
+                        pos.y += _this.animation[_this._animationIndex].yOffset;
+                    _this.draw(_this.animation[_this._animationIndex].index, pos, Charjs.Direction.Right, Charjs.Vertical.Up, true);
+                    if (_this.animation[_this._animationIndex].wait) {
+                        _this.animation[_this._animationIndex].wait--;
                     }
                     else {
-                        animationIndex++;
+                        _this._animationIndex++;
                     }
                 }, this.frameInterval);
             }
         };
+        NormalBlockWorld.prototype.stop = function () {
+            this._isStarting = false;
+            if (this._pushedUpTimer) {
+                clearInterval(this._pushedUpTimer);
+                this._pushedUpTimer = null;
+            }
+        };
+        NormalBlockWorld.prototype.onPushedUp = function () {
+            for (var _i = 0, _a = this.entityEnemies; _i < _a.length; _i++) {
+                var enemy = _a[_i];
+                enemy.onKicked(Charjs.Direction.Right, 0);
+            }
+            if (!this._pushedUpTimer) {
+                this.animation = NormalBlockWorld.getAnimation(this.pixSize);
+                this._animationIndex = 0;
+                this.registerCommand();
+                this.start();
+            }
+        };
         NormalBlockWorld.prototype.onTrampled = function () {
+        };
+        NormalBlockWorld.prototype.registerCommand = function () {
+            document.addEventListener('keypress', this.defaultCommand);
+        };
+        NormalBlockWorld.prototype.removeCommand = function () {
+            document.removeEventListener('keypress', this.defaultCommand);
         };
         return NormalBlockWorld;
     }(Charjs.AbstractOtherObject));
