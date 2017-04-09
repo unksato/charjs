@@ -381,15 +381,9 @@ var Charjs;
         };
         NormalBlockWorld.prototype.onPushedUp = function () {
             var _this = this;
-            var _loop_1 = function (enemy) {
-                enemy.onKicked(Charjs.Direction.Right, 0);
-                this_1.entityEnemies.some(function (v, i, array) { if (v == enemy)
-                    array.splice(i, 1); return true; });
-            };
-            var this_1 = this;
             for (var _i = 0, _a = this.entityEnemies; _i < _a.length; _i++) {
                 var enemy = _a[_i];
-                _loop_1(enemy);
+                enemy.onKicked(Charjs.Direction.Right, 0);
             }
             var animation = [
                 { yOffset: this.pixSize * 4, index: 0, wait: 0 },
@@ -1292,6 +1286,7 @@ var Charjs;
             ground.setBorderImage();
         };
         GameMaster.prototype.deleteEnemy = function (char) {
+            this.cleanEntityEnemiesFromAllObjects(char);
             delete this._enemys[char._name];
             if (Object.keys(this._enemys).length == 0) {
                 this.doGool();
@@ -1302,10 +1297,8 @@ var Charjs;
         };
         GameMaster.prototype.getApproachedObjects = function (target, radius) {
             var objs = [];
+            this.cleanEntityEnemiesFromAllObjects(target);
             for (var name_3 in this._objects) {
-                if (target instanceof Charjs.AbstractEnemy)
-                    this._objects[name_3].entityEnemies.some(function (v, i, array) { if (v == target)
-                        array.splice(i, 1); return true; });
                 if (this._objects[name_3].isActive) {
                     var objPos = this._objects[name_3].getPosition();
                     var charPos = target.getPosition();
@@ -1317,15 +1310,23 @@ var Charjs;
             }
             return objs;
         };
+        GameMaster.prototype.cleanEntityEnemiesFromAllObjects = function (target) {
+            if (target instanceof Charjs.AbstractEnemy) {
+                for (var name_4 in this._objects) {
+                    this._objects[name_4].entityEnemies.some(function (v, i, array) { if (v == target)
+                        array.splice(i, 1); return true; });
+                }
+            }
+        };
         GameMaster.prototype.init = function () {
             if (this._player) {
                 this._player.init();
             }
-            for (var name_4 in this._enemys) {
-                this._enemys[name_4].init();
+            for (var name_5 in this._enemys) {
+                this._enemys[name_5].init();
             }
-            for (var name_5 in this._objects) {
-                this._objects[name_5].init();
+            for (var name_6 in this._objects) {
+                this._objects[name_6].init();
             }
             this.registerCommand();
         };
@@ -1336,8 +1337,8 @@ var Charjs;
             document.addEventListener('keypress', this.defaultCommand);
         };
         GameMaster.prototype.start = function () {
-            for (var name_6 in this._enemys) {
-                this._enemys[name_6].start();
+            for (var name_7 in this._enemys) {
+                this._enemys[name_7].start();
             }
             if (this._player) {
                 this._player.start();
@@ -1345,8 +1346,8 @@ var Charjs;
             this._isStarting = true;
         };
         GameMaster.prototype.stop = function () {
-            for (var name_7 in this._enemys) {
-                this._enemys[name_7].stop();
+            for (var name_8 in this._enemys) {
+                this._enemys[name_8].stop();
             }
             if (this._player) {
                 this._player.stop();
@@ -1354,14 +1355,14 @@ var Charjs;
             this._isStarting = false;
         };
         GameMaster.prototype.doGameOver = function () {
-            for (var name_8 in this._enemys) {
-                this._enemys[name_8].stop();
+            for (var name_9 in this._enemys) {
+                this._enemys[name_9].stop();
             }
         };
         GameMaster.prototype.doGool = function () {
             var _this = this;
-            for (var name_9 in this._enemys) {
-                this._enemys[name_9].stop();
+            for (var name_10 in this._enemys) {
+                this._enemys[name_10].stop();
             }
             var screen = document.body;
             var blackScreen = document.createElement('div');
