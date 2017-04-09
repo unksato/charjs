@@ -67,14 +67,17 @@ namespace Charjs {
             return this._enemys;
         }
 
-        public getApproachedObjects(pos: IPosition, radius: number): IOtherObject[] {
+        public getApproachedObjects(target:ICharacter, radius: number): IOtherObject[] {
             let objs = [];
 
             for(let name in this._objects){
+                if(target instanceof AbstractEnemy)
+                    this._objects[name].entityEnemies.some((v, i, array) => {if(v==target) array.splice(i, 1);return true;});
                 if(this._objects[name].isActive){
                     let objPos = this._objects[name].getPosition();
-                    if( pos.x - radius < objPos.x && objPos.x < pos.x + radius &&
-                        pos.y - radius < objPos.y && objPos.y < pos.y + radius){
+                    let charPos = target.getPosition();
+                    if( charPos.x - radius < objPos.x && objPos.x < charPos.x + radius &&
+                        charPos.y - radius < objPos.y && objPos.y < charPos.y + radius){
                             objs.push(this._objects[name]);
                         }
                 }
