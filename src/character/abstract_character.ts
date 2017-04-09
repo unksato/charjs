@@ -239,7 +239,7 @@ namespace Charjs {
         protected rightObject: IOtherObject = null;
         protected leftObject: IOtherObject = null;
 
-        protected updateEnvironment(): void {
+        protected updateEntity(): void {
             if(this._gameMaster){
                 let objs = this._gameMaster.getApproachedObjects(this.position, this.size.width * 3);
                 this.entity.ground = null;
@@ -256,7 +256,7 @@ namespace Charjs {
 
                     let oPosLeft = oPos.x + oSize.widthOffset;
                     let oPosRight = oPos.x + oSize.width - oSize.widthOffset;
-                    let oPosUnder = oPos.y + /*Magic number*/this.pixSize * 3;
+                    let oPosUnder = oPos.y;
                     let oPosUpper = oPos.y + oSize.height - oSize.heightOffset;
 
                     let cPosLeft = this.position.x + this.size.widthOffset;
@@ -272,15 +272,14 @@ namespace Charjs {
                             continue;
                         }
                         // ceiling update
-                        if(cPosUpper <= oPosUnder && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder)){
+                        if(cPosUpper <= oPosUnder + /*Magic number*/this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder + /*Magic number*/this.pixSize * 3)){
                             this.upperObject = obj;
-                            this.entity.ceiling = oPosUnder;
+                            this.entity.ceiling = oPosUnder + /*Magic number*/this.pixSize * 3;
                             continue;
                         }
-                        continue;
                    }
 
-                    if(cPosUnder > oPosUnder && cPosUnder < oPosUpper  || cPosUpper > oPosUnder && cPosUpper < oPosUpper) {
+                    if(cPosUnder >= oPosUnder && cPosUnder < oPosUpper  || cPosUpper > oPosUnder && cPosUpper <= oPosUpper) {
                         // left update
                         if(cPosLeft >= oPosRight && ( this.entity.left === null || this.entity.left < oPosRight)){
                             this.leftObject = obj;
@@ -293,7 +292,6 @@ namespace Charjs {
                             this.entity.right = oPosLeft;  
                             continue;
                         }
-                        continue;
                    }
 
                 } 
@@ -302,13 +300,13 @@ namespace Charjs {
 
         protected updateDirection(): boolean{
             let currentDirection = this._direction;
-            let right = this.entity.right === null ? this.targetDom.clientWidth - this.size.width - (/*Magic offset*/ this.pixSize * 2) : this.entity.right;
-            let left = this.entity.left === null ? 0 : this.entity.left;
+            let right = this.entity.right || this.targetDom.clientWidth;
+            let left = this.entity.left || 0;
 
-            if (this.position.x >  right && this._direction == Direction.Right) {
+            if (this.position.x + this.size.width >= right && currentDirection == Direction.Right) {
                 this._direction = Direction.Left;
             }
-            if (this.position.x < left && this._direction == Direction.Left) {
+            if (this.position.x <= left && currentDirection == Direction.Left) {
                 this._direction = Direction.Right;
             }
 

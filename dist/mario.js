@@ -210,7 +210,7 @@ var Charjs;
             document.removeEventListener('keypress', this.defaultCommand);
             _super.prototype.destroy.call(this);
         };
-        AbstractCharacter.prototype.updateEnvironment = function () {
+        AbstractCharacter.prototype.updateEntity = function () {
             if (this._gameMaster) {
                 var objs = this._gameMaster.getApproachedObjects(this.position, this.size.width * 3);
                 this.entity.ground = null;
@@ -227,7 +227,7 @@ var Charjs;
                     var oSize = obj.getCharSize();
                     var oPosLeft = oPos.x + oSize.widthOffset;
                     var oPosRight = oPos.x + oSize.width - oSize.widthOffset;
-                    var oPosUnder = oPos.y + this.pixSize * 3;
+                    var oPosUnder = oPos.y;
                     var oPosUpper = oPos.y + oSize.height - oSize.heightOffset;
                     var cPosLeft = this.position.x + this.size.widthOffset;
                     var cPosRight = this.position.x + this.size.width - this.size.widthOffset;
@@ -239,14 +239,13 @@ var Charjs;
                             this.entity.ground = oPosUpper;
                             continue;
                         }
-                        if (cPosUpper <= oPosUnder && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder)) {
+                        if (cPosUpper <= oPosUnder + this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder + this.pixSize * 3)) {
                             this.upperObject = obj;
-                            this.entity.ceiling = oPosUnder;
+                            this.entity.ceiling = oPosUnder + this.pixSize * 3;
                             continue;
                         }
-                        continue;
                     }
-                    if (cPosUnder > oPosUnder && cPosUnder < oPosUpper || cPosUpper > oPosUnder && cPosUpper < oPosUpper) {
+                    if (cPosUnder >= oPosUnder && cPosUnder < oPosUpper || cPosUpper > oPosUnder && cPosUpper <= oPosUpper) {
                         if (cPosLeft >= oPosRight && (this.entity.left === null || this.entity.left < oPosRight)) {
                             this.leftObject = obj;
                             this.entity.left = oPosRight;
@@ -257,19 +256,18 @@ var Charjs;
                             this.entity.right = oPosLeft;
                             continue;
                         }
-                        continue;
                     }
                 }
             }
         };
         AbstractCharacter.prototype.updateDirection = function () {
             var currentDirection = this._direction;
-            var right = this.entity.right === null ? this.targetDom.clientWidth - this.size.width - (this.pixSize * 2) : this.entity.right;
-            var left = this.entity.left === null ? 0 : this.entity.left;
-            if (this.position.x > right && this._direction == Direction.Right) {
+            var right = this.entity.right || this.targetDom.clientWidth;
+            var left = this.entity.left || 0;
+            if (this.position.x + this.size.width >= right && currentDirection == Direction.Right) {
                 this._direction = Direction.Left;
             }
-            if (this.position.x < left && this._direction == Direction.Left) {
+            if (this.position.x <= left && currentDirection == Direction.Left) {
                 this._direction = Direction.Right;
             }
             return currentDirection != this._direction;
@@ -543,7 +541,7 @@ var Charjs;
                 if (this.doHitTestWithOtherEnemy()) {
                     this._direction = this._direction == Charjs.Direction.Right ? Charjs.Direction.Left : Charjs.Direction.Right;
                 }
-                this.updateEnvironment();
+                this.updateEntity();
                 this.executeJump();
                 if (this._direction == Charjs.Direction.Right) {
                     this.position.x += this.pixSize * this._speed;
@@ -675,7 +673,7 @@ var Charjs;
         }
         MarioWorld.prototype.onAction = function () {
             var _this = this;
-            this.updateEnvironment();
+            this.updateEntity();
             switch (this.doHitTest()) {
                 case HitStatus.dammage:
                     this.gameOver();
@@ -847,10 +845,12 @@ var Charjs;
         MarioWorld.prototype.executeRun = function () {
             var directionUpdated = this.updateDirection();
             if (this._direction == Charjs.Direction.Right) {
-                this.position.x += this.pixSize * this._speed;
+                var right = this.entity.right || this.targetDom.clientWidth;
+                this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
             }
             else {
-                this.position.x -= this.pixSize * this._speed;
+                var left = this.entity.left || 0;
+                this.position.x = Math.max(this.position.x - this.pixSize * this._speed, left);
             }
             var runIndex = this._runIndex;
             if (this._isSquat) {
