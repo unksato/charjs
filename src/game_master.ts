@@ -221,7 +221,7 @@ namespace Charjs {
             if(size > 0){
                 ctx.globalCompositeOperation = "destination-out";
                 ctx.beginPath();
-                ctx.arc(rect.left + rect.width / 2 , rect.top + rect.height / 2 , size, 0, Math.PI * 2, false);
+                ctx.arc(rect.left + rect.width / 2 + window.scrollX , rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
             }
             ctx.fill();
 
@@ -237,7 +237,5 @@ namespace Charjs {
                 return false;
             }
         }
-
-
     }   
 }

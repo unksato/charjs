@@ -1146,42 +1146,40 @@ var Charjs;
                     }
                 }, false);
             }
-            else {
-                document.addEventListener('keydown', function (e) {
-                    if (e.keyCode == 65 && !_this._isSquat) {
-                        _this.onJump();
-                    }
-                    if (e.keyCode == 88 && !_this._isSquat) {
-                        _this.onSpecialJump();
-                    }
-                    if (e.keyCode == 89 && !_this._isSquat) {
-                        _this.onGrab();
-                    }
-                    if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat) {
-                        _this.onSpeedUp();
-                    }
-                    if (e.keyCode == 40 && !_this._isJumping) {
-                        _this.onSquat();
-                    }
-                });
-                document.addEventListener('keyup', function (e) {
-                    if (e.keyCode == 65) {
-                        _this.onAbortJump();
-                    }
-                    if (e.keyCode == 88) {
-                        _this.onAbortJump();
-                    }
-                    if (e.keyCode == 89) {
-                        _this.onAbortGrab();
-                    }
-                    if (e.keyCode == 66) {
-                        _this.onAbortSpeedUp();
-                    }
-                    if (e.keyCode == 40) {
-                        _this.onAbortSquat();
-                    }
-                });
-            }
+            document.addEventListener('keydown', function (e) {
+                if (e.keyCode == 65 && !_this._isSquat) {
+                    _this.onJump();
+                }
+                if (e.keyCode == 88 && !_this._isSquat) {
+                    _this.onSpecialJump();
+                }
+                if (e.keyCode == 89 && !_this._isSquat) {
+                    _this.onGrab();
+                }
+                if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat) {
+                    _this.onSpeedUp();
+                }
+                if (e.keyCode == 40 && !_this._isJumping) {
+                    _this.onSquat();
+                }
+            });
+            document.addEventListener('keyup', function (e) {
+                if (e.keyCode == 65) {
+                    _this.onAbortJump();
+                }
+                if (e.keyCode == 88) {
+                    _this.onAbortJump();
+                }
+                if (e.keyCode == 89) {
+                    _this.onAbortGrab();
+                }
+                if (e.keyCode == 66) {
+                    _this.onAbortSpeedUp();
+                }
+                if (e.keyCode == 40) {
+                    _this.onAbortSquat();
+                }
+            });
         };
         return MarioWorld;
     }(Charjs.AbstractPlayer));
@@ -1412,7 +1410,7 @@ var Charjs;
             if (size > 0) {
                 ctx.globalCompositeOperation = "destination-out";
                 ctx.beginPath();
-                ctx.arc(rect.left + rect.width / 2, rect.top + rect.height / 2, size, 0, Math.PI * 2, false);
+                ctx.arc(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
             }
             ctx.fill();
             targetDom.appendChild(element);

@@ -532,46 +532,45 @@ namespace Charjs {
                     }
                 },false);
 
-            } else {
-                document.addEventListener('keydown', (e) => {
-                    if (e.keyCode == 65 && !this._isSquat) {
-                        this.onJump();
-                    }
-                    if (e.keyCode == 88 && !this._isSquat) {
-                        this.onSpecialJump();
-                    }
-
-                    if (e.keyCode == 89 && !this._isSquat) {
-                        this.onGrab();
-                    }
-
-                    if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
-                        this.onSpeedUp();
-                    }
-
-                    if (e.keyCode == 40 && !this._isJumping) {
-                        this.onSquat();
-                    }
-
-                });
-                document.addEventListener('keyup', (e) => {
-                    if (e.keyCode == 65) {
-                        this.onAbortJump();
-                    }
-                    if (e.keyCode == 88) {
-                        this.onAbortJump();
-                    }
-                    if (e.keyCode == 89) {
-                        this.onAbortGrab();
-                    }
-                    if (e.keyCode == 66) {
-                        this.onAbortSpeedUp();
-                    }
-                    if (e.keyCode == 40) {
-                        this.onAbortSquat();
-                    }
-                });
             }
+            document.addEventListener('keydown', (e) => {
+                if (e.keyCode == 65 && !this._isSquat) {
+                    this.onJump();
+                }
+                if (e.keyCode == 88 && !this._isSquat) {
+                    this.onSpecialJump();
+                }
+
+                if (e.keyCode == 89 && !this._isSquat) {
+                    this.onGrab();
+                }
+
+                if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
+                    this.onSpeedUp();
+                }
+
+                if (e.keyCode == 40 && !this._isJumping) {
+                    this.onSquat();
+                }
+
+            });
+            document.addEventListener('keyup', (e) => {
+                if (e.keyCode == 65) {
+                    this.onAbortJump();
+                }
+                if (e.keyCode == 88) {
+                    this.onAbortJump();
+                }
+                if (e.keyCode == 89) {
+                    this.onAbortGrab();
+                }
+                if (e.keyCode == 66) {
+                    this.onAbortSpeedUp();
+                }
+                if (e.keyCode == 40) {
+                    this.onAbortSquat();
+                }
+            });
         }
 
         colors = ['','#000000','#ffffff','#520000','#8c5a18','#21318c','#ff4273','#b52963','#ffde73','#dea539','#ffd6c6','#ff736b','#84dece','#42849c'];
