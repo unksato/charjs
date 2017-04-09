@@ -18,7 +18,6 @@ namespace Charjs {
         private _speed = MarioWorld.DEFAULT_SPEED;
         private _gameOverWaitCount = 0;
 
-
         private _speedUpTimer = null;
         private _speedDownTimer = null;
         private _squatTimer = null;
@@ -36,7 +35,7 @@ namespace Charjs {
         }
 
         onAction(): void {
-            this.updateEnvironment();
+            this.updateEntity();
             switch (this.doHitTest()) {
                 case HitStatus.dammage:
                     this.gameOver();
@@ -216,9 +215,11 @@ namespace Charjs {
             let directionUpdated = this.updateDirection();
 
             if (this._direction == Direction.Right) {
-                this.position.x += this.pixSize * this._speed;
+                let right = this.entity.right || this.targetDom.clientWidth;
+                this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
             } else {
-                this.position.x -= this.pixSize * this._speed;            
+                let left = this.entity.left || 0;
+                this.position.x = Math.max(this.position.x - this.pixSize * this._speed, left);
             }
 
             let runIndex = this._runIndex;

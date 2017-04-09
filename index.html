@@ -9,17 +9,25 @@
                 controller.CreateGround(Charjs.NormalGroundWorld,document.getElementById('ground'));
 
                 var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 200, y: 0 }, Charjs.Direction.Left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 180, y: 0 }, Charjs.Direction.Left);
                 controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.Right);
-                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 250, y: 0 }, Charjs.Direction.Left);
+                controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
 
-                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 168, y: 100 });
-                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 200, y: 100 });
-                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 232, y: 100 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 48, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 80, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 112, y: 200 });
 
-                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 68, y: 200 });
-                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 100, y: 200 });
-                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 132, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 148, y: 100 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 180, y: 100 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 212, y: 100 });
+
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 260, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 292, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 200 });
+                controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 232 });
+
+                // for(var i = 0; i < 8;i++)
+                //     controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 100 + 32 * i, y: 0 });
 
 
                 controller.init();

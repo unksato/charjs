@@ -136,7 +136,7 @@ namespace Charjs {
                     this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
                 }
 
-                this.updateEnvironment();                
+                this.updateEntity();                
 
                 this.executeJump();
 
