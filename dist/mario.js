@@ -381,9 +381,15 @@ var Charjs;
         };
         NormalBlockWorld.prototype.onPushedUp = function () {
             var _this = this;
+            var _loop_1 = function (enemy) {
+                enemy.onKicked(Charjs.Direction.Right, 0);
+                this_1.entityEnemies.some(function (v, i, array) { if (v == enemy)
+                    array.splice(i, 1); return true; });
+            };
+            var this_1 = this;
             for (var _i = 0, _a = this.entityEnemies; _i < _a.length; _i++) {
                 var enemy = _a[_i];
-                enemy.onKicked(Charjs.Direction.Right, 0);
+                _loop_1(enemy);
             }
             var animation = [
                 { yOffset: this.pixSize * 4, index: 0, wait: 0 },
