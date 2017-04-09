@@ -149,6 +149,10 @@ namespace Charjs {
 
         private executeJump(): {index:number, direction: Direction} {
             let ground = this.entity.ground || 0;
+
+            if(this.position.y > ground)
+                this._isJumping = true;
+
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
                 if(this.entity.ceiling != null){
@@ -188,15 +192,7 @@ namespace Charjs {
                     }
                 }
             } else {
-                if(this.position.y > ground){
-                    this._yVector-= this._gravity*this.pixSize;
-                    this.position.y+=this._yVector;
-                    if(this.position.y < ground){
-                        this.position.y = ground;
-                    }
-                }else{
-                    this._yVector = 0;
-                }                
+                this._yVector = 0;
                 return null;
             }   
         }
