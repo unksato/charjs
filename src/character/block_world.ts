@@ -88,7 +88,6 @@ namespace Charjs {
         onPushedUp(): void {
             for(let enemy of this.entityEnemies){
                 enemy.onKicked(Direction.Right, 0);
-                this.entityEnemies.some((v, i, array) => {if(v==enemy) array.splice(i, 1);return true;});
             }
 
             let animation = [

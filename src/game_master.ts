@@ -57,6 +57,7 @@ namespace Charjs {
         }
 
         public deleteEnemy(char : IEnemy) {
+            this.cleanEntityEnemiesFromAllObjects(char);
             delete this._enemys[char._name];
             if(Object.keys(this._enemys).length == 0){
                 this.doGool();
@@ -69,10 +70,8 @@ namespace Charjs {
 
         public getApproachedObjects(target:ICharacter, radius: number): IOtherObject[] {
             let objs = [];
-
+            this.cleanEntityEnemiesFromAllObjects(target);
             for(let name in this._objects){
-                if(target instanceof AbstractEnemy)
-                    this._objects[name].entityEnemies.some((v, i, array) => {if(v==target) array.splice(i, 1);return true;});
                 if(this._objects[name].isActive){
                     let objPos = this._objects[name].getPosition();
                     let charPos = target.getPosition();
@@ -83,6 +82,14 @@ namespace Charjs {
                 }
             }
             return objs;
+        }
+
+        public cleanEntityEnemiesFromAllObjects(target:ICharacter) {
+            if(target instanceof AbstractEnemy){
+                for(let name in this._objects){
+                    this._objects[name].entityEnemies.some((v, i, array) => {if(v==target) array.splice(i, 1);return true;});
+                }
+            }
         }
 
         public init(): void {
