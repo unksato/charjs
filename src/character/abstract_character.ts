@@ -241,7 +241,7 @@ namespace Charjs {
 
         protected updateEntity(): void {
             if(this._gameMaster){
-                let objs = this._gameMaster.getApproachedObjects(this.position, this.size.width * 3);
+                let objs = this._gameMaster.getApproachedObjects(this, this.size.width * 3);
                 this.entity.ground = null;
                 this.entity.ceiling = null;
                 this.entity.right = null;
@@ -266,13 +266,15 @@ namespace Charjs {
 
                     if(cPosLeft >= oPosLeft && cPosLeft <= oPosRight  || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
                         // ground update
-                        if(cPosUnder >= oPosUpper && ( this.entity.ground === null || this.entity.ground > oPosUpper)){
+                        if(cPosUnder >= oPosUpper && ( this.entity.ground === null || this.entity.ground >= oPosUpper)){
                             this.underObject = obj;
+                            if(cPosUnder == oPosUpper && this instanceof AbstractEnemy && obj.entityEnemies.indexOf(this) == -1)
+                                obj.entityEnemies.push(this);
                             this.entity.ground = oPosUpper;
                             continue;
                         }
                         // ceiling update
-                        if(cPosUpper <= oPosUnder + /*Magic number*/this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder + /*Magic number*/this.pixSize * 3)){
+                        if(cPosUpper <= oPosUnder + /*Magic number*/this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling >= oPosUnder + /*Magic number*/this.pixSize * 3)){
                             this.upperObject = obj;
                             this.entity.ceiling = oPosUnder + /*Magic number*/this.pixSize * 3;
                             continue;
@@ -332,12 +334,14 @@ namespace Charjs {
         onPushedUp(): void;
         onTrampled(): void;
         isActive: boolean;
+        entityEnemies: IEnemy[];
     }
 
     export abstract class AbstractOtherObject extends AbstractObject implements IOtherObject {
         abstract onPushedUp(): void;
         abstract onTrampled(): void;
         isActive = true;
+        entityEnemies: IEnemy[] = [];
     }
 
     export abstract class AbstractGround extends AbstractObject {

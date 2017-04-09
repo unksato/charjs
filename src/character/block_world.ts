@@ -86,6 +86,10 @@ namespace Charjs {
         private _pushedUpTimer:number = null;
 
         onPushedUp(): void {
+            for(let enemy of this.entityEnemies){
+                enemy.onKicked(Direction.Right, 0);
+            }
+
             let animation = [
                 {yOffset:this.pixSize * 4, index:0, wait:0},
                 {yOffset:this.pixSize * 8, index:0, wait:0},

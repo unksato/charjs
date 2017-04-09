@@ -212,7 +212,7 @@ var Charjs;
         };
         AbstractCharacter.prototype.updateEntity = function () {
             if (this._gameMaster) {
-                var objs = this._gameMaster.getApproachedObjects(this.position, this.size.width * 3);
+                var objs = this._gameMaster.getApproachedObjects(this, this.size.width * 3);
                 this.entity.ground = null;
                 this.entity.ceiling = null;
                 this.entity.right = null;
@@ -234,12 +234,14 @@ var Charjs;
                     var cPosUnder = this.position.y;
                     var cPosUpper = this.position.y + this.size.height - this.size.heightOffset;
                     if (cPosLeft >= oPosLeft && cPosLeft <= oPosRight || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
-                        if (cPosUnder >= oPosUpper && (this.entity.ground === null || this.entity.ground > oPosUpper)) {
+                        if (cPosUnder >= oPosUpper && (this.entity.ground === null || this.entity.ground >= oPosUpper)) {
                             this.underObject = obj;
+                            if (cPosUnder == oPosUpper && this instanceof AbstractEnemy && obj.entityEnemies.indexOf(this) == -1)
+                                obj.entityEnemies.push(this);
                             this.entity.ground = oPosUpper;
                             continue;
                         }
-                        if (cPosUpper <= oPosUnder + this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling > oPosUnder + this.pixSize * 3)) {
+                        if (cPosUpper <= oPosUnder + this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling >= oPosUnder + this.pixSize * 3)) {
                             this.upperObject = obj;
                             this.entity.ceiling = oPosUnder + this.pixSize * 3;
                             continue;
@@ -296,6 +298,7 @@ var Charjs;
         function AbstractOtherObject() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.isActive = true;
+            _this.entityEnemies = [];
             return _this;
         }
         return AbstractOtherObject;
@@ -378,6 +381,10 @@ var Charjs;
         };
         NormalBlockWorld.prototype.onPushedUp = function () {
             var _this = this;
+            for (var _i = 0, _a = this.entityEnemies; _i < _a.length; _i++) {
+                var enemy = _a[_i];
+                enemy.onKicked(Charjs.Direction.Right, 0);
+            }
             var animation = [
                 { yOffset: this.pixSize * 4, index: 0, wait: 0 },
                 { yOffset: this.pixSize * 8, index: 0, wait: 0 },
@@ -1287,13 +1294,17 @@ var Charjs;
         GameMaster.prototype.getEnemys = function () {
             return this._enemys;
         };
-        GameMaster.prototype.getApproachedObjects = function (pos, radius) {
+        GameMaster.prototype.getApproachedObjects = function (target, radius) {
             var objs = [];
             for (var name_3 in this._objects) {
+                if (target instanceof Charjs.AbstractEnemy)
+                    this._objects[name_3].entityEnemies.some(function (v, i, array) { if (v == target)
+                        array.splice(i, 1); return true; });
                 if (this._objects[name_3].isActive) {
                     var objPos = this._objects[name_3].getPosition();
-                    if (pos.x - radius < objPos.x && objPos.x < pos.x + radius &&
-                        pos.y - radius < objPos.y && objPos.y < pos.y + radius) {
+                    var charPos = target.getPosition();
+                    if (charPos.x - radius < objPos.x && objPos.x < charPos.x + radius &&
+                        charPos.y - radius < objPos.y && objPos.y < charPos.y + radius) {
                         objs.push(this._objects[name_3]);
                     }
                 }
