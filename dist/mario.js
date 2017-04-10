@@ -48,6 +48,7 @@ var Charjs;
             this.zIndex = zIndex;
             this.frameInterval = frameInterval;
             this._name = '';
+            this._gameMaster = null;
             this.cssTextTemplate = "z-index: " + this.zIndex + "; position: absolute; bottom: 0;";
             this.currentAction = null;
             this._rightActions = [];
@@ -66,6 +67,22 @@ var Charjs;
                 }
             }
             else {
+            }
+        };
+        AbstractObject.prototype.getTimer = function (func, interval) {
+            if (this._gameMaster) {
+                return this._gameMaster.addEvent(func);
+            }
+            else {
+                return setInterval(func, interval);
+            }
+        };
+        AbstractObject.prototype.removeTimer = function (id) {
+            if (this._gameMaster) {
+                this._gameMaster.removeEvent(id);
+            }
+            else {
+                clearInterval(id);
             }
         };
         AbstractObject.prototype.init = function () {
@@ -163,7 +180,6 @@ var Charjs;
         __extends(AbstractCharacter, _super);
         function AbstractCharacter() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this._gameMaster = null;
             _this._isStarting = false;
             _this._frameTimer = null;
             _this._gravity = 2;
@@ -189,15 +205,18 @@ var Charjs;
             }
             this.registerActionCommand();
         };
+        AbstractCharacter.prototype.init = function () {
+            _super.prototype.init.call(this);
+            this.registerCommand();
+        };
         AbstractCharacter.prototype.start = function () {
             var _this = this;
-            this.registerCommand();
             this._isStarting = true;
-            this._frameTimer = setInterval(function () { _this.onAction(); }, this.frameInterval);
+            this._frameTimer = this.getTimer(function () { _this.onAction(); }, this.frameInterval);
         };
         AbstractCharacter.prototype.stop = function () {
             if (this._frameTimer) {
-                clearInterval(this._frameTimer);
+                this.removeTimer(this._frameTimer);
                 this._frameTimer = null;
             }
             this._isStarting = false;
@@ -432,7 +451,7 @@ var Charjs;
             if (this._animationIndex !== null && this.animation != null) {
                 this.isActive = false;
                 this._isStarting = true;
-                this._pushedUpTimer = setInterval(function () {
+                this._pushedUpTimer = this.getTimer(function () {
                     if (_this._animationIndex >= _this.animation.length) {
                         _this.animation = null;
                         _this.isActive = true;
@@ -457,7 +476,7 @@ var Charjs;
         NormalBlockWorld.prototype.stop = function () {
             this._isStarting = false;
             if (this._pushedUpTimer) {
-                clearInterval(this._pushedUpTimer);
+                this.removeTimer(this._pushedUpTimer);
                 this._pushedUpTimer = null;
             }
         };
@@ -623,12 +642,12 @@ var Charjs;
             this._isKilled = true;
             var yVector = 10 * this.pixSize;
             var direction = kickDirection == Charjs.Direction.Right ? 1 : -1;
-            var killTimer = setInterval(function () {
+            var killTimer = this.getTimer(function () {
                 yVector -= _this._gravity * _this.pixSize;
                 _this.position.y = _this.position.y + yVector;
                 _this.position.x += kickPower * direction;
                 if (_this.position.y < _this.size.height * 5 * -1) {
-                    clearInterval(killTimer);
+                    _this.removeTimer(killTimer);
                     _this.destroy();
                     return;
                 }
@@ -989,16 +1008,16 @@ var Charjs;
             var _this = this;
             if (!this._speedUpTimer) {
                 if (this._speedDownTimer) {
-                    clearInterval(this._speedDownTimer);
+                    this.removeTimer(this._speedDownTimer);
                     this._speedDownTimer = null;
                 }
-                this._speedUpTimer = setInterval(function () {
+                this._speedUpTimer = this.getTimer(function () {
                     if (_this._speed < 10) {
                         if (!_this._isBraking)
                             _this._speed++;
                     }
                     else {
-                        clearInterval(_this._speedUpTimer);
+                        _this.removeTimer(_this._speedUpTimer);
                         _this._speedUpTimer = null;
                     }
                 }, this.frameInterval);
@@ -1007,16 +1026,16 @@ var Charjs;
         MarioWorld.prototype.onAbortSpeedUp = function () {
             var _this = this;
             if (!this._speedDownTimer) {
-                this._speedDownTimer = setInterval(function () {
+                this._speedDownTimer = this.getTimer(function () {
                     if (_this._speedUpTimer) {
-                        clearInterval(_this._speedUpTimer);
+                        _this.removeTimer(_this._speedUpTimer);
                         _this._speedUpTimer = null;
                     }
                     if (_this._speed > 2) {
                         _this._speed--;
                     }
                     else {
-                        clearInterval(_this._speedDownTimer);
+                        _this.removeTimer(_this._speedDownTimer);
                         _this._speedDownTimer = null;
                         _this._isBraking = false;
                     }
@@ -1028,12 +1047,12 @@ var Charjs;
             this.onAbortSpeedUp();
             this._isSquat = true;
             if (!this._squatTimer) {
-                this._squatTimer = setInterval(function () {
+                this._squatTimer = this.getTimer(function () {
                     if (_this._speed > 0) {
                         _this._speed--;
                     }
                     else {
-                        clearInterval(_this._squatTimer);
+                        _this.removeTimer(_this._squatTimer);
                         _this._squatTimer = null;
                     }
                 }, this.frameInterval);
@@ -1041,7 +1060,7 @@ var Charjs;
         };
         MarioWorld.prototype.onAbortSquat = function () {
             if (this._squatTimer) {
-                clearInterval(this._squatTimer);
+                this.removeTimer(this._squatTimer);
                 this._squatTimer = null;
             }
             this._speed = MarioWorld.DEFAULT_SPEED;
@@ -1052,7 +1071,7 @@ var Charjs;
             if (this._gameMaster)
                 this._gameMaster.doGameOver();
             this.stop();
-            this._gameOverTimer = setInterval(function () {
+            this._gameOverTimer = this.getTimer(function () {
                 if (_this._gameOverWaitCount < 20) {
                     _this._gameOverWaitCount++;
                     _this.draw(9, null, Charjs.Direction.Right, Charjs.Vertical.Up, true);
@@ -1062,7 +1081,7 @@ var Charjs;
                 _this._yVector -= _this._gravity * _this.pixSize;
                 _this.position.y = _this.position.y + _this._yVector;
                 if (_this.position.y < _this.size.height * 5 * -1) {
-                    clearInterval(_this._gameOverTimer);
+                    _this.removeTimer(_this._gameOverTimer);
                     _this.destroy();
                     return;
                 }
@@ -1259,6 +1278,9 @@ var Charjs;
             this.targetDom = targetDom;
             this.charSize = charSize;
             this.frameInterval = frameInterval;
+            this._events = {};
+            this._eventCount = 0;
+            this._gameTimer = null;
             this._enemys = {};
             this._enemyCount = 0;
             this._objects = {};
@@ -1284,6 +1306,30 @@ var Charjs;
             master = new GameMaster(targetDom, charSize);
             GameMaster.GAME_MASTERS[gameName] = master;
             return master;
+        };
+        GameMaster.prototype.addEvent = function (func) {
+            this._eventCount++;
+            this._events[this._eventCount] = func;
+            return this._eventCount;
+        };
+        GameMaster.prototype.removeEvent = function (id) {
+            delete this._events[id];
+        };
+        GameMaster.prototype.startTimer = function () {
+            var _this = this;
+            if (!this._gameTimer) {
+                this._gameTimer = setInterval(function () {
+                    for (var id in _this._events) {
+                        _this._events[id]();
+                    }
+                }, this.frameInterval);
+            }
+        };
+        GameMaster.prototype.stopTimer = function () {
+            if (this._gameTimer) {
+                clearInterval(this._gameTimer);
+                this._gameTimer = null;
+            }
         };
         GameMaster.prototype.CreatePlayerInstance = function (clz, position, direction) {
             if (direction === void 0) { direction = Charjs.Direction.Right; }
@@ -1365,6 +1411,7 @@ var Charjs;
             document.addEventListener('keypress', this.defaultCommand);
         };
         GameMaster.prototype.start = function () {
+            this.startTimer();
             for (var name_7 in this._enemys) {
                 this._enemys[name_7].start();
             }
@@ -1374,6 +1421,7 @@ var Charjs;
             this._isStarting = true;
         };
         GameMaster.prototype.stop = function () {
+            this.stopTimer();
             for (var name_8 in this._enemys) {
                 this._enemys[name_8].stop();
             }

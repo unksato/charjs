@@ -61,6 +61,9 @@ namespace Charjs {
 
     export abstract class AbstractObject implements IObject {
         public _name = '';
+
+        public _gameMaster: GameMaster = null;
+
         abstract chars: number[][][];
         abstract cchars: number[][][];
         abstract colors: string[];
@@ -90,6 +93,22 @@ namespace Charjs {
                 // for(let char of this.chars){
                 //     this.cchars.push(Util.Compression.RLE(char));
                 // }
+            }
+        }
+
+        protected getTimer(func: Function, interval: number) : number {
+            if(this._gameMaster){
+                return this._gameMaster.addEvent(func);
+            }else{
+                return setInterval(func, interval);
+            }
+        }
+
+        protected removeTimer(id : number) : void {
+            if(this._gameMaster){
+                this._gameMaster.removeEvent(id);
+            }else{
+                clearInterval(id);
             }
         }
 
@@ -188,8 +207,6 @@ namespace Charjs {
         abstract onAction(): void;        
         abstract registerActionCommand(): void;
 
-        public _gameMaster: GameMaster = null;
-
         private _isStarting = false;
         private _frameTimer: number = null;
         protected _gravity = 2;
@@ -211,15 +228,19 @@ namespace Charjs {
             }
         }
 
-        public start(): void {
+        public init() {
+            super.init();
             this.registerCommand();
+        }
+
+        public start(): void {
             this._isStarting = true;
-            this._frameTimer = setInterval(() => { this.onAction() }, this.frameInterval);
+            this._frameTimer = this.getTimer(() => { this.onAction() }, this.frameInterval);
         }
 
         public stop(): void {
             if (this._frameTimer) {
-                clearInterval(this._frameTimer);
+                this.removeTimer(this._frameTimer);
                 this._frameTimer = null;
             }
             this._isStarting = false;

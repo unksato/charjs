@@ -125,7 +125,7 @@ namespace Charjs {
             if(this._animationIndex !== null && this.animation != null){
                 this.isActive = false;
                 this._isStarting = true;
-                this._pushedUpTimer = setInterval(() => {
+                this._pushedUpTimer = this.getTimer(() => {
                     if(this._animationIndex >= this.animation.length){
                         this.animation = null;
                         this.isActive = true;
@@ -151,7 +151,7 @@ namespace Charjs {
         private stop():void {
             this._isStarting = false;
             if(this._pushedUpTimer) {
-                clearInterval(this._pushedUpTimer);
+                this.removeTimer(this._pushedUpTimer);
                 this._pushedUpTimer = null;
             }
         }

@@ -17,6 +17,38 @@ namespace Charjs {
             return master;
         }
 
+        private _events: {[id:number]: Function} = {};
+        private _eventCount = 0;
+
+        public addEvent(func: Function) : number {
+            this._eventCount++;
+            this._events[this._eventCount] = func;
+            return this._eventCount;
+        }
+
+        public removeEvent(id:number) : void {
+            delete this._events[id];
+        }
+
+        private _gameTimer = null;
+
+        private startTimer() : void {
+            if(!this._gameTimer){
+                this._gameTimer = setInterval(() => {
+                    for(let id in this._events){
+                        this._events[id]();
+                    }
+                }, this.frameInterval);
+            }
+        }
+
+        private stopTimer(): void {
+            if(this._gameTimer){
+                clearInterval(this._gameTimer);
+                this._gameTimer = null;
+            }
+        }
+
         private _enemys: {[key:string]:IEnemy} = {}
         private _enemyCount = 0;
         private _objects: {[key:string]:IOtherObject} = {}
@@ -125,6 +157,8 @@ namespace Charjs {
         }
 
         public start(): void {
+            this.startTimer();
+
             for (let name in this._enemys) {
                 this._enemys[name].start();
             }
@@ -136,6 +170,8 @@ namespace Charjs {
         }
 
         public stop(): void {
+            this.stopTimer();
+
             for (let name in this._enemys) {
                 this._enemys[name].stop();
             }

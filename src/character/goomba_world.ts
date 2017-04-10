@@ -182,14 +182,14 @@ namespace Charjs {
             let yVector = 10 * this.pixSize;
             let direction = kickDirection == Direction.Right ? 1 : -1;
 
-            let killTimer = setInterval(() => {
+            let killTimer = this.getTimer(() => {
 
                 yVector -= this._gravity * this.pixSize;
                 this.position.y = this.position.y + yVector;
                 this.position.x += kickPower * direction;
 
                 if (this.position.y < this.size.height * 5 * -1) {
-                    clearInterval(killTimer);
+                    this.removeTimer(killTimer);
                     this.destroy();
                     return;
                 }

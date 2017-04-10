@@ -333,15 +333,15 @@ namespace Charjs {
         private onSpeedUp(): void {
             if (!this._speedUpTimer) {
                 if (this._speedDownTimer) {
-                    clearInterval(this._speedDownTimer);
+                    this.removeTimer(this._speedDownTimer);
                     this._speedDownTimer = null;
                 }
-                this._speedUpTimer = setInterval(() => {
+                this._speedUpTimer = this.getTimer(() => {
                     if (this._speed < 10) {
                         if(!this._isBraking)
                             this._speed++;
                     } else {
-                        clearInterval(this._speedUpTimer);
+                        this.removeTimer(this._speedUpTimer);
                         this._speedUpTimer = null;
                     }
                 }, this.frameInterval);
@@ -350,15 +350,15 @@ namespace Charjs {
 
         private onAbortSpeedUp(): void {
             if (!this._speedDownTimer) {
-                this._speedDownTimer = setInterval(() => {
+                this._speedDownTimer = this.getTimer(() => {
                     if (this._speedUpTimer) {
-                        clearInterval(this._speedUpTimer);
+                        this.removeTimer(this._speedUpTimer);
                         this._speedUpTimer = null;
                     }
                     if (this._speed > 2) {
                         this._speed--;
                     } else {
-                        clearInterval(this._speedDownTimer);
+                        this.removeTimer(this._speedDownTimer);
                         this._speedDownTimer = null;
                         this._isBraking = false;
                     }
@@ -370,11 +370,11 @@ namespace Charjs {
             this.onAbortSpeedUp();
             this._isSquat = true;
             if (!this._squatTimer) {
-                this._squatTimer = setInterval(() => {
+                this._squatTimer = this.getTimer(() => {
                     if (this._speed > 0) {
                         this._speed--;
                     } else {
-                        clearInterval(this._squatTimer);
+                        this.removeTimer(this._squatTimer);
                         this._squatTimer = null;
                     }
                 }, this.frameInterval);
@@ -383,7 +383,7 @@ namespace Charjs {
 
         private onAbortSquat(): void {
             if (this._squatTimer) {
-                clearInterval(this._squatTimer);
+                this.removeTimer(this._squatTimer);
                 this._squatTimer = null;                
             }
             this._speed = MarioWorld.DEFAULT_SPEED;
@@ -393,7 +393,7 @@ namespace Charjs {
         public gameOver(): void {
             if (this._gameMaster) this._gameMaster.doGameOver();
             this.stop();
-            this._gameOverTimer = setInterval(() => {
+            this._gameOverTimer = this.getTimer(() => {
                 if (this._gameOverWaitCount < 20) {
                     this._gameOverWaitCount++;
                     this.draw(9, null, Direction.Right, Vertical.Up, true);
@@ -405,7 +405,7 @@ namespace Charjs {
                 this.position.y = this.position.y + this._yVector;
 
                 if (this.position.y < this.size.height * 5 * -1) {
-                    clearInterval(this._gameOverTimer);
+                    this.removeTimer(this._gameOverTimer);
                     this.destroy();
                     return;
                 }
