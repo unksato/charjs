@@ -1441,24 +1441,24 @@ var Charjs;
             blackScreen.setAttribute("width", screen.clientWidth.toString());
             blackScreen.setAttribute("height", screen.clientHeight.toString());
             var backgroundOpacity = 0;
-            var goolDimTimer = setInterval(function () {
+            var goolDimTimer = this.addEvent(function () {
                 if (Math.floor(backgroundOpacity) != 1) {
                     backgroundOpacity += 0.01;
                 }
                 else {
-                    clearInterval(goolDimTimer);
+                    _this.removeEvent(goolDimTimer);
                     _this._player.stop();
                     _this._player.onGool(function () {
-                        var goolDimOffTimer = setInterval(function () {
+                        var goolDimOffTimer = _this.addEvent(function () {
                             if (backgroundOpacity.toFixed(2) != "0.20") {
                                 backgroundOpacity -= 0.05;
                             }
                             else {
-                                clearInterval(goolDimOffTimer);
+                                _this.removeEvent(goolDimOffTimer);
                                 _this._player.start();
                                 var circleSize_1 = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
                                 var circleAnimationCount_1 = 0;
-                                var circleTimer_1 = setInterval(function () {
+                                var circleTimer_1 = _this.addEvent(function () {
                                     circleSize_1 -= 20;
                                     var rect = _this._player.getCurrntElement().getBoundingClientRect();
                                     _this.drawBlackClipCircle(screen, rect, circleSize_1, circleAnimationCount_1);
@@ -1467,14 +1467,14 @@ var Charjs;
                                         clearInterval(circleTimer_1);
                                         _this._player.destroy();
                                     }
-                                }, _this.frameInterval / 2);
+                                });
                             }
                             blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 1) + "; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: " + backgroundOpacity + ";";
-                        }, _this.frameInterval);
+                        });
                     });
                 }
                 blackScreen.style.cssText = "z-index: " + (_this._player.zIndex - 1) + "; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: " + backgroundOpacity + ";";
-            }, this.frameInterval * 1.5);
+            });
             this.targetDom.appendChild(blackScreen);
         };
         GameMaster.prototype.drawBlackClipCircle = function (targetDom, rect, size, count) {

@@ -192,26 +192,24 @@ namespace Charjs {
 
             let backgroundOpacity = 0;
 
-            let goolDimTimer = setInterval(() => {
+            let goolDimTimer = this.addEvent(() => {
                 if (Math.floor(backgroundOpacity) != 1) {
                     backgroundOpacity += 0.01;
                 } else {
-                    clearInterval(goolDimTimer);
+                    this.removeEvent(goolDimTimer);
                     this._player.stop();
                     this._player.onGool(() => {
 
-                        let goolDimOffTimer = setInterval(() => {
+                        let goolDimOffTimer = this.addEvent(() => {
 
                             if (backgroundOpacity.toFixed(2) != "0.20") {
                                 backgroundOpacity -= 0.05;
                             } else {
-                                clearInterval(goolDimOffTimer);
-
+                                this.removeEvent(goolDimOffTimer);
                                 this._player.start();
-
                                 let circleSize =  screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
                                 let circleAnimationCount = 0;
-                                let circleTimer = setInterval(() => {
+                                let circleTimer = this.addEvent(() => {
                                     circleSize-=20;
                                     let rect = this._player.getCurrntElement().getBoundingClientRect();
                                     this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
@@ -220,15 +218,14 @@ namespace Charjs {
                                         clearInterval(circleTimer);
                                         this._player.destroy();
                                     }
-                                }, this.frameInterval / 2);
+                                });
                             }
                             blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
-
-                        }, this.frameInterval);
+                        });
                     });
                 }
                 blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
-            }, this.frameInterval * 1.5);  
+            });  
 
             this.targetDom.appendChild(blackScreen);
         }
