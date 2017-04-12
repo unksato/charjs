@@ -1,6 +1,6 @@
 namespace Charjs {
 
-    enum HitStatus{
+    enum HitStatus {
         none,
         dammage,
         attack,
@@ -28,10 +28,10 @@ namespace Charjs {
 
         private _isBraking = false;
         private _isSquat = false;
-        private _attackDirection : Direction = Direction.Right;
+        private _attackDirection: Direction = Direction.Right;
 
-        constructor(targetDom, pixSize:number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45){
-            super(targetDom, pixSize,position, direction, true, false, zIndex, frameInterval);
+        constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
+            super(targetDom, pixSize, position, direction, true, false, zIndex, frameInterval);
         }
 
         onAction(): void {
@@ -49,7 +49,7 @@ namespace Charjs {
                     break;
                 case HitStatus.grab:
                     this.moveGrabedEnemy();
-                    this.draw(14, null, this._direction, Vertical.Up, true);                               
+                    this.draw(14, null, this._direction, Vertical.Up, true);
                     this.stop();
                     setTimeout(() => {
                         this.start();
@@ -59,7 +59,7 @@ namespace Charjs {
                     let action = this.executeRun();
                     action = this.executeJump() || action;
 
-                    if(action.index === 0){
+                    if (action.index === 0) {
                         this.size.widthOffset = 4 * this.pixSize;
                     } else {
                         this.size.widthOffset = 0;
@@ -70,7 +70,7 @@ namespace Charjs {
         }
 
         private checkGrabedEnemysAttack(enemy: IEnemy) {
-            if(this._grabedEnemy){
+            if (this._grabedEnemy) {
                 let ePos = enemy.getPosition();
                 let eSize = enemy.getCharSize()
 
@@ -78,11 +78,11 @@ namespace Charjs {
                 let gEnemySize = this._grabedEnemy.getCharSize()
                 if (gEnemyPos.y > ePos.y + eSize.height)
                     return;
-                if(ePos.y > gEnemyPos.y + gEnemySize.height)
+                if (ePos.y > gEnemyPos.y + gEnemySize.height)
                     return;
-                if(gEnemyPos.x > ePos.x + eSize.width)
+                if (gEnemyPos.x > ePos.x + eSize.width)
                     return;
-                if(ePos.x > gEnemyPos.x + gEnemySize.width)
+                if (ePos.x > gEnemyPos.x + gEnemySize.width)
                     return;
 
                 let grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
@@ -111,27 +111,27 @@ namespace Charjs {
                             continue;
                         if (ePos.x > this.position.x + this.size.width)
                             continue;
-                        
+
                         if (enemys[name].isStepped()) {
-                            if(!this._grabbing){
+                            if (!this._grabbing) {
                                 let playerCenter = this.position.x + this.size.width / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
                                 this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
                                 return HitStatus.attack;
-                            }else{
+                            } else {
                                 this.grabEnemy(enemys[name]);
                                 return HitStatus.grab;
                             }
                         }
 
                         if (this._isJumping && this._yVector < 0) {
-                            if(this._isSpecial){
+                            if (this._isSpecial) {
                                 let playerCenter = this.position.x + this.size.width / 2;
                                 let enemyCenter = ePos.x + eSize.width / 2;
                                 this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
                                 enemys[name].onKicked(this._attackDirection, this._speed * 3);
-                            }else{
+                            } else {
                                 enemys[name].onStepped();
                             }
                             this._yVector = 12 * this.pixSize;
@@ -145,26 +145,26 @@ namespace Charjs {
         }
 
         private _specialAnimationIndex = 0;
-        private _specialAnimation = [{index:0, direction:Direction.Right},{index:12, direction:Direction.Right},{index:0, direction:Direction.Left},{index:13, direction:Direction.Right}]
+        private _specialAnimation = [{ index: 0, direction: Direction.Right }, { index: 12, direction: Direction.Right }, { index: 0, direction: Direction.Left }, { index: 13, direction: Direction.Right }]
 
-        private executeJump(): {index:number, direction: Direction} {
+        private executeJump(): { index: number, direction: Direction } {
             let ground = this.entity.ground || 0;
 
-            if(this.position.y > ground)
+            if (this.position.y > ground)
                 this._isJumping = true;
 
             if (this._isJumping) {
                 this._yVector -= this._gravity * this.pixSize;
-                if(this.entity.ceiling != null){
+                if (this.entity.ceiling != null) {
                     this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
-                    if(this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0){
+                    if (this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0) {
                         this.upperObject.onPushedUp();
                         this._yVector = 0;
                     }
-                }else{
+                } else {
                     this.position.y = this.position.y + this._yVector;
                 }
-            
+
                 this.moveGrabedEnemy();
                 if (this.position.y <= ground) {
                     this._isJumping = false;
@@ -172,21 +172,21 @@ namespace Charjs {
                     this.position.y = ground;
                     return null;
                 } else {
-                    if(!this._grabedEnemy){
-                        if(!this._isSpecial) {
+                    if (!this._grabedEnemy) {
+                        if (!this._isSpecial) {
                             if (this._speed > 8) {
                                 if (this._yVector > 0 && this.position.y < this.size.height * 3) {
                                     return null;
                                 } else {
-                                    return {index:7, direction:this._direction};
+                                    return { index: 7, direction: this._direction };
                                 }
                             } else {
-                                return {index:this._yVector > 0 ? 2 : 3, direction:this._direction};
+                                return { index: this._yVector > 0 ? 2 : 3, direction: this._direction };
                             }
-                        }else{
+                        } else {
                             this._specialAnimationIndex++;
-                            if(this._specialAnimationIndex > this._specialAnimation.length)
-                                this._specialAnimationIndex=0;
+                            if (this._specialAnimationIndex > this._specialAnimation.length)
+                                this._specialAnimationIndex = 0;
                             return this._specialAnimation[this._specialAnimationIndex];
                         }
                     }
@@ -194,20 +194,20 @@ namespace Charjs {
             } else {
                 this._yVector = 0;
                 return null;
-            }   
+            }
         }
 
         private moveGrabedEnemy() {
-            if(this._grabedEnemy){
+            if (this._grabedEnemy) {
                 let grabXOffset = this._direction == Direction.Right ? this.size.width * 0.7 : this.size.width * -1 * 0.7;
                 let grabYOffset = this.pixSize;
                 this._grabedEnemy.zIndex = this.zIndex - 1;
-                this._grabedEnemy.setPosition({x:this.position.x + grabXOffset ,y:this.position.y + grabYOffset});
+                this._grabedEnemy.setPosition({ x: this.position.x + grabXOffset, y: this.position.y + grabYOffset });
                 this._grabedEnemy.drawAction();
             }
         }
 
-        private executeRun(): { index:number, direction: Direction} {
+        private executeRun(): { index: number, direction: Direction } {
             let directionUpdated = this.updateDirection();
 
             if (this._direction == Direction.Right) {
@@ -223,9 +223,9 @@ namespace Charjs {
             if (this._isSquat) {
                 if (this._grabedEnemy)
                     runIndex = 14;
-                else 
-                    runIndex = 8;              
-                return {index:runIndex, direction: this._direction};
+                else
+                    runIndex = 8;
+                return { index: runIndex, direction: this._direction };
             }
 
 
@@ -238,16 +238,16 @@ namespace Charjs {
 
             // grabed action
             if (this._grabedEnemy) {
-                if(directionUpdated){
+                if (directionUpdated) {
                     runIndex = 12;
-                    this._grabedEnemy.setPosition({x:this.position.x,y:this.position.y});
+                    this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
                     this._grabedEnemy.zIndex = this.zIndex + 1;
                     this._grabedEnemy.drawAction();
-                }else{
+                } else {
                     runIndex = this._runIndex == 0 ? 15 : 16;
                     this.moveGrabedEnemy();
                 }
-            }else{
+            } else {
                 // Speed up action
                 if (this._speed > 8) {
                     runIndex = this._runIndex == 0 ? 4 : 5;
@@ -271,13 +271,13 @@ namespace Charjs {
                     }
                 }
             }
-            return {index:runIndex, direction: this._direction};;
+            return { index: runIndex, direction: this._direction };;
         }
 
-        private _grabedEnemy : IEnemy = null;
+        private _grabedEnemy: IEnemy = null;
         private _grabbing = false;
 
-        private grabEnemy(enemy: IEnemy) : void {
+        private grabEnemy(enemy: IEnemy): void {
             enemy.onGrabed(this);
             this._grabedEnemy = enemy;
         }
@@ -286,7 +286,7 @@ namespace Charjs {
             this._grabedEnemy = null;
         }
 
-        private putEnemy() : void {
+        private putEnemy(): void {
 
         }
 
@@ -296,7 +296,7 @@ namespace Charjs {
 
         private onAbortGrab(): void {
             this._grabbing = false;
-            if(this._grabedEnemy){
+            if (this._grabedEnemy) {
                 this.draw(11, null, this._direction, Vertical.Up, true);
                 this.stop();
                 setTimeout(() => {
@@ -333,15 +333,15 @@ namespace Charjs {
         private onSpeedUp(): void {
             if (!this._speedUpTimer) {
                 if (this._speedDownTimer) {
-                    clearInterval(this._speedDownTimer);
+                    this.removeTimer(this._speedDownTimer);
                     this._speedDownTimer = null;
                 }
-                this._speedUpTimer = setInterval(() => {
+                this._speedUpTimer = this.getTimer(() => {
                     if (this._speed < 10) {
-                        if(!this._isBraking)
+                        if (!this._isBraking)
                             this._speed++;
                     } else {
-                        clearInterval(this._speedUpTimer);
+                        this.removeTimer(this._speedUpTimer);
                         this._speedUpTimer = null;
                     }
                 }, this.frameInterval);
@@ -350,15 +350,15 @@ namespace Charjs {
 
         private onAbortSpeedUp(): void {
             if (!this._speedDownTimer) {
-                this._speedDownTimer = setInterval(() => {
+                this._speedDownTimer = this.getTimer(() => {
                     if (this._speedUpTimer) {
-                        clearInterval(this._speedUpTimer);
+                        this.removeTimer(this._speedUpTimer);
                         this._speedUpTimer = null;
                     }
                     if (this._speed > 2) {
                         this._speed--;
                     } else {
-                        clearInterval(this._speedDownTimer);
+                        this.removeTimer(this._speedDownTimer);
                         this._speedDownTimer = null;
                         this._isBraking = false;
                     }
@@ -370,11 +370,11 @@ namespace Charjs {
             this.onAbortSpeedUp();
             this._isSquat = true;
             if (!this._squatTimer) {
-                this._squatTimer = setInterval(() => {
+                this._squatTimer = this.getTimer(() => {
                     if (this._speed > 0) {
                         this._speed--;
                     } else {
-                        clearInterval(this._squatTimer);
+                        this.removeTimer(this._squatTimer);
                         this._squatTimer = null;
                     }
                 }, this.frameInterval);
@@ -383,8 +383,8 @@ namespace Charjs {
 
         private onAbortSquat(): void {
             if (this._squatTimer) {
-                clearInterval(this._squatTimer);
-                this._squatTimer = null;                
+                this.removeTimer(this._squatTimer);
+                this._squatTimer = null;
             }
             this._speed = MarioWorld.DEFAULT_SPEED;
             this._isSquat = false;
@@ -393,7 +393,7 @@ namespace Charjs {
         public gameOver(): void {
             if (this._gameMaster) this._gameMaster.doGameOver();
             this.stop();
-            this._gameOverTimer = setInterval(() => {
+            this._gameOverTimer = this.getTimer(() => {
                 if (this._gameOverWaitCount < 20) {
                     this._gameOverWaitCount++;
                     this.draw(9, null, Direction.Right, Vertical.Up, true);
@@ -405,7 +405,7 @@ namespace Charjs {
                 this.position.y = this.position.y + this._yVector;
 
                 if (this.position.y < this.size.height * 5 * -1) {
-                    clearInterval(this._gameOverTimer);
+                    this.removeTimer(this._gameOverTimer);
                     this.destroy();
                     return;
                 }
@@ -424,17 +424,17 @@ namespace Charjs {
 
         private _backgroundOpacity = 0;
 
-        public onGool(callback?:Function): void {
+        public onGool(callback?: Function): void {
             this.draw(10, null, Direction.Right, Vertical.Up, true);
-            if(callback) callback();
+            if (callback) callback();
         }
 
         private _canSpeedUpForMobile: boolean = true;
         private _screenModeForMobile: string = 'PORTRAIT';
         private _deviceDirection: number = 1;
 
-        private touchAbort(touchLength: number){
-            switch(touchLength) {
+        private touchAbort(touchLength: number) {
+            switch (touchLength) {
                 case 3:
                     this.onAbortSquat();
                     break;
@@ -450,13 +450,13 @@ namespace Charjs {
             }
         }
 
-        private touch(touchLength: number){
-            switch(touchLength){
+        private touch(touchLength: number) {
+            switch (touchLength) {
                 case 1:
                     this.onGrab();
                     break;
                 case 2:
-                    this.onJump();                     
+                    this.onJump();
                     break;
                 case 3:
                     this.onSpecialJump();
@@ -465,72 +465,72 @@ namespace Charjs {
                     this.onSquat();
                     break;
                 default:
-                    this.onJump();                     
-            }            
+                    this.onJump();
+            }
         }
 
         registerActionCommand(): void {
             if (GameMaster.checkMobile()) {
-                if(window.orientation == 0){
+                if (window.orientation == 0) {
                     this._screenModeForMobile = 'PORTRAIT';
                     this._deviceDirection = 1;
-                }else if(window.orientation == 90){
+                } else if (window.orientation == 90) {
                     this._screenModeForMobile = 'LANSCAPE';
                     this._deviceDirection = 1;
-                }else if(window.orientation == -90){
+                } else if (window.orientation == -90) {
                     this._screenModeForMobile = 'LANSCAPE';
                     this._deviceDirection = -1;
                 }
-                document.addEventListener('touchstart', (e)=>{
+                document.addEventListener('touchstart', (e) => {
                     this.touch(e.targetTouches.length);
                 });
-                document.addEventListener('touchend', (e)=>{
+                document.addEventListener('touchend', (e) => {
                     this.touchAbort(e.targetTouches.length);
                 });
-                document.addEventListener('touchcancel', (e)=>{
+                document.addEventListener('touchcancel', (e) => {
                     this.touchAbort(e.targetTouches.length);
                 });
 
-                window.addEventListener('deviceorientation',(e)=>{
-                    if(!this._isSquat){
+                window.addEventListener('deviceorientation', (e) => {
+                    if (!this._isSquat) {
                         let motion = 0;
-                        switch(this._screenModeForMobile){
+                        switch (this._screenModeForMobile) {
                             case 'PORTRAIT':
                                 motion = Math.round(e.gamma);
-                                break;    
+                                break;
                             case 'LANSCAPE':
                                 motion = Math.round(e.beta);
-                                break;                       
+                                break;
                         }
                         motion = motion * this._deviceDirection;
-                        if(Math.abs(motion) >= 20 && this._canSpeedUpForMobile){
-                            if(this._direction == Direction.Left && motion < 0){
+                        if (Math.abs(motion) >= 20 && this._canSpeedUpForMobile) {
+                            if (this._direction == Direction.Left && motion < 0) {
                                 this._canSpeedUpForMobile = false;
                                 this.onSpeedUp();
-                            }else if(this._direction == Direction.Right && motion > 0){
+                            } else if (this._direction == Direction.Right && motion > 0) {
                                 this._canSpeedUpForMobile = false;
                                 this.onSpeedUp();
                             }
-                        }else if(Math.abs(motion) < 20 && !this._canSpeedUpForMobile){
+                        } else if (Math.abs(motion) < 20 && !this._canSpeedUpForMobile) {
                             this.onAbortSpeedUp();
                             this._canSpeedUpForMobile = true;
                         }
                     }
                 });
-                window.addEventListener('orientationchange', (e)=>{
+                window.addEventListener('orientationchange', (e) => {
                     if (window.matchMedia("(orientation: portrait)").matches) {
                         this._screenModeForMobile = 'PORTRAIT';
                         this._deviceDirection = 1;
                     }
                     if (window.matchMedia("(orientation: landscape)").matches) {
                         this._screenModeForMobile = 'LANSCAPE';
-                        if(window.orientation == 90){
+                        if (window.orientation == 90) {
                             this._deviceDirection = 1;
-                        }else{
-                            this._deviceDirection = -1;                            
+                        } else {
+                            this._deviceDirection = -1;
                         }
                     }
-                },false);
+                }, false);
 
             }
             document.addEventListener('keydown', (e) => {
@@ -573,404 +573,404 @@ namespace Charjs {
             });
         }
 
-        colors = ['','#000000','#ffffff','#520000','#8c5a18','#21318c','#ff4273','#b52963','#ffde73','#dea539','#ffd6c6','#ff736b','#84dece','#42849c'];
-        cchars = [[[0,16],[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[0,3,1,1,4,2,11,3,1,4,0,3],[0,4,3,1,7,1,4,4,5,1,0,5],[0,3,3,1,7,2,6,1,13,2,12,2,5,1,0,4],[0,3,3,1,4,3,13,1,2,2,12,1,2,1,5,1,0,3],[0,3,4,1,2,3,4,1,2,2,12,1,2,1,5,1,0,3],[0,3,4,1,2,2,4,1,13,3,12,2,5,1,0,3],[0,3,4,1,2,2,4,1,13,2,5,1,13,1,5,1,0,4],[0,4,4,4,1,1,4,1,1,1,0,5],[0,4,1,1,4,3,8,1,1,1,8,1,1,1,0,4],[0,4,1,8,0,4]],[[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[0,3,1,1,4,2,11,3,1,4,0,3],[0,3,4,1,7,3,4,3,5,1,0,5],[0,3,4,4,13,2,12,2,5,1,0,4],[0,2,1,1,4,1,2,3,4,1,2,2,12,1,2,1,5,1,1,2,0,1],[0,1,1,1,3,1,4,1,2,2,4,2,2,2,12,1,2,1,1,1,8,1,1,2],[0,1,1,1,3,1,4,1,2,2,4,1,13,3,12,1,5,1,1,1,4,1,1,2],[0,1,1,1,3,1,1,1,4,2,13,4,5,1,1,1,4,1,1,2,0,1],[0,1,1,1,3,1,8,1,1,1,0,1,5,4,0,1,1,1,4,1,1,2,0,1],[0,2,1,2,0,8,1,2,0,2],[0,16],[0,16]],[[0,12,4,2,0,2],[0,11,4,1,2,2,4,1,0,1],[0,10,4,1,2,4,4,1],[0,7,3,5,2,3,4,1],[0,5,3,2,6,3,8,1,6,1,3,1,2,1,4,1,0,1],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,4,2,0,1],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,3,1,0,3],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[0,1,4,3,7,1,4,1,11,3,1,4,0,3],[4,2,2,2,4,1,7,1,4,4,5,1,0,5],[4,1,2,4,4,1,7,1,13,2,12,2,5,1,0,4],[4,1,2,4,4,1,13,2,2,2,12,1,2,1,5,1,1,2,0,1],[0,1,4,1,2,2,4,1,13,3,2,2,12,1,2,1,1,1,8,1,1,2],[0,1,1,1,3,1,4,1,13,6,12,1,5,1,1,1,4,1,1,2],[0,1,1,1,3,1,5,3,13,4,5,1,1,1,4,1,1,2,0,1],[0,1,1,1,3,1,8,1,1,1,0,1,5,4,0,1,1,1,4,1,1,2,0,1],[0,2,1,2,0,8,1,2,0,2]],[[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,7,1,1,5,11,1,1,2,0,4],[0,1,3,1,7,2,1,2,10,6,0,4],[0,1,3,1,7,1,10,1,1,2,10,2,1,1,10,1,1,1,10,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,10,2,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,1,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,2,1,1,11,2,1,1,10,2,1,1,11,5,4,1,0,1],[0,1,4,1,2,2,3,1,11,2,1,7,2,1,3,1],[4,1,2,4,3,1,11,3,1,4,2,2,3,1],[4,1,2,4,3,1,4,4,5,1,4,1,2,1,1,2,0,1],[0,1,4,1,2,2,3,1,13,4,12,2,5,1,1,1,8,1,1,2],[0,1,1,1,3,2,5,1,13,3,2,2,12,1,2,1,1,1,4,1,1,2],[0,1,1,1,4,2,5,1,13,3,2,2,12,1,2,1,1,1,4,1,1,2],[0,1,1,1,4,1,8,1,5,2,13,4,12,1,5,1,1,1,4,1,1,2],[0,2,1,2,0,1,5,2,13,3,5,1,0,2,1,2,0,1],[0,6,5,4,0,6],[0,16]],[[0,16],[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[4,6,11,3,1,4,0,3],[4,1,2,3,4,1,7,1,4,4,5,1,0,5],[0,1,4,1,2,2,4,1,7,2,13,2,12,2,5,1,0,4],[0,2,4,2,7,2,13,2,2,2,12,1,2,1,5,1,0,3],[0,3,5,1,13,4,2,2,12,1,2,1,5,1,0,3],[0,3,5,1,13,6,12,2,5,1,0,3],[0,3,5,2,13,4,5,1,13,1,5,1,0,4],[0,4,4,4,1,1,4,1,1,1,0,5],[0,4,1,1,4,3,8,1,1,1,8,1,1,1,0,4],[0,4,1,8,0,4]],[[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[4,6,11,3,1,4,0,3],[4,1,2,3,4,1,7,1,4,4,5,1,0,5],[0,1,4,1,2,2,4,1,7,1,13,3,12,2,5,1,0,4],[0,2,4,2,7,2,13,2,2,2,12,1,2,1,5,1,1,2,0,1],[0,1,1,1,3,2,13,4,2,2,12,1,2,1,1,1,8,1,1,2],[0,1,1,1,3,2,13,6,12,1,5,1,1,1,4,1,1,2],[0,1,1,1,3,1,1,1,5,2,13,4,5,1,1,1,4,1,1,2,0,1],[0,1,1,1,3,1,8,1,1,1,0,1,5,4,0,1,1,1,4,1,1,2,0,1],[0,2,1,2,0,8,1,2,0,2],[0,16],[0,16]],[[0,16],[0,5,3,5,0,6],[0,4,3,1,6,1,8,1,6,3,3,2,0,4],[0,4,3,1,2,1,8,2,7,4,3,1,0,3],[0,3,1,6,7,4,3,1,0,2],[0,2,1,9,7,3,3,1,0,1],[0,4,11,5,1,4,7,1,3,1,0,1],[0,4,10,1,1,1,10,1,1,1,10,1,11,1,1,2,10,1,7,2,3,1],[0,2,4,2,10,1,1,1,10,1,1,1,10,2,1,1,10,1,4,1,10,1,7,1,3,1],[0,1,4,1,10,7,1,2,10,1,4,1,11,1,7,1,3,1],[0,1,4,1,11,5,1,1,10,2,1,1,10,1,11,1,1,1,3,1,0,1],[0,2,1,6,4,3,11,1,1,2,7,1,3,1],[0,3,1,4,4,1,2,2,4,2,1,1,2,1,7,1,3,1],[0,4,3,1,7,2,2,4,4,1,2,3,4,1],[0,4,5,1,3,2,2,4,4,1,2,3,4,1],[0,4,5,1,13,1,3,3,2,1,4,3,2,1,4,1,0,1],[0,4,5,1,13,1,4,1,8,1,4,2,13,1,2,2,4,1,0,2],[0,5,1,1,4,2,1,2,13,3,5,1,0,2],[0,5,1,1,4,1,1,3,5,1,13,3,5,1,0,1],[0,6,1,3,0,2,1,1,4,2,1,1,0,1],[0,11,1,1,4,2,8,1,1,1],[0,11,1,5]],[[0,16],[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[0,3,1,1,4,2,11,3,1,4,0,3],[0,1,1,2,4,9,0,4],[1,1,8,1,4,1,2,3,4,1,7,1,4,1,12,1,5,1,0,5],[0,1,1,1,4,2,2,2,4,1,7,1,4,1,12,2,5,1,0,4],[0,3,5,1,4,3,2,2,12,1,2,1,5,1,0,4],[0,3,1,2,13,3,2,1,12,1,2,1,5,1,0,4],[0,2,1,1,4,2,5,1,13,4,5,1,0,5],[0,2,1,1,4,3,5,1,13,1,5,2,0,6],[0,2,1,1,8,1,1,2,5,3,0,7],[0,3,1,1,0,12]],[[0,16],[0,16],[0,16],[0,16],[0,16],[0,16],[0,16],[0,16],[0,5,3,4,0,7],[0,3,3,2,6,4,3,2,0,5],[0,2,3,1,6,5,7,1,6,2,3,1,0,4],[0,1,3,1,7,2,3,2,6,1,7,1,6,2,8,1,6,1,3,1,0,3],[0,1,3,1,7,1,3,1,2,2,3,1,7,2,9,1,8,1,2,1,3,1,0,3],[0,1,3,2,2,4,3,1,7,1,6,1,1,4,0,2],[0,1,5,1,3,1,2,4,3,1,1,7,0,1],[5,1,13,1,1,1,3,4,7,1,10,6,4,1,0,1],[5,1,13,1,3,1,7,3,3,1,12,1,1,1,11,5,4,1,0,1],[5,1,13,1,3,1,7,2,3,1,13,2,5,1,1,5,0,2],[5,1,13,2,3,2,13,1,5,2,12,1,5,1,1,3,0,3],[5,2,13,2,5,2,4,1,1,1,4,1,1,1,0,6],[0,1,5,3,4,3,8,1,1,1,8,1,1,1,0,5],[0,4,1,7,0,5]],[[0,6,3,4,0,6],[0,4,3,2,6,1,8,2,6,1,3,2,0,4],[0,3,3,1,6,2,2,1,8,2,2,1,6,2,3,1,0,3],[0,2,3,1,6,3,1,4,6,3,3,1,0,2],[0,2,3,1,6,1,1,8,6,1,3,1,0,2],[0,2,3,1,1,10,3,1,0,2],[0,3,3,1,1,1,6,1,1,1,6,2,1,1,6,1,1,1,3,1,0,3],[0,2,1,2,6,8,1,2,0,2],[0,3,1,1,6,8,1,1,0,3],[0,2,1,2,6,1,11,1,1,1,11,2,1,1,11,1,6,1,1,2,0,2],[0,1,4,1,10,1,1,1,11,2,2,4,11,2,1,1,10,1,4,1,0,1],[0,1,4,1,10,1,1,2,10,6,1,2,10,1,4,1,0,1],[0,1,4,1,11,1,1,1,10,1,1,1,11,4,1,1,10,1,1,1,11,1,4,1,0,1],[4,1,2,1,4,1,10,1,1,8,10,1,4,1,0,2],[4,1,2,2,4,1,10,3,3,2,10,3,4,3,0,1],[0,1,4,1,6,2,4,2,10,1,7,2,10,1,4,2,6,1,2,2,4,1],[0,1,4,1,3,1,6,1,5,1,4,1,10,1,6,2,10,1,4,1,1,3,2,1,4,1],[0,3,5,1,12,2,4,1,10,2,4,1,2,1,1,4,0,1],[0,3,5,1,12,1,2,2,4,2,2,2,1,4,0,1],[0,2,1,3,2,2,13,3,5,1,1,4,0,1],[0,1,1,1,8,1,4,2,1,1,5,4,0,1,1,4,0,1],[0,1,1,4,4,1,1,1,0,5,1,2,0,2],[0,4,1,3,0,9]],[[0,16],[0,7,3,4,0,5],[0,5,3,2,6,1,8,2,6,1,3,2,0,3],[1,2,0,1,1,2,6,2,2,1,8,2,2,1,6,2,3,1,0,2],[1,1,2,1,1,1,2,1,1,1,6,2,1,4,6,3,3,1,0,1],[0,1,1,1,2,2,1,9,6,1,3,1,0,1],[1,1,2,1,1,3,11,2,1,1,11,2,1,1,11,2,1,1,3,1,0,1],[1,3,2,1,1,1,10,2,1,1,10,2,1,1,10,2,1,1,4,1,0,1],[1,1,2,1,1,1,2,1,1,2,10,6,1,2,10,1,4,1],[0,1,1,3,3,1,10,1,1,1,11,4,1,1,10,1,4,1,11,1,4,1],[0,1,3,1,7,1,6,1,3,1,11,1,1,6,11,1,4,2,0,1],[0,2,3,1,7,1,6,1,4,1,11,1,1,4,11,1,4,1,7,2,4,1],[0,2,3,1,7,1,6,1,3,1,4,6,7,1,4,3],[0,3,3,1,6,1,5,1,12,5,7,2,2,2,4,1],[0,4,5,1,13,1,12,1,2,2,12,2,2,1,4,1,2,2,4,1],[0,4,5,1,13,2,2,2,12,2,2,1,5,1,4,2,0,1],[0,3,5,1,13,5,12,4,5,1,0,2],[0,3,5,1,13,7,12,2,5,1,0,2],[0,2,5,1,13,10,5,1,0,2],[0,1,1,1,4,3,5,6,4,3,1,1,0,1],[1,1,4,1,8,1,4,1,1,1,0,6,1,1,4,1,8,1,4,1,1,1],[1,4,0,8,1,4]],[[0,16],[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[0,3,1,1,4,2,11,3,1,4,0,3],[0,2,4,1,6,3,4,4,5,1,0,5],[0,1,4,2,6,2,7,1,13,2,12,3,5,1,0,1,1,2,0,1],[4,1,2,2,4,1,7,1,13,2,2,2,12,1,2,2,5,1,8,1,1,2],[4,1,2,3,4,1,13,2,2,2,12,1,2,2,1,1,4,1,1,2],[4,1,2,2,4,1,5,1,13,4,12,3,1,1,4,1,1,2],[0,1,4,2,0,2,5,1,13,3,5,3,1,1,4,1,1,2],[0,4,1,1,4,3,1,1,0,4,1,2,0,1],[0,4,1,1,4,3,8,1,1,1,0,6],[0,4,1,6,0,6]],[[0,16],[0,16],[0,6,3,4,0,6],[0,4,3,2,6,1,8,2,6,1,3,2,0,4],[0,3,3,1,6,2,8,3,2,1,6,2,3,1,0,3],[0,2,3,1,7,3,1,4,6,3,3,1,0,2],[0,2,3,1,7,1,1,8,6,1,3,1,0,2],[0,2,4,1,1,1,11,2,1,1,11,2,1,1,11,2,1,1,4,1,0,2],[0,1,4,1,10,1,1,1,10,2,1,1,10,2,1,1,10,2,1,1,10,1,4,1,0,1],[0,1,4,1,11,1,1,2,10,6,1,2,11,1,4,1,0,1],[0,2,4,1,1,1,10,1,1,1,11,4,1,1,10,1,1,1,4,1,0,2],[0,3,4,1,11,1,1,6,11,1,4,1,0,3],[0,4,4,1,11,1,1,4,11,1,4,1,0,4],[0,3,3,1,7,1,4,6,6,1,3,1,0,3],[0,2,3,1,7,2,13,1,12,5,7,1,6,1,3,1,0,2],[0,2,4,1,7,1,13,1,2,2,12,2,2,2,12,1,7,1,4,1,0,2],[0,1,4,1,2,1,4,1,13,1,2,2,12,2,2,2,12,1,4,1,2,1,4,1,0,1],[0,1,4,1,2,1,4,1,13,4,12,4,4,1,2,1,4,1,0,1],[0,2,4,2,5,1,13,2,5,2,13,2,5,1,4,2,0,2],[0,4,1,1,4,6,1,1,0,4],[0,3,1,1,4,1,8,1,4,1,1,2,4,1,8,1,4,1,1,1,0,3],[0,3,1,10,0,3]],[[0,16],[0,16],[0,6,3,4,0,6],[0,4,3,2,6,4,3,2,0,4],[0,3,3,1,6,8,3,1,0,3],[0,2,3,1,6,10,3,1,0,2],[0,2,3,1,7,1,6,9,3,1,0,2],[0,2,4,1,7,1,6,8,7,1,4,1,0,2],[0,2,4,1,3,1,7,2,6,4,7,2,3,1,4,1,0,2],[0,1,4,1,10,1,1,1,3,2,7,4,3,2,1,1,10,1,4,1,0,1],[0,1,4,1,11,1,1,3,3,4,1,3,11,1,4,1,0,1],[0,2,4,2,1,8,4,2,0,2],[0,4,11,1,1,6,11,1,0,4],[0,3,3,2,12,2,1,2,12,2,3,2,0,3],[0,2,3,1,7,1,5,1,12,2,8,2,12,2,5,1,7,1,3,1,0,2],[0,2,3,1,5,1,12,8,5,1,3,1,0,2],[0,2,3,1,5,3,12,4,5,3,3,1,0,2],[0,3,5,1,12,2,5,1,12,2,5,1,13,2,5,1,0,3],[0,4,5,1,13,1,5,4,13,1,5,1,0,4],[0,4,1,1,4,6,1,1,0,4],[0,3,1,1,4,3,1,2,4,3,1,1,0,3],[0,3,1,10,0,3]],[[0,16],[0,16],[0,16],[0,16],[0,16],[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,8,2,2,1,3,1,0,3],[0,3,3,1,6,2,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,0,4],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,2,1,1,10,2,1,1,11,5,4,1,0,1],[5,1,13,4,11,2,1,7,0,2],[5,1,13,5,3,1,6,3,4,4,0,2],[5,1,13,3,5,2,3,1,7,2,6,2,3,1,2,1,4,3],[5,1,13,6,3,2,7,2,3,1,2,3,4,1],[0,1,5,1,13,2,1,1,4,3,1,1,3,3,2,3,4,1],[0,2,5,2,1,1,4,3,8,1,1,1,8,1,1,1,4,3,0,1],[0,4,1,8,0,4]],[[0,16],[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[0,3,1,1,4,2,11,3,1,2,4,3,0,2],[0,4,5,1,13,1,4,5,3,1,2,1,4,3],[0,3,5,1,13,2,3,1,6,4,3,1,2,3,4,1],[0,3,5,1,13,2,3,1,7,4,3,1,2,3,4,1],[0,3,5,1,13,3,3,5,4,3,0,1],[0,3,5,1,13,6,12,2,5,1,0,3],[0,3,5,1,13,5,5,1,13,1,5,1,0,4],[0,4,5,1,4,3,1,1,4,1,1,1,0,5],[0,4,1,1,4,3,8,1,1,1,8,1,1,1,0,4],[0,4,1,8,0,4]],[[0,16],[0,7,3,5,0,4],[0,5,3,2,6,3,8,1,6,1,3,1,0,3],[0,4,3,1,6,2,7,2,9,1,8,1,2,1,3,1,0,3],[0,3,3,1,7,1,6,1,7,2,1,6,0,2],[0,2,3,1,7,3,1,9,0,1],[0,2,3,1,10,1,1,3,11,1,1,1,11,1,1,1,11,1,0,4],[0,1,3,1,10,1,4,1,10,1,1,1,11,1,10,1,1,1,10,1,1,1,10,1,4,2,0,2],[0,1,3,1,11,1,4,1,10,1,1,2,10,7,4,1,0,1],[0,1,3,1,1,1,11,1,10,1,1,1,10,2,1,1,11,5,4,1,0,1],[0,2,1,2,11,2,10,1,1,7,0,2],[0,3,1,1,4,1,11,4,1,2,4,3,0,2],[0,4,5,1,4,6,3,1,2,1,4,3],[0,3,5,2,13,1,3,1,6,4,3,1,2,3,4,1],[0,2,1,1,5,1,13,2,3,1,7,4,3,1,2,3,4,1],[0,1,1,1,4,1,5,1,13,3,3,5,4,3,1,1],[0,1,1,1,4,1,5,1,13,6,12,1,5,1,1,1,4,1,1,2],[0,1,1,1,4,1,1,1,5,2,13,4,5,1,1,1,4,1,1,2,0,1],[0,1,1,1,4,1,8,1,1,1,0,1,5,4,0,1,1,1,4,1,1,2,0,1],[0,2,1,2,0,8,1,2,0,2],[0,16],[0,16]]];
+        colors = ['', '#000000', '#ffffff', '#520000', '#8c5a18', '#21318c', '#ff4273', '#b52963', '#ffde73', '#dea539', '#ffd6c6', '#ff736b', '#84dece', '#42849c'];
+        cchars = [[[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 4, 3, 1, 7, 1, 4, 4, 5, 1, 0, 5], [0, 3, 3, 1, 7, 2, 6, 1, 13, 2, 12, 2, 5, 1, 0, 4], [0, 3, 3, 1, 4, 3, 13, 1, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 4, 1, 2, 3, 4, 1, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 4, 1, 2, 2, 4, 1, 13, 3, 12, 2, 5, 1, 0, 3], [0, 3, 4, 1, 2, 2, 4, 1, 13, 2, 5, 1, 13, 1, 5, 1, 0, 4], [0, 4, 4, 4, 1, 1, 4, 1, 1, 1, 0, 5], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 4], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 3, 4, 1, 7, 3, 4, 3, 5, 1, 0, 5], [0, 3, 4, 4, 13, 2, 12, 2, 5, 1, 0, 4], [0, 2, 1, 1, 4, 1, 2, 3, 4, 1, 2, 2, 12, 1, 2, 1, 5, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 4, 1, 2, 2, 4, 2, 2, 2, 12, 1, 2, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 1, 4, 1, 2, 2, 4, 1, 13, 3, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 3, 1, 1, 1, 4, 2, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2], [0, 16], [0, 16]], [[0, 12, 4, 2, 0, 2], [0, 11, 4, 1, 2, 2, 4, 1, 0, 1], [0, 10, 4, 1, 2, 4, 4, 1], [0, 7, 3, 5, 2, 3, 4, 1], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 2, 1, 4, 1, 0, 1], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 4, 2, 0, 1], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 3, 1, 0, 3], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 1, 4, 3, 7, 1, 4, 1, 11, 3, 1, 4, 0, 3], [4, 2, 2, 2, 4, 1, 7, 1, 4, 4, 5, 1, 0, 5], [4, 1, 2, 4, 4, 1, 7, 1, 13, 2, 12, 2, 5, 1, 0, 4], [4, 1, 2, 4, 4, 1, 13, 2, 2, 2, 12, 1, 2, 1, 5, 1, 1, 2, 0, 1], [0, 1, 4, 1, 2, 2, 4, 1, 13, 3, 2, 2, 12, 1, 2, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 1, 4, 1, 13, 6, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 3, 1, 5, 3, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 7, 1, 1, 5, 11, 1, 1, 2, 0, 4], [0, 1, 3, 1, 7, 2, 1, 2, 10, 6, 0, 4], [0, 1, 3, 1, 7, 1, 10, 1, 1, 2, 10, 2, 1, 1, 10, 1, 1, 1, 10, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 10, 2, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 1, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 2, 1, 1, 11, 2, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 1, 4, 1, 2, 2, 3, 1, 11, 2, 1, 7, 2, 1, 3, 1], [4, 1, 2, 4, 3, 1, 11, 3, 1, 4, 2, 2, 3, 1], [4, 1, 2, 4, 3, 1, 4, 4, 5, 1, 4, 1, 2, 1, 1, 2, 0, 1], [0, 1, 4, 1, 2, 2, 3, 1, 13, 4, 12, 2, 5, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 2, 5, 1, 13, 3, 2, 2, 12, 1, 2, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 4, 2, 5, 1, 13, 3, 2, 2, 12, 1, 2, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 4, 1, 8, 1, 5, 2, 13, 4, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 2, 1, 2, 0, 1, 5, 2, 13, 3, 5, 1, 0, 2, 1, 2, 0, 1], [0, 6, 5, 4, 0, 6], [0, 16]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [4, 6, 11, 3, 1, 4, 0, 3], [4, 1, 2, 3, 4, 1, 7, 1, 4, 4, 5, 1, 0, 5], [0, 1, 4, 1, 2, 2, 4, 1, 7, 2, 13, 2, 12, 2, 5, 1, 0, 4], [0, 2, 4, 2, 7, 2, 13, 2, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 5, 1, 13, 4, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 5, 1, 13, 6, 12, 2, 5, 1, 0, 3], [0, 3, 5, 2, 13, 4, 5, 1, 13, 1, 5, 1, 0, 4], [0, 4, 4, 4, 1, 1, 4, 1, 1, 1, 0, 5], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 4], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [4, 6, 11, 3, 1, 4, 0, 3], [4, 1, 2, 3, 4, 1, 7, 1, 4, 4, 5, 1, 0, 5], [0, 1, 4, 1, 2, 2, 4, 1, 7, 1, 13, 3, 12, 2, 5, 1, 0, 4], [0, 2, 4, 2, 7, 2, 13, 2, 2, 2, 12, 1, 2, 1, 5, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 2, 13, 4, 2, 2, 12, 1, 2, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 2, 13, 6, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 3, 1, 1, 1, 5, 2, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2], [0, 16], [0, 16]], [[0, 16], [0, 5, 3, 5, 0, 6], [0, 4, 3, 1, 6, 1, 8, 1, 6, 3, 3, 2, 0, 4], [0, 4, 3, 1, 2, 1, 8, 2, 7, 4, 3, 1, 0, 3], [0, 3, 1, 6, 7, 4, 3, 1, 0, 2], [0, 2, 1, 9, 7, 3, 3, 1, 0, 1], [0, 4, 11, 5, 1, 4, 7, 1, 3, 1, 0, 1], [0, 4, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 11, 1, 1, 2, 10, 1, 7, 2, 3, 1], [0, 2, 4, 2, 10, 1, 1, 1, 10, 1, 1, 1, 10, 2, 1, 1, 10, 1, 4, 1, 10, 1, 7, 1, 3, 1], [0, 1, 4, 1, 10, 7, 1, 2, 10, 1, 4, 1, 11, 1, 7, 1, 3, 1], [0, 1, 4, 1, 11, 5, 1, 1, 10, 2, 1, 1, 10, 1, 11, 1, 1, 1, 3, 1, 0, 1], [0, 2, 1, 6, 4, 3, 11, 1, 1, 2, 7, 1, 3, 1], [0, 3, 1, 4, 4, 1, 2, 2, 4, 2, 1, 1, 2, 1, 7, 1, 3, 1], [0, 4, 3, 1, 7, 2, 2, 4, 4, 1, 2, 3, 4, 1], [0, 4, 5, 1, 3, 2, 2, 4, 4, 1, 2, 3, 4, 1], [0, 4, 5, 1, 13, 1, 3, 3, 2, 1, 4, 3, 2, 1, 4, 1, 0, 1], [0, 4, 5, 1, 13, 1, 4, 1, 8, 1, 4, 2, 13, 1, 2, 2, 4, 1, 0, 2], [0, 5, 1, 1, 4, 2, 1, 2, 13, 3, 5, 1, 0, 2], [0, 5, 1, 1, 4, 1, 1, 3, 5, 1, 13, 3, 5, 1, 0, 1], [0, 6, 1, 3, 0, 2, 1, 1, 4, 2, 1, 1, 0, 1], [0, 11, 1, 1, 4, 2, 8, 1, 1, 1], [0, 11, 1, 5]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 1, 1, 2, 4, 9, 0, 4], [1, 1, 8, 1, 4, 1, 2, 3, 4, 1, 7, 1, 4, 1, 12, 1, 5, 1, 0, 5], [0, 1, 1, 1, 4, 2, 2, 2, 4, 1, 7, 1, 4, 1, 12, 2, 5, 1, 0, 4], [0, 3, 5, 1, 4, 3, 2, 2, 12, 1, 2, 1, 5, 1, 0, 4], [0, 3, 1, 2, 13, 3, 2, 1, 12, 1, 2, 1, 5, 1, 0, 4], [0, 2, 1, 1, 4, 2, 5, 1, 13, 4, 5, 1, 0, 5], [0, 2, 1, 1, 4, 3, 5, 1, 13, 1, 5, 2, 0, 6], [0, 2, 1, 1, 8, 1, 1, 2, 5, 3, 0, 7], [0, 3, 1, 1, 0, 12]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 5, 3, 4, 0, 7], [0, 3, 3, 2, 6, 4, 3, 2, 0, 5], [0, 2, 3, 1, 6, 5, 7, 1, 6, 2, 3, 1, 0, 4], [0, 1, 3, 1, 7, 2, 3, 2, 6, 1, 7, 1, 6, 2, 8, 1, 6, 1, 3, 1, 0, 3], [0, 1, 3, 1, 7, 1, 3, 1, 2, 2, 3, 1, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 1, 3, 2, 2, 4, 3, 1, 7, 1, 6, 1, 1, 4, 0, 2], [0, 1, 5, 1, 3, 1, 2, 4, 3, 1, 1, 7, 0, 1], [5, 1, 13, 1, 1, 1, 3, 4, 7, 1, 10, 6, 4, 1, 0, 1], [5, 1, 13, 1, 3, 1, 7, 3, 3, 1, 12, 1, 1, 1, 11, 5, 4, 1, 0, 1], [5, 1, 13, 1, 3, 1, 7, 2, 3, 1, 13, 2, 5, 1, 1, 5, 0, 2], [5, 1, 13, 2, 3, 2, 13, 1, 5, 2, 12, 1, 5, 1, 1, 3, 0, 3], [5, 2, 13, 2, 5, 2, 4, 1, 1, 1, 4, 1, 1, 1, 0, 6], [0, 1, 5, 3, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 5], [0, 4, 1, 7, 0, 5]], [[0, 6, 3, 4, 0, 6], [0, 4, 3, 2, 6, 1, 8, 2, 6, 1, 3, 2, 0, 4], [0, 3, 3, 1, 6, 2, 2, 1, 8, 2, 2, 1, 6, 2, 3, 1, 0, 3], [0, 2, 3, 1, 6, 3, 1, 4, 6, 3, 3, 1, 0, 2], [0, 2, 3, 1, 6, 1, 1, 8, 6, 1, 3, 1, 0, 2], [0, 2, 3, 1, 1, 10, 3, 1, 0, 2], [0, 3, 3, 1, 1, 1, 6, 1, 1, 1, 6, 2, 1, 1, 6, 1, 1, 1, 3, 1, 0, 3], [0, 2, 1, 2, 6, 8, 1, 2, 0, 2], [0, 3, 1, 1, 6, 8, 1, 1, 0, 3], [0, 2, 1, 2, 6, 1, 11, 1, 1, 1, 11, 2, 1, 1, 11, 1, 6, 1, 1, 2, 0, 2], [0, 1, 4, 1, 10, 1, 1, 1, 11, 2, 2, 4, 11, 2, 1, 1, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 10, 1, 1, 2, 10, 6, 1, 2, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 11, 1, 1, 1, 10, 1, 1, 1, 11, 4, 1, 1, 10, 1, 1, 1, 11, 1, 4, 1, 0, 1], [4, 1, 2, 1, 4, 1, 10, 1, 1, 8, 10, 1, 4, 1, 0, 2], [4, 1, 2, 2, 4, 1, 10, 3, 3, 2, 10, 3, 4, 3, 0, 1], [0, 1, 4, 1, 6, 2, 4, 2, 10, 1, 7, 2, 10, 1, 4, 2, 6, 1, 2, 2, 4, 1], [0, 1, 4, 1, 3, 1, 6, 1, 5, 1, 4, 1, 10, 1, 6, 2, 10, 1, 4, 1, 1, 3, 2, 1, 4, 1], [0, 3, 5, 1, 12, 2, 4, 1, 10, 2, 4, 1, 2, 1, 1, 4, 0, 1], [0, 3, 5, 1, 12, 1, 2, 2, 4, 2, 2, 2, 1, 4, 0, 1], [0, 2, 1, 3, 2, 2, 13, 3, 5, 1, 1, 4, 0, 1], [0, 1, 1, 1, 8, 1, 4, 2, 1, 1, 5, 4, 0, 1, 1, 4, 0, 1], [0, 1, 1, 4, 4, 1, 1, 1, 0, 5, 1, 2, 0, 2], [0, 4, 1, 3, 0, 9]], [[0, 16], [0, 7, 3, 4, 0, 5], [0, 5, 3, 2, 6, 1, 8, 2, 6, 1, 3, 2, 0, 3], [1, 2, 0, 1, 1, 2, 6, 2, 2, 1, 8, 2, 2, 1, 6, 2, 3, 1, 0, 2], [1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 6, 2, 1, 4, 6, 3, 3, 1, 0, 1], [0, 1, 1, 1, 2, 2, 1, 9, 6, 1, 3, 1, 0, 1], [1, 1, 2, 1, 1, 3, 11, 2, 1, 1, 11, 2, 1, 1, 11, 2, 1, 1, 3, 1, 0, 1], [1, 3, 2, 1, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 4, 1, 0, 1], [1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 10, 6, 1, 2, 10, 1, 4, 1], [0, 1, 1, 3, 3, 1, 10, 1, 1, 1, 11, 4, 1, 1, 10, 1, 4, 1, 11, 1, 4, 1], [0, 1, 3, 1, 7, 1, 6, 1, 3, 1, 11, 1, 1, 6, 11, 1, 4, 2, 0, 1], [0, 2, 3, 1, 7, 1, 6, 1, 4, 1, 11, 1, 1, 4, 11, 1, 4, 1, 7, 2, 4, 1], [0, 2, 3, 1, 7, 1, 6, 1, 3, 1, 4, 6, 7, 1, 4, 3], [0, 3, 3, 1, 6, 1, 5, 1, 12, 5, 7, 2, 2, 2, 4, 1], [0, 4, 5, 1, 13, 1, 12, 1, 2, 2, 12, 2, 2, 1, 4, 1, 2, 2, 4, 1], [0, 4, 5, 1, 13, 2, 2, 2, 12, 2, 2, 1, 5, 1, 4, 2, 0, 1], [0, 3, 5, 1, 13, 5, 12, 4, 5, 1, 0, 2], [0, 3, 5, 1, 13, 7, 12, 2, 5, 1, 0, 2], [0, 2, 5, 1, 13, 10, 5, 1, 0, 2], [0, 1, 1, 1, 4, 3, 5, 6, 4, 3, 1, 1, 0, 1], [1, 1, 4, 1, 8, 1, 4, 1, 1, 1, 0, 6, 1, 1, 4, 1, 8, 1, 4, 1, 1, 1], [1, 4, 0, 8, 1, 4]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 2, 4, 1, 6, 3, 4, 4, 5, 1, 0, 5], [0, 1, 4, 2, 6, 2, 7, 1, 13, 2, 12, 3, 5, 1, 0, 1, 1, 2, 0, 1], [4, 1, 2, 2, 4, 1, 7, 1, 13, 2, 2, 2, 12, 1, 2, 2, 5, 1, 8, 1, 1, 2], [4, 1, 2, 3, 4, 1, 13, 2, 2, 2, 12, 1, 2, 2, 1, 1, 4, 1, 1, 2], [4, 1, 2, 2, 4, 1, 5, 1, 13, 4, 12, 3, 1, 1, 4, 1, 1, 2], [0, 1, 4, 2, 0, 2, 5, 1, 13, 3, 5, 3, 1, 1, 4, 1, 1, 2], [0, 4, 1, 1, 4, 3, 1, 1, 0, 4, 1, 2, 0, 1], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 0, 6], [0, 4, 1, 6, 0, 6]], [[0, 16], [0, 16], [0, 6, 3, 4, 0, 6], [0, 4, 3, 2, 6, 1, 8, 2, 6, 1, 3, 2, 0, 4], [0, 3, 3, 1, 6, 2, 8, 3, 2, 1, 6, 2, 3, 1, 0, 3], [0, 2, 3, 1, 7, 3, 1, 4, 6, 3, 3, 1, 0, 2], [0, 2, 3, 1, 7, 1, 1, 8, 6, 1, 3, 1, 0, 2], [0, 2, 4, 1, 1, 1, 11, 2, 1, 1, 11, 2, 1, 1, 11, 2, 1, 1, 4, 1, 0, 2], [0, 1, 4, 1, 10, 1, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 11, 1, 1, 2, 10, 6, 1, 2, 11, 1, 4, 1, 0, 1], [0, 2, 4, 1, 1, 1, 10, 1, 1, 1, 11, 4, 1, 1, 10, 1, 1, 1, 4, 1, 0, 2], [0, 3, 4, 1, 11, 1, 1, 6, 11, 1, 4, 1, 0, 3], [0, 4, 4, 1, 11, 1, 1, 4, 11, 1, 4, 1, 0, 4], [0, 3, 3, 1, 7, 1, 4, 6, 6, 1, 3, 1, 0, 3], [0, 2, 3, 1, 7, 2, 13, 1, 12, 5, 7, 1, 6, 1, 3, 1, 0, 2], [0, 2, 4, 1, 7, 1, 13, 1, 2, 2, 12, 2, 2, 2, 12, 1, 7, 1, 4, 1, 0, 2], [0, 1, 4, 1, 2, 1, 4, 1, 13, 1, 2, 2, 12, 2, 2, 2, 12, 1, 4, 1, 2, 1, 4, 1, 0, 1], [0, 1, 4, 1, 2, 1, 4, 1, 13, 4, 12, 4, 4, 1, 2, 1, 4, 1, 0, 1], [0, 2, 4, 2, 5, 1, 13, 2, 5, 2, 13, 2, 5, 1, 4, 2, 0, 2], [0, 4, 1, 1, 4, 6, 1, 1, 0, 4], [0, 3, 1, 1, 4, 1, 8, 1, 4, 1, 1, 2, 4, 1, 8, 1, 4, 1, 1, 1, 0, 3], [0, 3, 1, 10, 0, 3]], [[0, 16], [0, 16], [0, 6, 3, 4, 0, 6], [0, 4, 3, 2, 6, 4, 3, 2, 0, 4], [0, 3, 3, 1, 6, 8, 3, 1, 0, 3], [0, 2, 3, 1, 6, 10, 3, 1, 0, 2], [0, 2, 3, 1, 7, 1, 6, 9, 3, 1, 0, 2], [0, 2, 4, 1, 7, 1, 6, 8, 7, 1, 4, 1, 0, 2], [0, 2, 4, 1, 3, 1, 7, 2, 6, 4, 7, 2, 3, 1, 4, 1, 0, 2], [0, 1, 4, 1, 10, 1, 1, 1, 3, 2, 7, 4, 3, 2, 1, 1, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 11, 1, 1, 3, 3, 4, 1, 3, 11, 1, 4, 1, 0, 1], [0, 2, 4, 2, 1, 8, 4, 2, 0, 2], [0, 4, 11, 1, 1, 6, 11, 1, 0, 4], [0, 3, 3, 2, 12, 2, 1, 2, 12, 2, 3, 2, 0, 3], [0, 2, 3, 1, 7, 1, 5, 1, 12, 2, 8, 2, 12, 2, 5, 1, 7, 1, 3, 1, 0, 2], [0, 2, 3, 1, 5, 1, 12, 8, 5, 1, 3, 1, 0, 2], [0, 2, 3, 1, 5, 3, 12, 4, 5, 3, 3, 1, 0, 2], [0, 3, 5, 1, 12, 2, 5, 1, 12, 2, 5, 1, 13, 2, 5, 1, 0, 3], [0, 4, 5, 1, 13, 1, 5, 4, 13, 1, 5, 1, 0, 4], [0, 4, 1, 1, 4, 6, 1, 1, 0, 4], [0, 3, 1, 1, 4, 3, 1, 2, 4, 3, 1, 1, 0, 3], [0, 3, 1, 10, 0, 3]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 8, 2, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 6, 2, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 0, 4], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 2, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [5, 1, 13, 4, 11, 2, 1, 7, 0, 2], [5, 1, 13, 5, 3, 1, 6, 3, 4, 4, 0, 2], [5, 1, 13, 3, 5, 2, 3, 1, 7, 2, 6, 2, 3, 1, 2, 1, 4, 3], [5, 1, 13, 6, 3, 2, 7, 2, 3, 1, 2, 3, 4, 1], [0, 1, 5, 1, 13, 2, 1, 1, 4, 3, 1, 1, 3, 3, 2, 3, 4, 1], [0, 2, 5, 2, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 4, 3, 0, 1], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 2, 4, 3, 0, 2], [0, 4, 5, 1, 13, 1, 4, 5, 3, 1, 2, 1, 4, 3], [0, 3, 5, 1, 13, 2, 3, 1, 6, 4, 3, 1, 2, 3, 4, 1], [0, 3, 5, 1, 13, 2, 3, 1, 7, 4, 3, 1, 2, 3, 4, 1], [0, 3, 5, 1, 13, 3, 3, 5, 4, 3, 0, 1], [0, 3, 5, 1, 13, 6, 12, 2, 5, 1, 0, 3], [0, 3, 5, 1, 13, 5, 5, 1, 13, 1, 5, 1, 0, 4], [0, 4, 5, 1, 4, 3, 1, 1, 4, 1, 1, 1, 0, 5], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 4], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 1, 11, 4, 1, 2, 4, 3, 0, 2], [0, 4, 5, 1, 4, 6, 3, 1, 2, 1, 4, 3], [0, 3, 5, 2, 13, 1, 3, 1, 6, 4, 3, 1, 2, 3, 4, 1], [0, 2, 1, 1, 5, 1, 13, 2, 3, 1, 7, 4, 3, 1, 2, 3, 4, 1], [0, 1, 1, 1, 4, 1, 5, 1, 13, 3, 3, 5, 4, 3, 1, 1], [0, 1, 1, 1, 4, 1, 5, 1, 13, 6, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 4, 1, 1, 1, 5, 2, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 4, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2], [0, 16], [0, 16]]];
         chars = null;
-/*
-        chars = [[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 7, 6,13,13,12,12, 5, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 4, 4, 4,13, 2, 2,12, 2, 5, 0, 0, 0],
-            [ 0, 0, 0, 4, 2, 2, 2, 4, 2, 2,12, 2, 5, 0, 0, 0],
-            [ 0, 0, 0, 4, 2, 2, 4,13,13,13,12,12, 5, 0, 0, 0],
-            [ 0, 0, 0, 4, 2, 2, 4,13,13, 5,13, 5, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 4, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
-            [ 0, 0, 0, 4, 7, 7, 7, 4, 4, 4, 5, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 4, 4, 4, 4,13,13,12,12, 5, 0, 0, 0, 0],
-            [ 0, 0, 1, 4, 2, 2, 2, 4, 2, 2,12, 2, 5, 1, 1, 0],
-            [ 0, 1, 3, 4, 2, 2, 4, 4, 2, 2,12, 2, 1, 8, 1, 1],
-            [ 0, 1, 3, 4, 2, 2, 4,13,13,13,12, 5, 1, 4, 1, 1],
-            [ 0, 1, 3, 1, 4, 4,13,13,13,13, 5, 1, 4, 1, 1, 0],
-            [ 0, 1, 3, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
-            [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ],[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 2, 4, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 2, 2, 2, 4],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 2, 2, 2, 4],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 2, 4, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 4, 4, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 3, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 4, 4, 4, 7, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
-            [ 4, 4, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
-            [ 4, 2, 2, 2, 2, 4, 7,13,13,12,12, 5, 0, 0, 0, 0],
-            [ 4, 2, 2, 2, 2, 4,13,13, 2, 2,12, 2, 5, 1, 1, 0],
-            [ 0, 4, 2, 2, 4,13,13,13, 2, 2,12, 2, 1, 8, 1, 1],
-            [ 0, 1, 3, 4,13,13,13,13,13,13,12, 5, 1, 4, 1, 1],
-            [ 0, 1, 3, 5, 5, 5,13,13,13,13, 5, 1, 4, 1, 1, 0],
-            [ 0, 1, 3, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
-            [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0]
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3, 7, 1, 1, 1, 1, 1,11, 1, 1, 0, 0, 0, 0],
-            [ 0, 3, 7, 7, 1, 1,10,10,10,10,10,10, 0, 0, 0, 0],
-            [ 0, 3, 7,10, 1, 1,10,10, 1,10, 1,10, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,10,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 1,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 0, 1,11,11, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 4, 2, 2, 3,11,11, 1, 1, 1, 1, 1, 1, 1, 2, 3],
-            [ 4, 2, 2, 2, 2, 3,11,11,11, 1, 1, 1, 1, 2, 2, 3],
-            [ 4, 2, 2, 2, 2, 3, 4, 4, 4, 4, 5, 4, 2, 1, 1, 0],
-            [ 0, 4, 2, 2, 3,13,13,13,13,12,12, 5, 1, 8, 1, 1],
-            [ 0, 1, 3, 3, 5,13,13,13, 2, 2,12, 2, 1, 4, 1, 1],
-            [ 0, 1, 4, 4, 5,13,13,13, 2, 2,12, 2, 1, 4, 1, 1],
-            [ 0, 1, 4, 8, 5, 5,13,13,13,13,12, 5, 1, 4, 1, 1],
-            [ 0, 0, 1, 1, 0, 5, 5,13,13,13, 5, 0, 0, 1, 1, 0],
-            [ 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 4, 4, 4, 4, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
-            [ 4, 2, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
-            [ 0, 4, 2, 2, 4, 7, 7,13,13,12,12, 5, 0, 0, 0, 0],
-            [ 0, 0, 4, 4, 7, 7,13,13, 2, 2,12, 2, 5, 0, 0, 0],
-            [ 0, 0, 0, 5,13,13,13,13, 2, 2,12, 2, 5, 0, 0, 0],
-            [ 0, 0, 0, 5,13,13,13,13,13,13,12,12, 5, 0, 0, 0],
-            [ 0, 0, 0, 5, 5,13,13,13,13, 5,13, 5, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 4, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 4, 4, 4, 4, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
-            [ 4, 2, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
-            [ 0, 4, 2, 2, 4, 7,13,13,13,12,12, 5, 0, 0, 0, 0],
-            [ 0, 0, 4, 4, 7, 7,13,13, 2, 2,12, 2, 5, 1, 1, 0],
-            [ 0, 1, 3, 3,13,13,13,13, 2, 2,12, 2, 1, 8, 1, 1],
-            [ 0, 1, 3, 3,13,13,13,13,13,13,12, 5, 1, 4, 1, 1],
-            [ 0, 1, 3, 1, 5, 5,13,13,13,13, 5, 1, 4, 1, 1, 0],
-            [ 0, 1, 3, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
-            [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 8, 6, 6, 6, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 2, 8, 8, 7, 7, 7, 7, 3, 0, 0, 0],
-            [ 0, 0, 0, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 3, 0, 0],
-            [ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 3, 0],
-            [ 0, 0, 0, 0,11,11,11,11,11, 1, 1, 1, 1, 7, 3, 0],
-            [ 0, 0, 0, 0,10, 1,10, 1,10,11, 1, 1,10, 7, 7, 3],
-            [ 0, 0, 4, 4,10, 1,10, 1,10,10, 1,10, 4,10, 7, 3],
-            [ 0, 4,10,10,10,10,10,10,10, 1, 1,10, 4,11, 7, 3],
-            [ 0, 4,11,11,11,11,11, 1,10,10, 1,10,11, 1, 3, 0],
-            [ 0, 0, 1, 1, 1, 1, 1, 1, 4, 4, 4,11, 1, 1, 7, 3],
-            [ 0, 0, 0, 1, 1, 1, 1, 4, 2, 2, 4, 4, 1, 2, 7, 3],
-            [ 0, 0, 0, 0, 3, 7, 7, 2, 2, 2, 2, 4, 2, 2, 2, 4],
-            [ 0, 0, 0, 0, 5, 3, 3, 2, 2, 2, 2, 4, 2, 2, 2, 4],
-            [ 0, 0, 0, 0, 5,13, 3, 3, 3, 2, 4, 4, 4, 2, 4, 0],
-            [ 0, 0, 0, 0, 5,13, 4, 8, 4, 4,13, 2, 2, 4, 0, 0],
-            [ 0, 0, 0, 0, 0, 1, 4, 4, 1, 1,13,13,13, 5, 0, 0],
-            [ 0, 0, 0, 0, 0, 1, 4, 1, 1, 1, 5,13,13,13, 5, 0],
-            [ 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 4, 4, 1, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 8, 1],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
-            [ 0, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0],
-            [ 1, 8, 4, 2, 2, 2, 4, 7, 4,12, 5, 0, 0, 0, 0, 0],
-            [ 0, 1, 4, 4, 2, 2, 4, 7, 4,12,12, 5, 0, 0, 0, 0],
-            [ 0, 0, 0, 5, 4, 4, 4, 2, 2,12, 2, 5, 0, 0, 0, 0],
-            [ 0, 0, 0, 1, 1,13,13,13, 2,12, 2, 5, 0, 0, 0, 0],
-            [ 0, 0, 1, 4, 4, 5,13,13,13,13, 5, 0, 0, 0, 0, 0],
-            [ 0, 0, 1, 4, 4, 4, 5,13, 5, 5, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 1, 8, 1, 1, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ],[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 3, 6, 6, 6, 6, 3, 3, 0, 0, 0, 0, 0],
-            [ 0, 0, 3, 6, 6, 6, 6, 6, 7, 6, 6, 3, 0, 0, 0, 0],
-            [ 0, 3, 7, 7, 3, 3, 6, 7, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 3, 7, 3, 2, 2, 3, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 3, 3, 2, 2, 2, 2, 3, 7, 6, 1, 1, 1, 1, 0, 0],
-            [ 0, 5, 3, 2, 2, 2, 2, 3, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 5,13, 1, 3, 3, 3, 3, 7,10,10,10,10,10,10, 4, 0],
-            [ 5,13, 3, 7, 7, 7, 3,12, 1,11,11,11,11,11, 4, 0],
-            [ 5,13, 3, 7, 7, 3,13,13, 5, 1, 1, 1, 1, 1, 0, 0],
-            [ 5,13,13, 3, 3,13, 5, 5,12, 5, 1, 1, 1, 0, 0, 0],
-            [ 5, 5,13,13, 5, 5, 4, 1, 4, 1, 0, 0, 0, 0, 0, 0],
-            [ 0, 5, 5, 5, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]            
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 6, 6, 2, 8, 8, 2, 6, 6, 3, 0, 0, 0],
-            [ 0, 0, 3, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 3, 0, 0],
-            [ 0, 0, 3, 6, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0, 0],
-            [ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0],
-            [ 0, 0, 0, 3, 1, 6, 1, 6, 6, 1, 6, 1, 3, 0, 0, 0],
-            [ 0, 0, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 1, 0, 0],
-            [ 0, 0, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 0, 0, 0],
-            [ 0, 0, 1, 1, 6,11, 1,11,11, 1,11, 6, 1, 1, 0, 0],
-            [ 0, 4,10, 1,11,11, 2, 2, 2, 2,11,11, 1,10, 4, 0],
-            [ 0, 4,10, 1, 1,10,10,10,10,10,10, 1, 1,10, 4, 0],
-            [ 0, 4,11, 1,10, 1,11,11,11,11, 1,10, 1,11, 4, 0],
-            [ 4, 2, 4,10, 1, 1, 1, 1, 1, 1, 1, 1,10, 4, 0, 0],
-            [ 4, 2, 2, 4,10,10,10, 3, 3,10,10,10, 4, 4, 4, 0],
-            [ 0, 4, 6, 6, 4, 4,10, 7, 7,10, 4, 4, 6, 2, 2, 4],
-            [ 0, 4, 3, 6, 5, 4,10, 6, 6,10, 4, 1, 1, 1, 2, 4],
-            [ 0, 0, 0, 5,12,12, 4,10,10, 4, 2, 1, 1, 1, 1, 0],
-            [ 0, 0, 0, 5,12, 2, 2, 4, 4, 2, 2, 1, 1, 1, 1, 0],
-            [ 0, 0, 1, 1, 1, 2, 2,13,13,13, 5, 1, 1, 1, 1, 0],
-            [ 0, 1, 8, 4, 4, 1, 5, 5, 5, 5, 0, 1, 1, 1, 1, 0],
-            [ 0, 1, 1, 1, 1, 4, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-            [ 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]            
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0],
-            [ 1, 1, 0, 1, 1, 6, 6, 2, 8, 8, 2, 6, 6, 3, 0, 0],
-            [ 1, 2, 1, 2, 1, 6, 6, 1, 1, 1, 1, 6, 6, 6, 3, 0],
-            [ 0, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0],
-            [ 1, 2, 1, 1, 1,11,11, 1,11,11, 1,11,11, 1, 3, 0],
-            [ 1, 1, 1, 2, 1,10,10, 1,10,10, 1,10,10, 1, 4, 0],
-            [ 1, 2, 1, 2, 1, 1,10,10,10,10,10,10, 1, 1,10, 4],
-            [ 0, 1, 1, 1, 3,10, 1,11,11,11,11, 1,10, 4,11, 4],
-            [ 0, 3, 7, 6, 3,11, 1, 1, 1, 1, 1, 1,11, 4, 4, 0],
-            [ 0, 0, 3, 7, 6, 4,11, 1, 1, 1, 1,11, 4, 7, 7, 4],
-            [ 0, 0, 3, 7, 6, 3, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4],
-            [ 0, 0, 0, 3, 6, 5,12,12,12,12,12, 7, 7, 2, 2, 4],
-            [ 0, 0, 0, 0, 5,13,12, 2, 2,12,12, 2, 4, 2, 2, 4],
-            [ 0, 0, 0, 0, 5,13,13, 2, 2,12,12, 2, 5, 4, 4, 0],
-            [ 0, 0, 0, 5,13,13,13,13,13,12,12,12,12, 5, 0, 0],
-            [ 0, 0, 0, 5,13,13,13,13,13,13,13,12,12, 5, 0, 0],
-            [ 0, 0, 5,13,13,13,13,13,13,13,13,13,13, 5, 0, 0],
-            [ 0, 1, 4, 4, 4, 5, 5, 5, 5, 5, 5, 4, 4, 4, 1, 0],
-            [ 1, 4, 8, 4, 1, 0, 0, 0, 0, 0, 0, 1, 4, 8, 4, 1],
-            [ 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
-        ], [
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
-            [ 0, 0, 4, 6, 6, 6, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
-            [ 0, 4, 4, 6, 6, 7,13,13,12,12,12, 5, 0, 1, 1, 0],
-            [ 4, 2, 2, 4, 7,13,13, 2, 2,12, 2, 2, 5, 8, 1, 1],
-            [ 4, 2, 2, 2, 4,13,13, 2, 2,12, 2, 2, 1, 4, 1, 1],
-            [ 4, 2, 2, 4, 5,13,13,13,13,12,12,12, 1, 4, 1, 1],
-            [ 0, 4, 4, 0, 0, 5,13,13,13, 5, 5, 5, 1, 4, 1, 1],
-            [ 0, 0, 0, 0, 1, 4, 4, 4, 1, 0, 0, 0, 0, 1, 1, 0],
-            [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
-        ],[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 6, 6, 8, 8, 8, 2, 6, 6, 3, 0, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 6, 6, 6, 3, 0, 0],
-            [ 0, 0, 3, 7, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0, 0],
-            [ 0, 0, 4, 1,11,11, 1,11,11, 1,11,11, 1, 4, 0, 0],
-            [ 0, 4,10, 1,10,10, 1,10,10, 1,10,10, 1,10, 4, 0],
-            [ 0, 4,11, 1, 1,10,10,10,10,10,10, 1, 1,11, 4, 0],
-            [ 0, 0, 4, 1,10, 1,11,11,11,11, 1,10, 1, 4, 0, 0],
-            [ 0, 0, 0, 4,11, 1, 1, 1, 1, 1, 1,11, 4, 0, 0, 0],
-            [ 0, 0, 0, 0, 4,11, 1, 1, 1, 1,11, 4, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 4, 4, 4, 4, 4, 4, 6, 3, 0, 0, 0],
-            [ 0, 0, 3, 7, 7,13,12,12,12,12,12, 7, 6, 3, 0, 0],
-            [ 0, 0, 4, 7,13, 2, 2,12,12, 2, 2,12, 7, 4, 0, 0],
-            [ 0, 4, 2, 4,13, 2, 2,12,12, 2, 2,12, 4, 2, 4, 0],
-            [ 0, 4, 2, 4,13,13,13,13,12,12,12,12, 4, 2, 4, 0],
-            [ 0, 0, 4, 4, 5,13,13, 5, 5,13,13, 5, 4, 4, 0, 0],
-            [ 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 1, 0, 0, 0, 0],
-            [ 0, 0, 0, 1, 4, 8, 4, 1, 1, 4, 8, 4, 1, 0, 0, 0],
-            [ 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]            
-        ],[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 3, 6, 6, 6, 6, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0],
-            [ 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0],
-            [ 0, 0, 3, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0],
-            [ 0, 0, 4, 7, 6, 6, 6, 6, 6, 6, 6, 6, 7, 4, 0, 0],
-            [ 0, 0, 4, 3, 7, 7, 6, 6, 6, 6, 7, 7, 3, 4, 0, 0],
-            [ 0, 4,10, 1, 3, 3, 7, 7, 7, 7, 3, 3, 1,10, 4, 0],
-            [ 0, 4,11, 1, 1, 1, 3, 3, 3, 3, 1, 1, 1,11, 4, 0],
-            [ 0, 0, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 0, 0],
-            [ 0, 0, 0, 0,11, 1, 1, 1, 1, 1, 1,11, 0, 0, 0, 0],
-            [ 0, 0, 0, 3, 3,12,12, 1, 1,12,12, 3, 3, 0, 0, 0],
-            [ 0, 0, 3, 7, 5,12,12, 8, 8,12,12, 5, 7, 3, 0, 0],
-            [ 0, 0, 3, 5,12,12,12,12,12,12,12,12, 5, 3, 0, 0],
-            [ 0, 0, 3, 5, 5, 5,12,12,12,12, 5, 5, 5, 3, 0, 0],
-            [ 0, 0, 0, 5,12,12, 5,12,12, 5,13,13, 5, 0, 0, 0],
-            [ 0, 0, 0, 0, 5,13, 5, 5, 5, 5,13, 5, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 1, 0, 0, 0, 0],
-            [ 0, 0, 0, 1, 4, 4, 4, 1, 1, 4, 4, 4, 1, 0, 0, 0],
-            [ 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]            
-        ],[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 8, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 6, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 0, 0, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,11, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 5,13,13,13,13,11,11, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 5,13,13,13,13,13, 3, 6, 6, 6, 4, 4, 4, 4, 0, 0],
-            [ 5,13,13,13, 5, 5, 3, 7, 7, 6, 6, 3, 2, 4, 4, 4],
-            [ 5,13,13,13,13,13,13, 3, 3, 7, 7, 3, 2, 2, 2, 4],
-            [ 0, 5,13,13, 1, 4, 4, 4, 1, 3, 3, 3, 2, 2, 2, 4],
-            [ 0, 0, 5, 5, 1, 4, 4, 4, 8, 1, 8, 1, 4, 4, 4, 0],
-            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]            
-        ],[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 4, 4, 4, 0, 0],
-            [ 0, 0, 0, 0, 5,13, 4, 4, 4, 4, 4, 3, 2, 4, 4, 4],
-            [ 0, 0, 0, 5,13,13, 3, 6, 6, 6, 6, 3, 2, 2, 2, 4],
-            [ 0, 0, 0, 5,13,13, 3, 7, 7, 7, 7, 3, 2, 2, 2, 4],
-            [ 0, 0, 0, 5,13,13,13, 3, 3, 3, 3, 3, 4, 4, 4, 0],
-            [ 0, 0, 0, 5,13,13,13,13,13,13,12,12, 5, 0, 0, 0],
-            [ 0, 0, 0, 5,13,13,13,13,13, 5,13, 5, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 5, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-        ],[
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
-            [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
-            [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-            [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
-            [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
-            [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
-            [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
-            [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-            [ 0, 0, 0, 1, 4,11,11,11,11, 1, 1, 4, 4, 4, 0, 0],
-            [ 0, 0, 0, 0, 5, 4, 4, 4, 4, 4, 4, 3, 2, 4, 4, 4],
-            [ 0, 0, 0, 5, 5,13, 3, 6, 6, 6, 6, 3, 2, 2, 2, 4],
-            [ 0, 0, 1, 5,13,13, 3, 7, 7, 7, 7, 3, 2, 2, 2, 4],
-            [ 0, 1, 4, 5,13,13,13, 3, 3, 3, 3, 3, 4, 4, 4, 1],
-            [ 0, 1, 4, 5,13,13,13,13,13,13,12, 5, 1, 4, 1, 1],
-            [ 0, 1, 4, 1, 5, 5,13,13,13,13, 5, 1, 4, 1, 1, 0],
-            [ 0, 1, 4, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
-            [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ]];
-*/
+        /*
+                chars = [[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 7, 6,13,13,12,12, 5, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 4, 4, 4,13, 2, 2,12, 2, 5, 0, 0, 0],
+                    [ 0, 0, 0, 4, 2, 2, 2, 4, 2, 2,12, 2, 5, 0, 0, 0],
+                    [ 0, 0, 0, 4, 2, 2, 4,13,13,13,12,12, 5, 0, 0, 0],
+                    [ 0, 0, 0, 4, 2, 2, 4,13,13, 5,13, 5, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 4, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+                    [ 0, 0, 0, 4, 7, 7, 7, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 4, 4, 4, 4,13,13,12,12, 5, 0, 0, 0, 0],
+                    [ 0, 0, 1, 4, 2, 2, 2, 4, 2, 2,12, 2, 5, 1, 1, 0],
+                    [ 0, 1, 3, 4, 2, 2, 4, 4, 2, 2,12, 2, 1, 8, 1, 1],
+                    [ 0, 1, 3, 4, 2, 2, 4,13,13,13,12, 5, 1, 4, 1, 1],
+                    [ 0, 1, 3, 1, 4, 4,13,13,13,13, 5, 1, 4, 1, 1, 0],
+                    [ 0, 1, 3, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
+                    [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                ],[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 2, 4, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 2, 2, 2, 4],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 2, 2, 2, 4],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 2, 4, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 4, 4, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 3, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 4, 4, 4, 7, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+                    [ 4, 4, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+                    [ 4, 2, 2, 2, 2, 4, 7,13,13,12,12, 5, 0, 0, 0, 0],
+                    [ 4, 2, 2, 2, 2, 4,13,13, 2, 2,12, 2, 5, 1, 1, 0],
+                    [ 0, 4, 2, 2, 4,13,13,13, 2, 2,12, 2, 1, 8, 1, 1],
+                    [ 0, 1, 3, 4,13,13,13,13,13,13,12, 5, 1, 4, 1, 1],
+                    [ 0, 1, 3, 5, 5, 5,13,13,13,13, 5, 1, 4, 1, 1, 0],
+                    [ 0, 1, 3, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
+                    [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0]
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3, 7, 1, 1, 1, 1, 1,11, 1, 1, 0, 0, 0, 0],
+                    [ 0, 3, 7, 7, 1, 1,10,10,10,10,10,10, 0, 0, 0, 0],
+                    [ 0, 3, 7,10, 1, 1,10,10, 1,10, 1,10, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,10,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 1,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 0, 1,11,11, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 4, 2, 2, 3,11,11, 1, 1, 1, 1, 1, 1, 1, 2, 3],
+                    [ 4, 2, 2, 2, 2, 3,11,11,11, 1, 1, 1, 1, 2, 2, 3],
+                    [ 4, 2, 2, 2, 2, 3, 4, 4, 4, 4, 5, 4, 2, 1, 1, 0],
+                    [ 0, 4, 2, 2, 3,13,13,13,13,12,12, 5, 1, 8, 1, 1],
+                    [ 0, 1, 3, 3, 5,13,13,13, 2, 2,12, 2, 1, 4, 1, 1],
+                    [ 0, 1, 4, 4, 5,13,13,13, 2, 2,12, 2, 1, 4, 1, 1],
+                    [ 0, 1, 4, 8, 5, 5,13,13,13,13,12, 5, 1, 4, 1, 1],
+                    [ 0, 0, 1, 1, 0, 5, 5,13,13,13, 5, 0, 0, 1, 1, 0],
+                    [ 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 4, 4, 4, 4, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+                    [ 4, 2, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+                    [ 0, 4, 2, 2, 4, 7, 7,13,13,12,12, 5, 0, 0, 0, 0],
+                    [ 0, 0, 4, 4, 7, 7,13,13, 2, 2,12, 2, 5, 0, 0, 0],
+                    [ 0, 0, 0, 5,13,13,13,13, 2, 2,12, 2, 5, 0, 0, 0],
+                    [ 0, 0, 0, 5,13,13,13,13,13,13,12,12, 5, 0, 0, 0],
+                    [ 0, 0, 0, 5, 5,13,13,13,13, 5,13, 5, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 4, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 4, 4, 4, 4, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+                    [ 4, 2, 2, 2, 4, 7, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+                    [ 0, 4, 2, 2, 4, 7,13,13,13,12,12, 5, 0, 0, 0, 0],
+                    [ 0, 0, 4, 4, 7, 7,13,13, 2, 2,12, 2, 5, 1, 1, 0],
+                    [ 0, 1, 3, 3,13,13,13,13, 2, 2,12, 2, 1, 8, 1, 1],
+                    [ 0, 1, 3, 3,13,13,13,13,13,13,12, 5, 1, 4, 1, 1],
+                    [ 0, 1, 3, 1, 5, 5,13,13,13,13, 5, 1, 4, 1, 1, 0],
+                    [ 0, 1, 3, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
+                    [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 8, 6, 6, 6, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 2, 8, 8, 7, 7, 7, 7, 3, 0, 0, 0],
+                    [ 0, 0, 0, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 3, 0, 0],
+                    [ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 3, 0],
+                    [ 0, 0, 0, 0,11,11,11,11,11, 1, 1, 1, 1, 7, 3, 0],
+                    [ 0, 0, 0, 0,10, 1,10, 1,10,11, 1, 1,10, 7, 7, 3],
+                    [ 0, 0, 4, 4,10, 1,10, 1,10,10, 1,10, 4,10, 7, 3],
+                    [ 0, 4,10,10,10,10,10,10,10, 1, 1,10, 4,11, 7, 3],
+                    [ 0, 4,11,11,11,11,11, 1,10,10, 1,10,11, 1, 3, 0],
+                    [ 0, 0, 1, 1, 1, 1, 1, 1, 4, 4, 4,11, 1, 1, 7, 3],
+                    [ 0, 0, 0, 1, 1, 1, 1, 4, 2, 2, 4, 4, 1, 2, 7, 3],
+                    [ 0, 0, 0, 0, 3, 7, 7, 2, 2, 2, 2, 4, 2, 2, 2, 4],
+                    [ 0, 0, 0, 0, 5, 3, 3, 2, 2, 2, 2, 4, 2, 2, 2, 4],
+                    [ 0, 0, 0, 0, 5,13, 3, 3, 3, 2, 4, 4, 4, 2, 4, 0],
+                    [ 0, 0, 0, 0, 5,13, 4, 8, 4, 4,13, 2, 2, 4, 0, 0],
+                    [ 0, 0, 0, 0, 0, 1, 4, 4, 1, 1,13,13,13, 5, 0, 0],
+                    [ 0, 0, 0, 0, 0, 1, 4, 1, 1, 1, 5,13,13,13, 5, 0],
+                    [ 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 4, 4, 1, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 8, 1],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+                    [ 0, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0],
+                    [ 1, 8, 4, 2, 2, 2, 4, 7, 4,12, 5, 0, 0, 0, 0, 0],
+                    [ 0, 1, 4, 4, 2, 2, 4, 7, 4,12,12, 5, 0, 0, 0, 0],
+                    [ 0, 0, 0, 5, 4, 4, 4, 2, 2,12, 2, 5, 0, 0, 0, 0],
+                    [ 0, 0, 0, 1, 1,13,13,13, 2,12, 2, 5, 0, 0, 0, 0],
+                    [ 0, 0, 1, 4, 4, 5,13,13,13,13, 5, 0, 0, 0, 0, 0],
+                    [ 0, 0, 1, 4, 4, 4, 5,13, 5, 5, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 1, 8, 1, 1, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                ],[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 3, 6, 6, 6, 6, 3, 3, 0, 0, 0, 0, 0],
+                    [ 0, 0, 3, 6, 6, 6, 6, 6, 7, 6, 6, 3, 0, 0, 0, 0],
+                    [ 0, 3, 7, 7, 3, 3, 6, 7, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 3, 7, 3, 2, 2, 3, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 3, 3, 2, 2, 2, 2, 3, 7, 6, 1, 1, 1, 1, 0, 0],
+                    [ 0, 5, 3, 2, 2, 2, 2, 3, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 5,13, 1, 3, 3, 3, 3, 7,10,10,10,10,10,10, 4, 0],
+                    [ 5,13, 3, 7, 7, 7, 3,12, 1,11,11,11,11,11, 4, 0],
+                    [ 5,13, 3, 7, 7, 3,13,13, 5, 1, 1, 1, 1, 1, 0, 0],
+                    [ 5,13,13, 3, 3,13, 5, 5,12, 5, 1, 1, 1, 0, 0, 0],
+                    [ 5, 5,13,13, 5, 5, 4, 1, 4, 1, 0, 0, 0, 0, 0, 0],
+                    [ 0, 5, 5, 5, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]            
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 6, 6, 2, 8, 8, 2, 6, 6, 3, 0, 0, 0],
+                    [ 0, 0, 3, 6, 6, 6, 1, 1, 1, 1, 6, 6, 6, 3, 0, 0],
+                    [ 0, 0, 3, 6, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0, 0],
+                    [ 0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0],
+                    [ 0, 0, 0, 3, 1, 6, 1, 6, 6, 1, 6, 1, 3, 0, 0, 0],
+                    [ 0, 0, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 1, 0, 0],
+                    [ 0, 0, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 0, 0, 0],
+                    [ 0, 0, 1, 1, 6,11, 1,11,11, 1,11, 6, 1, 1, 0, 0],
+                    [ 0, 4,10, 1,11,11, 2, 2, 2, 2,11,11, 1,10, 4, 0],
+                    [ 0, 4,10, 1, 1,10,10,10,10,10,10, 1, 1,10, 4, 0],
+                    [ 0, 4,11, 1,10, 1,11,11,11,11, 1,10, 1,11, 4, 0],
+                    [ 4, 2, 4,10, 1, 1, 1, 1, 1, 1, 1, 1,10, 4, 0, 0],
+                    [ 4, 2, 2, 4,10,10,10, 3, 3,10,10,10, 4, 4, 4, 0],
+                    [ 0, 4, 6, 6, 4, 4,10, 7, 7,10, 4, 4, 6, 2, 2, 4],
+                    [ 0, 4, 3, 6, 5, 4,10, 6, 6,10, 4, 1, 1, 1, 2, 4],
+                    [ 0, 0, 0, 5,12,12, 4,10,10, 4, 2, 1, 1, 1, 1, 0],
+                    [ 0, 0, 0, 5,12, 2, 2, 4, 4, 2, 2, 1, 1, 1, 1, 0],
+                    [ 0, 0, 1, 1, 1, 2, 2,13,13,13, 5, 1, 1, 1, 1, 0],
+                    [ 0, 1, 8, 4, 4, 1, 5, 5, 5, 5, 0, 1, 1, 1, 1, 0],
+                    [ 0, 1, 1, 1, 1, 4, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+                    [ 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]            
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0],
+                    [ 1, 1, 0, 1, 1, 6, 6, 2, 8, 8, 2, 6, 6, 3, 0, 0],
+                    [ 1, 2, 1, 2, 1, 6, 6, 1, 1, 1, 1, 6, 6, 6, 3, 0],
+                    [ 0, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0],
+                    [ 1, 2, 1, 1, 1,11,11, 1,11,11, 1,11,11, 1, 3, 0],
+                    [ 1, 1, 1, 2, 1,10,10, 1,10,10, 1,10,10, 1, 4, 0],
+                    [ 1, 2, 1, 2, 1, 1,10,10,10,10,10,10, 1, 1,10, 4],
+                    [ 0, 1, 1, 1, 3,10, 1,11,11,11,11, 1,10, 4,11, 4],
+                    [ 0, 3, 7, 6, 3,11, 1, 1, 1, 1, 1, 1,11, 4, 4, 0],
+                    [ 0, 0, 3, 7, 6, 4,11, 1, 1, 1, 1,11, 4, 7, 7, 4],
+                    [ 0, 0, 3, 7, 6, 3, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4],
+                    [ 0, 0, 0, 3, 6, 5,12,12,12,12,12, 7, 7, 2, 2, 4],
+                    [ 0, 0, 0, 0, 5,13,12, 2, 2,12,12, 2, 4, 2, 2, 4],
+                    [ 0, 0, 0, 0, 5,13,13, 2, 2,12,12, 2, 5, 4, 4, 0],
+                    [ 0, 0, 0, 5,13,13,13,13,13,12,12,12,12, 5, 0, 0],
+                    [ 0, 0, 0, 5,13,13,13,13,13,13,13,12,12, 5, 0, 0],
+                    [ 0, 0, 5,13,13,13,13,13,13,13,13,13,13, 5, 0, 0],
+                    [ 0, 1, 4, 4, 4, 5, 5, 5, 5, 5, 5, 4, 4, 4, 1, 0],
+                    [ 1, 4, 8, 4, 1, 0, 0, 0, 0, 0, 0, 1, 4, 8, 4, 1],
+                    [ 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
+                ], [
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 1, 1, 0, 0, 0],
+                    [ 0, 0, 4, 6, 6, 6, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0],
+                    [ 0, 4, 4, 6, 6, 7,13,13,12,12,12, 5, 0, 1, 1, 0],
+                    [ 4, 2, 2, 4, 7,13,13, 2, 2,12, 2, 2, 5, 8, 1, 1],
+                    [ 4, 2, 2, 2, 4,13,13, 2, 2,12, 2, 2, 1, 4, 1, 1],
+                    [ 4, 2, 2, 4, 5,13,13,13,13,12,12,12, 1, 4, 1, 1],
+                    [ 0, 4, 4, 0, 0, 5,13,13,13, 5, 5, 5, 1, 4, 1, 1],
+                    [ 0, 0, 0, 0, 1, 4, 4, 4, 1, 0, 0, 0, 0, 1, 1, 0],
+                    [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+                ],[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 3, 6, 8, 8, 6, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 6, 6, 8, 8, 8, 2, 6, 6, 3, 0, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 6, 6, 6, 3, 0, 0],
+                    [ 0, 0, 3, 7, 1, 1, 1, 1, 1, 1, 1, 1, 6, 3, 0, 0],
+                    [ 0, 0, 4, 1,11,11, 1,11,11, 1,11,11, 1, 4, 0, 0],
+                    [ 0, 4,10, 1,10,10, 1,10,10, 1,10,10, 1,10, 4, 0],
+                    [ 0, 4,11, 1, 1,10,10,10,10,10,10, 1, 1,11, 4, 0],
+                    [ 0, 0, 4, 1,10, 1,11,11,11,11, 1,10, 1, 4, 0, 0],
+                    [ 0, 0, 0, 4,11, 1, 1, 1, 1, 1, 1,11, 4, 0, 0, 0],
+                    [ 0, 0, 0, 0, 4,11, 1, 1, 1, 1,11, 4, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 4, 4, 4, 4, 4, 4, 6, 3, 0, 0, 0],
+                    [ 0, 0, 3, 7, 7,13,12,12,12,12,12, 7, 6, 3, 0, 0],
+                    [ 0, 0, 4, 7,13, 2, 2,12,12, 2, 2,12, 7, 4, 0, 0],
+                    [ 0, 4, 2, 4,13, 2, 2,12,12, 2, 2,12, 4, 2, 4, 0],
+                    [ 0, 4, 2, 4,13,13,13,13,12,12,12,12, 4, 2, 4, 0],
+                    [ 0, 0, 4, 4, 5,13,13, 5, 5,13,13, 5, 4, 4, 0, 0],
+                    [ 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 1, 0, 0, 0, 0],
+                    [ 0, 0, 0, 1, 4, 8, 4, 1, 1, 4, 8, 4, 1, 0, 0, 0],
+                    [ 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]            
+                ],[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 3, 6, 6, 6, 6, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0],
+                    [ 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0],
+                    [ 0, 0, 3, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0],
+                    [ 0, 0, 4, 7, 6, 6, 6, 6, 6, 6, 6, 6, 7, 4, 0, 0],
+                    [ 0, 0, 4, 3, 7, 7, 6, 6, 6, 6, 7, 7, 3, 4, 0, 0],
+                    [ 0, 4,10, 1, 3, 3, 7, 7, 7, 7, 3, 3, 1,10, 4, 0],
+                    [ 0, 4,11, 1, 1, 1, 3, 3, 3, 3, 1, 1, 1,11, 4, 0],
+                    [ 0, 0, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 0, 0],
+                    [ 0, 0, 0, 0,11, 1, 1, 1, 1, 1, 1,11, 0, 0, 0, 0],
+                    [ 0, 0, 0, 3, 3,12,12, 1, 1,12,12, 3, 3, 0, 0, 0],
+                    [ 0, 0, 3, 7, 5,12,12, 8, 8,12,12, 5, 7, 3, 0, 0],
+                    [ 0, 0, 3, 5,12,12,12,12,12,12,12,12, 5, 3, 0, 0],
+                    [ 0, 0, 3, 5, 5, 5,12,12,12,12, 5, 5, 5, 3, 0, 0],
+                    [ 0, 0, 0, 5,12,12, 5,12,12, 5,13,13, 5, 0, 0, 0],
+                    [ 0, 0, 0, 0, 5,13, 5, 5, 5, 5,13, 5, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 1, 0, 0, 0, 0],
+                    [ 0, 0, 0, 1, 4, 4, 4, 1, 1, 4, 4, 4, 1, 0, 0, 0],
+                    [ 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0]            
+                ],[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 8, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 6, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 0, 0, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,11, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 5,13,13,13,13,11,11, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 5,13,13,13,13,13, 3, 6, 6, 6, 4, 4, 4, 4, 0, 0],
+                    [ 5,13,13,13, 5, 5, 3, 7, 7, 6, 6, 3, 2, 4, 4, 4],
+                    [ 5,13,13,13,13,13,13, 3, 3, 7, 7, 3, 2, 2, 2, 4],
+                    [ 0, 5,13,13, 1, 4, 4, 4, 1, 3, 3, 3, 2, 2, 2, 4],
+                    [ 0, 0, 5, 5, 1, 4, 4, 4, 8, 1, 8, 1, 4, 4, 4, 0],
+                    [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]            
+                ],[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 0, 1, 4, 4,11,11,11, 1, 1, 4, 4, 4, 0, 0],
+                    [ 0, 0, 0, 0, 5,13, 4, 4, 4, 4, 4, 3, 2, 4, 4, 4],
+                    [ 0, 0, 0, 5,13,13, 3, 6, 6, 6, 6, 3, 2, 2, 2, 4],
+                    [ 0, 0, 0, 5,13,13, 3, 7, 7, 7, 7, 3, 2, 2, 2, 4],
+                    [ 0, 0, 0, 5,13,13,13, 3, 3, 3, 3, 3, 4, 4, 4, 0],
+                    [ 0, 0, 0, 5,13,13,13,13,13,13,12,12, 5, 0, 0, 0],
+                    [ 0, 0, 0, 5,13,13,13,13,13, 5,13, 5, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 5, 4, 4, 4, 1, 4, 1, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 4, 4, 4, 8, 1, 8, 1, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+                ],[
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 3, 3, 6, 6, 6, 8, 6, 3, 0, 0, 0],
+                    [ 0, 0, 0, 0, 3, 6, 6, 7, 7, 9, 8, 2, 3, 0, 0, 0],
+                    [ 0, 0, 0, 3, 7, 6, 7, 7, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 3, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [ 0, 0, 3,10, 1, 1, 1,11, 1,11, 1,11, 0, 0, 0, 0],
+                    [ 0, 3,10, 4,10, 1,11,10, 1,10, 1,10, 4, 4, 0, 0],
+                    [ 0, 3,11, 4,10, 1, 1,10,10,10,10,10,10,10, 4, 0],
+                    [ 0, 3, 1,11,10, 1,10,10, 1,11,11,11,11,11, 4, 0],
+                    [ 0, 0, 1, 1,11,11,10, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                    [ 0, 0, 0, 1, 4,11,11,11,11, 1, 1, 4, 4, 4, 0, 0],
+                    [ 0, 0, 0, 0, 5, 4, 4, 4, 4, 4, 4, 3, 2, 4, 4, 4],
+                    [ 0, 0, 0, 5, 5,13, 3, 6, 6, 6, 6, 3, 2, 2, 2, 4],
+                    [ 0, 0, 1, 5,13,13, 3, 7, 7, 7, 7, 3, 2, 2, 2, 4],
+                    [ 0, 1, 4, 5,13,13,13, 3, 3, 3, 3, 3, 4, 4, 4, 1],
+                    [ 0, 1, 4, 5,13,13,13,13,13,13,12, 5, 1, 4, 1, 1],
+                    [ 0, 1, 4, 1, 5, 5,13,13,13,13, 5, 1, 4, 1, 1, 0],
+                    [ 0, 1, 4, 8, 1, 0, 5, 5, 5, 5, 0, 1, 4, 1, 1, 0],
+                    [ 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                ]];
+        */
     }
 }
 
