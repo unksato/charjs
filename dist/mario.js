@@ -211,25 +211,15 @@ var Charjs;
         };
         AbstractCharacter.prototype.start = function () {
             var _this = this;
-            if (!this._frameTimer)
-                if (!this._gameMaster) {
-                    this._isStarting = true;
-                    this._frameTimer = this.getTimer(function () { _this.onAction(); }, this.frameInterval);
-                }
-                else {
-                    this._frameTimer = this._gameMaster.addEvent(function () { _this.onAction(); });
-                }
+            if (!this._frameTimer) {
+                this._frameTimer = this.getTimer(function () { _this.onAction(); }, this.frameInterval);
+            }
+            this._isStarting = true;
         };
         AbstractCharacter.prototype.stop = function () {
             if (this._frameTimer) {
-                if (!this._gameMaster) {
-                    this.removeTimer(this._frameTimer);
-                    this._frameTimer = null;
-                }
-                else {
-                    this._gameMaster.removeEvent(this._frameTimer);
-                    this._frameTimer = null;
-                }
+                this.removeTimer(this._frameTimer);
+                this._frameTimer = null;
             }
             this._isStarting = false;
         };
