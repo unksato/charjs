@@ -135,6 +135,13 @@ namespace Charjs {
                 this._objects[name].init();
             }
 
+            for (let name in this._enemys) {
+                this._enemys[name].start();
+            }
+            if (this._player) {
+                this._player.start();
+            }
+
             this.registerCommand();
         }
 
@@ -158,27 +165,11 @@ namespace Charjs {
 
         public start(): void {
             this.startTimer();
-
-            for (let name in this._enemys) {
-                this._enemys[name].start();
-            }
-            if (this._player) {
-                this._player.start();
-            }
-
             this._isStarting = true;
         }
 
         public stop(): void {
             this.stopTimer();
-
-            for (let name in this._enemys) {
-                this._enemys[name].stop();
-            }
-            if (this._player) {
-                this._player.stop();
-            }
-
             this._isStarting = false;
         }
 

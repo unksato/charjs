@@ -234,14 +234,24 @@ namespace Charjs {
         }
 
         public start(): void {
-            this._isStarting = true;
-            this._frameTimer = this.getTimer(() => { this.onAction() }, this.frameInterval);
+            if(! this._frameTimer)
+                if(!this._gameMaster){
+                    this._isStarting = true;
+                    this._frameTimer = this.getTimer(() => { this.onAction() }, this.frameInterval);
+                }else{
+                    this._frameTimer = this._gameMaster.addEvent(() => {this.onAction();});
+                }
         }
 
         public stop(): void {
             if (this._frameTimer) {
-                this.removeTimer(this._frameTimer);
-                this._frameTimer = null;
+                if(!this._gameMaster){
+                    this.removeTimer(this._frameTimer);
+                    this._frameTimer = null;
+                }else{
+                    this._gameMaster.removeEvent(this._frameTimer);
+                    this._frameTimer = null;
+                }
             }
             this._isStarting = false;
         }

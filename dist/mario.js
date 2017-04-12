@@ -211,13 +211,25 @@ var Charjs;
         };
         AbstractCharacter.prototype.start = function () {
             var _this = this;
-            this._isStarting = true;
-            this._frameTimer = this.getTimer(function () { _this.onAction(); }, this.frameInterval);
+            if (!this._frameTimer)
+                if (!this._gameMaster) {
+                    this._isStarting = true;
+                    this._frameTimer = this.getTimer(function () { _this.onAction(); }, this.frameInterval);
+                }
+                else {
+                    this._frameTimer = this._gameMaster.addEvent(function () { _this.onAction(); });
+                }
         };
         AbstractCharacter.prototype.stop = function () {
             if (this._frameTimer) {
-                this.removeTimer(this._frameTimer);
-                this._frameTimer = null;
+                if (!this._gameMaster) {
+                    this.removeTimer(this._frameTimer);
+                    this._frameTimer = null;
+                }
+                else {
+                    this._gameMaster.removeEvent(this._frameTimer);
+                    this._frameTimer = null;
+                }
             }
             this._isStarting = false;
         };
@@ -1402,6 +1414,12 @@ var Charjs;
             for (var name_6 in this._objects) {
                 this._objects[name_6].init();
             }
+            for (var name_7 in this._enemys) {
+                this._enemys[name_7].start();
+            }
+            if (this._player) {
+                this._player.start();
+            }
             this.registerCommand();
         };
         GameMaster.prototype.isStarting = function () {
@@ -1412,33 +1430,21 @@ var Charjs;
         };
         GameMaster.prototype.start = function () {
             this.startTimer();
-            for (var name_7 in this._enemys) {
-                this._enemys[name_7].start();
-            }
-            if (this._player) {
-                this._player.start();
-            }
             this._isStarting = true;
         };
         GameMaster.prototype.stop = function () {
             this.stopTimer();
-            for (var name_8 in this._enemys) {
-                this._enemys[name_8].stop();
-            }
-            if (this._player) {
-                this._player.stop();
-            }
             this._isStarting = false;
         };
         GameMaster.prototype.doGameOver = function () {
-            for (var name_9 in this._enemys) {
-                this._enemys[name_9].stop();
+            for (var name_8 in this._enemys) {
+                this._enemys[name_8].stop();
             }
         };
         GameMaster.prototype.doGool = function () {
             var _this = this;
-            for (var name_10 in this._enemys) {
-                this._enemys[name_10].stop();
+            for (var name_9 in this._enemys) {
+                this._enemys[name_9].stop();
             }
             var screen = document.body;
             var blackScreen = document.createElement('div');
