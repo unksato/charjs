@@ -3,7 +3,7 @@ namespace Charjs {
 
         static GAME_MASTERS = {};
 
-        constructor(private targetDom, private charSize, private frameInterval = 45) {   
+        constructor(private targetDom, private charSize, private frameInterval = 45) {
         }
 
         public static GetController(gameName: string, targetDom, charSize: any): GameMaster {
@@ -17,25 +17,25 @@ namespace Charjs {
             return master;
         }
 
-        private _events: {[id:number]: Function} = {};
+        private _events: { [id: number]: Function } = {};
         private _eventCount = 0;
 
-        public addEvent(func: Function) : number {
+        public addEvent(func: Function): number {
             this._eventCount++;
             this._events[this._eventCount] = func;
             return this._eventCount;
         }
 
-        public removeEvent(id:number) : void {
+        public removeEvent(id: number): void {
             delete this._events[id];
         }
 
         private _gameTimer = null;
 
-        private startTimer() : void {
-            if(!this._gameTimer){
+        private startTimer(): void {
+            if (!this._gameTimer) {
                 this._gameTimer = setInterval(() => {
-                    for(let id in this._events){
+                    for (let id in this._events) {
                         this._events[id]();
                     }
                 }, this.frameInterval);
@@ -43,22 +43,22 @@ namespace Charjs {
         }
 
         private stopTimer(): void {
-            if(this._gameTimer){
+            if (this._gameTimer) {
                 clearInterval(this._gameTimer);
                 this._gameTimer = null;
             }
         }
 
-        private _enemys: {[key:string]:IEnemy} = {}
+        private _enemys: { [key: string]: IEnemy } = {}
         private _enemyCount = 0;
-        private _objects: {[key:string]:IOtherObject} = {}
+        private _objects: { [key: string]: IOtherObject } = {}
         private _objectCount = 0;
 
         private _player: IPlayer = null;
-        
+
         private _isStarting = false;
 
-        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.Right) : C {
+        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.Right): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
             char._name = 'player';
             this._player = <any>char;
@@ -66,7 +66,7 @@ namespace Charjs {
             return char;
         }
 
-        public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.Right) : C {
+        public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position, direction = Direction.Right): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
             char._name = 'enemy_' + this._enemyCount;
             this._enemyCount++;
@@ -75,7 +75,7 @@ namespace Charjs {
             return char;
         }
 
-        public CreateObjectInstance<C extends AbstractOtherObject>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position) : C {
+        public CreateObjectInstance<C extends AbstractOtherObject>(clz: { new (targetDom, pixSize, position, direction, frame): C }, position: Position): C {
             let char = new clz(this.targetDom, this.charSize, position, Direction.Right, this.frameInterval);
             char._name = 'obj_' + this._objectCount;
             this._objectCount++;
@@ -83,43 +83,43 @@ namespace Charjs {
             return char;
         }
 
-        public CreateGround<C extends AbstractGround>(clz: { new (targetDom, pixSize): C }, groundDom:HTMLElement) : void {
+        public CreateGround<C extends AbstractGround>(clz: { new (targetDom, pixSize): C }, groundDom: HTMLElement): void {
             let ground = <AbstractGround>new clz(groundDom, this.charSize);
             ground.setBorderImage();
         }
 
-        public deleteEnemy(char : IEnemy) {
+        public deleteEnemy(char: IEnemy) {
             this.cleanEntityEnemiesFromAllObjects(char);
             delete this._enemys[char._name];
-            if(Object.keys(this._enemys).length == 0){
+            if (Object.keys(this._enemys).length == 0) {
                 this.doGool();
             }
         }
 
-        public getEnemys(): {[name:string]:IEnemy} {
+        public getEnemys(): { [name: string]: IEnemy } {
             return this._enemys;
         }
 
-        public getApproachedObjects(target:ICharacter, radius: number): IOtherObject[] {
+        public getApproachedObjects(target: ICharacter, radius: number): IOtherObject[] {
             let objs = [];
             this.cleanEntityEnemiesFromAllObjects(target);
-            for(let name in this._objects){
-                if(this._objects[name].isActive){
+            for (let name in this._objects) {
+                if (this._objects[name].isActive) {
                     let objPos = this._objects[name].getPosition();
                     let charPos = target.getPosition();
-                    if( charPos.x - radius < objPos.x && objPos.x < charPos.x + radius &&
-                        charPos.y - radius < objPos.y && objPos.y < charPos.y + radius){
-                            objs.push(this._objects[name]);
-                        }
+                    if (charPos.x - radius < objPos.x && objPos.x < charPos.x + radius &&
+                        charPos.y - radius < objPos.y && objPos.y < charPos.y + radius) {
+                        objs.push(this._objects[name]);
+                    }
                 }
             }
             return objs;
         }
 
-        public cleanEntityEnemiesFromAllObjects(target:ICharacter) {
-            if(target instanceof AbstractEnemy){
-                for(let name in this._objects){
-                    this._objects[name].entityEnemies.some((v, i, array) => {if(v==target) array.splice(i, 1);return true;});
+        public cleanEntityEnemiesFromAllObjects(target: ICharacter) {
+            if (target instanceof AbstractEnemy) {
+                for (let name in this._objects) {
+                    this._objects[name].entityEnemies.some((v, i, array) => { if (v == target) array.splice(i, 1); return true; });
                 }
             }
         }
@@ -153,7 +153,7 @@ namespace Charjs {
             document.addEventListener('keypress', this.defaultCommand);
         }
 
-        defaultCommand = (e:KeyboardEvent) => {
+        defaultCommand = (e: KeyboardEvent) => {
             if (e.keyCode == 32) {
                 if (this._isStarting) {
                     this.stop();
@@ -207,14 +207,14 @@ namespace Charjs {
                             } else {
                                 this.removeEvent(goolDimOffTimer);
                                 this._player.start();
-                                let circleSize =  screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
+                                let circleSize = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
                                 let circleAnimationCount = 0;
                                 let circleTimer = this.addEvent(() => {
-                                    circleSize-=20;
+                                    circleSize -= 20;
                                     let rect = this._player.getCurrntElement().getBoundingClientRect();
                                     this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
                                     circleAnimationCount++;
-                                    if(circleSize <= 0){
+                                    if (circleSize <= 0) {
                                         clearInterval(circleTimer);
                                         this._player.destroy();
                                     }
@@ -225,7 +225,7 @@ namespace Charjs {
                     });
                 }
                 blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
-            });  
+            });
 
             this.targetDom.appendChild(blackScreen);
         }
@@ -236,16 +236,16 @@ namespace Charjs {
             let width = targetDom.scrollWidth;
             let height = targetDom.scrollHeight;
             element.id = `bkout_circle_${count}`;
-            element.setAttribute("width",width.toString());
-            element.setAttribute("height",height.toString());
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
             element.style.cssText = `z-index: ${this._player.zIndex + 1}; position: absolute;`;
             ctx.fillStyle = "black";
-            ctx.fillRect(0,0,width,height);
+            ctx.fillRect(0, 0, width, height);
 
-            if(size > 0){
+            if (size > 0) {
                 ctx.globalCompositeOperation = "destination-out";
                 ctx.beginPath();
-                ctx.arc(rect.left + rect.width / 2 + window.scrollX , rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
+                ctx.arc(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
             }
             ctx.fill();
 
@@ -261,5 +261,5 @@ namespace Charjs {
                 return false;
             }
         }
-    }   
+    }
 }

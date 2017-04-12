@@ -35,27 +35,27 @@ namespace Charjs {
         destroy(): void;
         getPosition(): IPosition;
         setPosition(position: IPosition): void;
-        getCharSize(): ISize;   
-        getCurrntElement(): HTMLCanvasElement;     
+        getCharSize(): ISize;
+        getCurrntElement(): HTMLCanvasElement;
     }
 
-    export interface ICharacter extends IObject{
+    export interface ICharacter extends IObject {
         start(): void;
         stop(): void;
         onAction(): void;
     }
 
-    export interface IPlayer extends ICharacter{
+    export interface IPlayer extends ICharacter {
         onGool(callback?: Function): void;
         releaseEnemy(): void;
     }
 
-    export interface IEnemy extends ICharacter{
+    export interface IEnemy extends ICharacter {
         onStepped(): void;
         onGrabed(player: IPlayer): void;
         onKicked(direction: number, kickPower: number): void;
         isKilled(): boolean;
-        isStepped(): boolean; 
+        isStepped(): boolean;
         drawAction(): void;
     }
 
@@ -70,24 +70,24 @@ namespace Charjs {
         protected cssTextTemplate = `z-index: ${this.zIndex}; position: absolute; bottom: 0;`;
 
         protected currentAction: HTMLCanvasElement = null;
-        protected _rightActions : HTMLCanvasElement[] = [];
-        protected _leftActions : HTMLCanvasElement[]  = [];
-        protected _verticalRightActions : HTMLCanvasElement[]  = [];
-        protected _verticalLeftActions : HTMLCanvasElement[]  = [];
+        protected _rightActions: HTMLCanvasElement[] = [];
+        protected _leftActions: HTMLCanvasElement[] = [];
+        protected _verticalRightActions: HTMLCanvasElement[] = [];
+        protected _verticalLeftActions: HTMLCanvasElement[] = [];
 
-        protected size : ISize = {height:0, width:0, widthOffset:0, heightOffset:0};
-        protected entity: Entity = {ground:null, ceiling:null, right: null, left:null};
+        protected size: ISize = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
+        protected entity: Entity = { ground: null, ceiling: null, right: null, left: null };
 
-        constructor(protected targetDom : HTMLElement ,protected pixSize = 2, protected position: IPosition = {x: 0, y:0}, protected _direction = Direction.Right, private useLeft = true, private  useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
+        constructor(protected targetDom: HTMLElement, protected pixSize = 2, protected position: IPosition = { x: 0, y: 0 }, protected _direction = Direction.Right, private useLeft = true, private useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
         }
 
         protected uncompress() {
-            if(this.cchars && this.cchars.length > 0){
+            if (this.cchars && this.cchars.length > 0) {
                 this.chars = [];
-                for(let cchar of this.cchars){
+                for (let cchar of this.cchars) {
                     this.chars.push(Util.Compression.RLD(cchar));
                 }
-            }else{
+            } else {
                 //// for debbuging code
                 // this.cchars = [];
                 // for(let char of this.chars){
@@ -96,37 +96,37 @@ namespace Charjs {
             }
         }
 
-        protected getTimer(func: Function, interval: number) : number {
-            if(this._gameMaster){
+        protected getTimer(func: Function, interval: number): number {
+            if (this._gameMaster) {
                 return this._gameMaster.addEvent(func);
-            }else{
+            } else {
                 return setInterval(func, interval);
             }
         }
 
-        protected removeTimer(id : number) : void {
-            if(this._gameMaster){
+        protected removeTimer(id: number): void {
+            if (this._gameMaster) {
                 this._gameMaster.removeEvent(id);
-            }else{
+            } else {
                 clearInterval(id);
             }
         }
 
-        init(): void{
+        init(): void {
             this.uncompress();
             for (let charactor of this.chars) {
                 this._rightActions.push(this.createCharacterAction(charactor));
-                if(this.useLeft)
+                if (this.useLeft)
                     this._leftActions.push(this.createCharacterAction(charactor, true));
                 if (this.useVertical) {
                     this._verticalRightActions.push(this.createCharacterAction(charactor, false, true));
-                    if(this.useLeft)
+                    if (this.useLeft)
                         this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
                 }
-            }           
+            }
         }
 
-        private createCharacterAction(charactorMap: number[][], isReverse:boolean = false, isVerticalRotation:boolean = false) : HTMLCanvasElement{
+        private createCharacterAction(charactorMap: number[][], isReverse: boolean = false, isVerticalRotation: boolean = false): HTMLCanvasElement {
             let element = document.createElement("canvas");
             let ctx = element.getContext("2d");
             this.size.width = this.pixSize * charactorMap[0].length;
@@ -137,15 +137,15 @@ namespace Charjs {
             element.style.cssText = this.cssTextTemplate;
             AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
             return element;
-        }    
+        }
 
-        protected static drawCharacter(ctx:CanvasRenderingContext2D, map:number[][], colors:string[], size:number, reverse: boolean, vertical: boolean) : void {
+        protected static drawCharacter(ctx: CanvasRenderingContext2D, map: number[][], colors: string[], size: number, reverse: boolean, vertical: boolean): void {
             if (reverse)
                 ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
             if (vertical)
                 ctx.transform(1, 0, 0, -1, 0, map.length * size);
-            for (let y = 0; y < map.length; y++){
-                for (let x = 0; x < map[y].length; x++){
+            for (let y = 0; y < map.length; y++) {
+                for (let x = 0; x < map[y].length; x++) {
                     if (map[y][x] != 0) {
                         ctx.beginPath();
                         ctx.rect(x * size, y * size, size, size);
@@ -167,9 +167,9 @@ namespace Charjs {
             if (removeCurrent) this.removeCharacter();
             position = position || this.position;
             if (vertical == Vertical.Up) {
-                this.currentAction = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index]; 
+                this.currentAction = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index];
             } else {
-                this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];                 
+                this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
             }
             this.currentAction.style.left = position.x + 'px';
             this.currentAction.style.bottom = position.y + 'px';
@@ -179,7 +179,7 @@ namespace Charjs {
 
         public refresh() {
             this.currentAction.style.left = this.position.x + 'px';
-            this.currentAction.style.bottom = this.position.y + 'px';            
+            this.currentAction.style.bottom = this.position.y + 'px';
         }
 
         public destroy(): void {
@@ -203,8 +203,8 @@ namespace Charjs {
         }
     }
 
-    export abstract class AbstractCharacter extends AbstractObject implements ICharacter{
-        abstract onAction(): void;        
+    export abstract class AbstractCharacter extends AbstractObject implements ICharacter {
+        abstract onAction(): void;
         abstract registerActionCommand(): void;
 
         private _isStarting = false;
@@ -212,13 +212,13 @@ namespace Charjs {
         protected _gravity = 2;
 
         public registerCommand(): void {
-            if(!this._gameMaster){
+            if (!this._gameMaster) {
                 document.addEventListener('keypress', this.defaultCommand);
             }
             this.registerActionCommand();
         }
 
-        defaultCommand = (e:KeyboardEvent) => {
+        defaultCommand = (e: KeyboardEvent) => {
             if (e.keyCode == 32) {
                 if (this._isStarting) {
                     this.stop();
@@ -234,7 +234,7 @@ namespace Charjs {
         }
 
         public start(): void {
-            if(! this._frameTimer){
+            if (!this._frameTimer) {
                 this._frameTimer = this.getTimer(() => { this.onAction() }, this.frameInterval);
             }
             this._isStarting = true;
@@ -250,7 +250,7 @@ namespace Charjs {
 
         public destroy(): void {
             this.stop();
-            if(this._gameMaster && this instanceof AbstractEnemy){
+            if (this._gameMaster && this instanceof AbstractEnemy) {
                 this._gameMaster.deleteEnemy(<any>this);
             }
             document.removeEventListener('keypress', this.defaultCommand);
@@ -263,7 +263,7 @@ namespace Charjs {
         protected leftObject: IOtherObject = null;
 
         protected updateEntity(): void {
-            if(this._gameMaster){
+            if (this._gameMaster) {
                 let objs = this._gameMaster.getApproachedObjects(this, this.size.width * 3);
                 this.entity.ground = null;
                 this.entity.ceiling = null;
@@ -273,7 +273,7 @@ namespace Charjs {
                 this.underObject = null;
                 this.rightObject = null;
                 this.leftObject = null;
-                for(let obj of objs){
+                for (let obj of objs) {
                     let oPos = obj.getPosition();
                     let oSize = obj.getCharSize();
 
@@ -287,43 +287,43 @@ namespace Charjs {
                     let cPosUnder = this.position.y;
                     let cPosUpper = this.position.y + this.size.height - this.size.heightOffset;
 
-                    if(cPosLeft >= oPosLeft && cPosLeft <= oPosRight  || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
+                    if (cPosLeft >= oPosLeft && cPosLeft <= oPosRight || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
                         // ground update
-                        if(cPosUnder >= oPosUpper && ( this.entity.ground === null || this.entity.ground >= oPosUpper)){
+                        if (cPosUnder >= oPosUpper && (this.entity.ground === null || this.entity.ground >= oPosUpper)) {
                             this.underObject = obj;
-                            if(cPosUnder == oPosUpper && this instanceof AbstractEnemy && obj.entityEnemies.indexOf(this) == -1)
+                            if (cPosUnder == oPosUpper && this instanceof AbstractEnemy && obj.entityEnemies.indexOf(this) == -1)
                                 obj.entityEnemies.push(this);
                             this.entity.ground = oPosUpper;
                             continue;
                         }
                         // ceiling update
-                        if(cPosUpper <= oPosUnder + /*Magic number*/this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling >= oPosUnder + /*Magic number*/this.pixSize * 3)){
+                        if (cPosUpper <= oPosUnder + /*Magic number*/this.pixSize * 3 && (this.entity.ceiling === null || this.entity.ceiling >= oPosUnder + /*Magic number*/this.pixSize * 3)) {
                             this.upperObject = obj;
                             this.entity.ceiling = oPosUnder + /*Magic number*/this.pixSize * 3;
                             continue;
                         }
-                   }
+                    }
 
-                    if(cPosUnder >= oPosUnder && cPosUnder < oPosUpper  || cPosUpper > oPosUnder && cPosUpper <= oPosUpper) {
+                    if (cPosUnder >= oPosUnder && cPosUnder < oPosUpper || cPosUpper > oPosUnder && cPosUpper <= oPosUpper) {
                         // left update
-                        if(cPosLeft >= oPosRight && ( this.entity.left === null || this.entity.left < oPosRight)){
+                        if (cPosLeft >= oPosRight && (this.entity.left === null || this.entity.left < oPosRight)) {
                             this.leftObject = obj;
                             this.entity.left = oPosRight;
                             continue;
                         }
                         // right update
-                        if(cPosRight <= oPosLeft && (this.entity.right === null || this.entity.right > oPosLeft)){
+                        if (cPosRight <= oPosLeft && (this.entity.right === null || this.entity.right > oPosLeft)) {
                             this.rightObject = obj;
-                            this.entity.right = oPosLeft;  
+                            this.entity.right = oPosLeft;
                             continue;
                         }
-                   }
+                    }
 
-                } 
+                }
             }
         }
 
-        protected updateDirection(): boolean{
+        protected updateDirection(): boolean {
             let currentDirection = this._direction;
             let right = this.entity.right || this.targetDom.clientWidth;
             let left = this.entity.left || 0;
@@ -346,14 +346,14 @@ namespace Charjs {
 
     export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
         abstract onStepped(): void;
-        abstract onGrabed(player:IPlayer): void;
+        abstract onGrabed(player: IPlayer): void;
         abstract onKicked(direction: number, kickPower: number): void;
         abstract isKilled(): boolean;
-        abstract isStepped(): boolean; 
+        abstract isStepped(): boolean;
         abstract drawAction(): void;
     }
 
-    export interface IOtherObject extends IObject{
+    export interface IOtherObject extends IObject {
         onPushedUp(): void;
         onTrampled(): void;
         isActive: boolean;
@@ -368,9 +368,9 @@ namespace Charjs {
     }
 
     export abstract class AbstractGround extends AbstractObject {
-        abstract setBorderImage() : void;
+        abstract setBorderImage(): void;
 
-        protected createBorderImage() : MyQ.Promise<string> {
+        protected createBorderImage(): MyQ.Promise<string> {
             this.uncompress();
 
             let q = MyQ.Deferred.defer<string>();
@@ -387,33 +387,33 @@ namespace Charjs {
 
             let drawProcess: MyQ.Promise<{}>[] = [];
 
-            drawProcess.push(this.drawImage(ctx,this.chars[0],false,false, 0,              0));
-            drawProcess.push(this.drawImage(ctx,this.chars[1],false,false, offsetSize,     0));
-            drawProcess.push(this.drawImage(ctx,this.chars[0],true,false,  offsetSize * 2, 0));
-            drawProcess.push(this.drawImage(ctx,this.chars[2],false,false, 0,              offsetSize));
-            drawProcess.push(this.drawImage(ctx,this.chars[3],false,false, offsetSize,     offsetSize));
-            drawProcess.push(this.drawImage(ctx,this.chars[2],true,false,  offsetSize * 2, offsetSize));
-            drawProcess.push(this.drawImage(ctx,this.chars[0],false,true,  0,              offsetSize * 2));
-            drawProcess.push(this.drawImage(ctx,this.chars[1],false,true,  offsetSize,     offsetSize * 2));
-            drawProcess.push(this.drawImage(ctx,this.chars[0],true,true,   offsetSize * 2, offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], false, false, 0, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[1], false, false, offsetSize, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], true, false, offsetSize * 2, 0));
+            drawProcess.push(this.drawImage(ctx, this.chars[2], false, false, 0, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[3], false, false, offsetSize, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[2], true, false, offsetSize * 2, offsetSize));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], false, true, 0, offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx, this.chars[1], false, true, offsetSize, offsetSize * 2));
+            drawProcess.push(this.drawImage(ctx, this.chars[0], true, true, offsetSize * 2, offsetSize * 2));
 
-            MyQ.Promise.all(drawProcess).then(()=>{
+            MyQ.Promise.all(drawProcess).then(() => {
                 q.resolve(element.toDataURL());
             });
 
             return q.promise;
         }
 
-        private drawImage(ctx: CanvasRenderingContext2D, map:number[][], reverse: boolean, vertical: boolean, offsetX:number, offsetY:number) : MyQ.Promise<{}>  {
+        private drawImage(ctx: CanvasRenderingContext2D, map: number[][], reverse: boolean, vertical: boolean, offsetX: number, offsetY: number): MyQ.Promise<{}> {
             let q = MyQ.Deferred.defer();
-            this.createImage(map,reverse, vertical).then((img) => {
-                ctx.drawImage(img,offsetX,offsetY);
+            this.createImage(map, reverse, vertical).then((img) => {
+                ctx.drawImage(img, offsetX, offsetY);
                 q.resolve({});
             });
             return q.promise;
         }
 
-        private createImage(map:number[][], reverse: boolean, vertical: boolean) : MyQ.Promise<HTMLImageElement> {
+        private createImage(map: number[][], reverse: boolean, vertical: boolean): MyQ.Promise<HTMLImageElement> {
             let q = MyQ.Deferred.defer<HTMLImageElement>();
 
             let element = document.createElement('canvas');
@@ -424,9 +424,9 @@ namespace Charjs {
             element.setAttribute("width", size.toString());
             element.setAttribute("height", size.toString());
 
-            AbstractCharacter.drawCharacter(ctx,map,this.colors,this.pixSize,reverse,vertical);
+            AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
             let img = new Image();
-            
+
             img.onload = () => {
                 q.resolve(img);
             }
