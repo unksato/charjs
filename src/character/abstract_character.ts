@@ -59,7 +59,23 @@ namespace Charjs {
         drawAction(): void;
     }
 
-    export abstract class AbstractObject implements IObject {
+    export abstract class AbstractPixel {
+        protected static drawPixel(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
+            ctx.beginPath();
+            ctx.rect(x * size, y * size, size, size);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        protected static createCanvasElement(width: number, height: number, zIndex: number): HTMLCanvasElement {
+            let element = document.createElement("canvas");
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
+            element.style.cssText = `z-index: ${zIndex}; position: absolute; bottom: 0;`;
+            return element;
+        }
+    }
+
+    export abstract class AbstractObject extends AbstractPixel implements IObject {
         public _name = '';
 
         public _gameMaster: GameMaster = null;
@@ -67,7 +83,6 @@ namespace Charjs {
         abstract chars: number[][][];
         abstract cchars: number[][][];
         abstract colors: string[];
-        protected cssTextTemplate = `z-index: ${this.zIndex}; position: absolute; bottom: 0;`;
 
         protected currentAction: HTMLCanvasElement = null;
         protected _rightActions: HTMLCanvasElement[] = [];
@@ -79,6 +94,7 @@ namespace Charjs {
         protected entity: Entity = { ground: null, ceiling: null, right: null, left: null };
 
         constructor(protected targetDom: HTMLElement, protected pixSize = 2, protected position: IPosition = { x: 0, y: 0 }, protected _direction = Direction.Right, private useLeft = true, private useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
+            super();
         }
 
         protected uncompress() {
@@ -127,15 +143,10 @@ namespace Charjs {
         }
 
         private createCharacterAction(charactorMap: number[][], isReverse: boolean = false, isVerticalRotation: boolean = false): HTMLCanvasElement {
-            let element = document.createElement("canvas");
-            let ctx = element.getContext("2d");
             this.size.width = this.pixSize * charactorMap[0].length;
             this.size.height = this.pixSize * charactorMap.length;
-
-            element.setAttribute("width", this.size.width.toString());
-            element.setAttribute("height", this.size.height.toString());
-            element.style.cssText = this.cssTextTemplate;
-            AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
+            let element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex);
+            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
             return element;
         }
 
@@ -147,10 +158,7 @@ namespace Charjs {
             for (let y = 0; y < map.length; y++) {
                 for (let x = 0; x < map[y].length; x++) {
                     if (map[y][x] != 0) {
-                        ctx.beginPath();
-                        ctx.rect(x * size, y * size, size, size);
-                        ctx.fillStyle = colors[map[y][x]];
-                        ctx.fill();
+                        AbstractObject.drawPixel(ctx, x, y, size, colors[map[y][x]]);
                     }
                 }
             }

@@ -30,7 +30,27 @@ var Charjs;
         return Entity;
     }());
     Charjs.Entity = Entity;
-    var AbstractObject = (function () {
+    var AbstractPixel = (function () {
+        function AbstractPixel() {
+        }
+        AbstractPixel.drawPixel = function (ctx, x, y, size, color) {
+            ctx.beginPath();
+            ctx.rect(x * size, y * size, size, size);
+            ctx.fillStyle = color;
+            ctx.fill();
+        };
+        AbstractPixel.createCanvasElement = function (width, height, zIndex) {
+            var element = document.createElement("canvas");
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
+            element.style.cssText = "z-index: " + zIndex + "; position: absolute; bottom: 0;";
+            return element;
+        };
+        return AbstractPixel;
+    }());
+    Charjs.AbstractPixel = AbstractPixel;
+    var AbstractObject = (function (_super) {
+        __extends(AbstractObject, _super);
         function AbstractObject(targetDom, pixSize, position, _direction, useLeft, useVertical, zIndex, frameInterval) {
             if (pixSize === void 0) { pixSize = 2; }
             if (position === void 0) { position = { x: 0, y: 0 }; }
@@ -39,24 +59,25 @@ var Charjs;
             if (useVertical === void 0) { useVertical = true; }
             if (zIndex === void 0) { zIndex = 2147483640; }
             if (frameInterval === void 0) { frameInterval = 45; }
-            this.targetDom = targetDom;
-            this.pixSize = pixSize;
-            this.position = position;
-            this._direction = _direction;
-            this.useLeft = useLeft;
-            this.useVertical = useVertical;
-            this.zIndex = zIndex;
-            this.frameInterval = frameInterval;
-            this._name = '';
-            this._gameMaster = null;
-            this.cssTextTemplate = "z-index: " + this.zIndex + "; position: absolute; bottom: 0;";
-            this.currentAction = null;
-            this._rightActions = [];
-            this._leftActions = [];
-            this._verticalRightActions = [];
-            this._verticalLeftActions = [];
-            this.size = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
-            this.entity = { ground: null, ceiling: null, right: null, left: null };
+            var _this = _super.call(this) || this;
+            _this.targetDom = targetDom;
+            _this.pixSize = pixSize;
+            _this.position = position;
+            _this._direction = _direction;
+            _this.useLeft = useLeft;
+            _this.useVertical = useVertical;
+            _this.zIndex = zIndex;
+            _this.frameInterval = frameInterval;
+            _this._name = '';
+            _this._gameMaster = null;
+            _this.currentAction = null;
+            _this._rightActions = [];
+            _this._leftActions = [];
+            _this._verticalRightActions = [];
+            _this._verticalLeftActions = [];
+            _this.size = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
+            _this.entity = { ground: null, ceiling: null, right: null, left: null };
+            return _this;
         }
         AbstractObject.prototype.uncompress = function () {
             if (this.cchars && this.cchars.length > 0) {
@@ -102,14 +123,10 @@ var Charjs;
         AbstractObject.prototype.createCharacterAction = function (charactorMap, isReverse, isVerticalRotation) {
             if (isReverse === void 0) { isReverse = false; }
             if (isVerticalRotation === void 0) { isVerticalRotation = false; }
-            var element = document.createElement("canvas");
-            var ctx = element.getContext("2d");
             this.size.width = this.pixSize * charactorMap[0].length;
             this.size.height = this.pixSize * charactorMap.length;
-            element.setAttribute("width", this.size.width.toString());
-            element.setAttribute("height", this.size.height.toString());
-            element.style.cssText = this.cssTextTemplate;
-            AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
+            var element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex);
+            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
             return element;
         };
         AbstractObject.drawCharacter = function (ctx, map, colors, size, reverse, vertical) {
@@ -120,10 +137,7 @@ var Charjs;
             for (var y = 0; y < map.length; y++) {
                 for (var x = 0; x < map[y].length; x++) {
                     if (map[y][x] != 0) {
-                        ctx.beginPath();
-                        ctx.rect(x * size, y * size, size, size);
-                        ctx.fillStyle = colors[map[y][x]];
-                        ctx.fill();
+                        AbstractObject.drawPixel(ctx, x, y, size, colors[map[y][x]]);
                     }
                 }
             }
@@ -174,7 +188,7 @@ var Charjs;
             return this.currentAction;
         };
         return AbstractObject;
-    }());
+    }(AbstractPixel));
     Charjs.AbstractObject = AbstractObject;
     var AbstractCharacter = (function (_super) {
         __extends(AbstractCharacter, _super);
@@ -1244,6 +1258,17 @@ var Charjs;
     MarioWorld.STEP = 2;
     MarioWorld.DEFAULT_SPEED = 2;
     Charjs.MarioWorld = MarioWorld;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
+    var Mountain01 = (function (_super) {
+        __extends(Mountain01, _super);
+        function Mountain01() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        return Mountain01;
+    }(Charjs.AbstractPixel));
+    Charjs.Mountain01 = Mountain01;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
