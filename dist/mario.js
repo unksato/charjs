@@ -1261,13 +1261,47 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
+    var AbstractMountain = (function (_super) {
+        __extends(AbstractMountain, _super);
+        function AbstractMountain(width, height, pixSize, type) {
+            var _this = _super.call(this) || this;
+            _this.width = width;
+            _this.height = height;
+            _this.pixSize = pixSize;
+            _this.type = type;
+            return _this;
+        }
+        AbstractMountain.prototype.draw = function () {
+            var element = AbstractMountain.createCanvasElement(this.width * 2, this.height, 1);
+            var ctx = element.getContext("2d");
+            var center = this.width / 2;
+            for (var i = 0; i < this.height; i++) {
+                if (i < 3) {
+                    for (var w = center - (i + 1) * 2; w < center + (i + i) * 2; w++) {
+                        AbstractMountain.drawPixel(ctx, w, i, this.pixSize, this.colors[0]);
+                    }
+                }
+                else {
+                    AbstractMountain.drawPixel(ctx, center - 4 - i, i, this.pixSize, this.colors[0]);
+                    AbstractMountain.drawPixel(ctx, center - 5 - i, i, this.pixSize, this.colors[0]);
+                    AbstractMountain.drawPixel(ctx, center + 4 + i, i, this.pixSize, this.colors[0]);
+                    AbstractMountain.drawPixel(ctx, center + 5 + i, i, this.pixSize, this.colors[0]);
+                }
+            }
+            return element;
+        };
+        return AbstractMountain;
+    }(Charjs.AbstractPixel));
+    Charjs.AbstractMountain = AbstractMountain;
     var Mountain01 = (function (_super) {
         __extends(Mountain01, _super);
         function Mountain01() {
-            return _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.colors = ['#6daf91', '#5d9f81', '#4d8f71'];
+            return _this;
         }
         return Mountain01;
-    }(Charjs.AbstractPixel));
+    }(AbstractMountain));
     Charjs.Mountain01 = Mountain01;
 })(Charjs || (Charjs = {}));
 var Charjs;
