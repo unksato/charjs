@@ -6,25 +6,42 @@ namespace Charjs {
         }
 
         draw(): HTMLCanvasElement {
-            let element = AbstractMountain.createCanvasElement(this.width * 2, this.height, 1);
+            let element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
             let ctx = element.getContext("2d");
-            let center = this.width / 2;
+            let center = this.width / this.pixSize / 2;
 
             for (let i = 0; i < this.height; i++) {
                 if (i < 3) {
-                    for (let w = center - (i + 1) * 2; w < center + (i + i) * 2; w++) {
-                        AbstractMountain.drawPixel(ctx, w, i, this.pixSize, this.colors[0]);
-                    }
+                    for (let w = center - (i + 1) * 2; w < center; w++)
+                        this.picWithMirror(center, ctx, w, i, this.colors[0]);
                 } else {
-                    AbstractMountain.drawPixel(ctx, center - 4 - i, i, this.pixSize, this.colors[0]);
-                    AbstractMountain.drawPixel(ctx, center - 5 - i, i, this.pixSize, this.colors[0]);
-                    AbstractMountain.drawPixel(ctx, center + 4 + i, i, this.pixSize, this.colors[0]);
-                    AbstractMountain.drawPixel(ctx, center + 5 + i, i, this.pixSize, this.colors[0]);
+                    for (let j = 2; j < 5; j++) {
+                        let s = center - i - j;
+                        this.picWithMirror(center, ctx, s, i, this.colors[0]);
+                        if (i >= 5)
+                            this.picWithMirror(center, ctx, s + 2, i, this.colors[1]);
+                    }
+                }
+                if (1 < i && i < 5) {
+                    for (let w = center - (i - 1) * 2; w < center; w++)
+                        this.picWithMirror(center, ctx, w, i, this.colors[1]);
+                }
+                if (3 < i && i < 6) {
+                    for (let w = center - ((i - 4) * 3) - 2; w < center; w++)
+                        this.picWithMirror(center, ctx, w, i, this.colors[2]);
+                } else if (i >= 5) {
+                    for (let w = center - i; w < center; w++)
+                        this.picWithMirror(center, ctx, w, i, this.colors[2]);
                 }
             }
             return element;
         }
 
+        private picWithMirror(center: number, ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
+            AbstractMountain.drawPixel(ctx, x, y, this.pixSize, color);
+            let mirrorX = center + (center - x) - 1;
+            AbstractMountain.drawPixel(ctx, mirrorX, y, this.pixSize, color);
+        }
     }
 
     export class Mountain01 extends AbstractMountain {
