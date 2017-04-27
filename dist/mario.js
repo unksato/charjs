@@ -1275,30 +1275,22 @@ var Charjs;
             var element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
             var ctx = element.getContext("2d");
             var center = this.width / this.pixSize / 2;
+            var datas = this.deepCopy(this.dataPattern);
+            for (var _i = 0, datas_1 = datas; _i < datas_1.length; _i++) {
+                var data = datas_1[_i];
+                data.currentOffset = center;
+            }
             for (var i = 0; i < this.height; i++) {
-                if (i < 3) {
-                    for (var w = center - (i + 1) * 2; w < center; w++)
-                        this.picWithMirror(center, ctx, w, i, this.colors[0]);
-                }
-                else {
-                    for (var j = 2; j < 5; j++) {
-                        var s = center - i - j;
-                        this.picWithMirror(center, ctx, s, i, this.colors[0]);
-                        if (i >= 5)
-                            this.picWithMirror(center, ctx, s + 2, i, this.colors[1]);
+                for (var _a = 0, datas_2 = datas; _a < datas_2.length; _a++) {
+                    var data = datas_2[_a];
+                    if (data.start <= i) {
+                        var start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
+                        var end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
+                        for (var w = start; w < end; w++) {
+                            this.picWithMirror(center, ctx, w, i, data.color);
+                        }
+                        data.currentOffset = start;
                     }
-                }
-                if (1 < i && i < 5) {
-                    for (var w = center - (i - 1) * 2; w < center; w++)
-                        this.picWithMirror(center, ctx, w, i, this.colors[1]);
-                }
-                if (3 < i && i < 6) {
-                    for (var w = center - ((i - 4) * 3) - 2; w < center; w++)
-                        this.picWithMirror(center, ctx, w, i, this.colors[2]);
-                }
-                else if (i >= 5) {
-                    for (var w = center - i; w < center; w++)
-                        this.picWithMirror(center, ctx, w, i, this.colors[2]);
                 }
             }
             return element;
@@ -1308,6 +1300,9 @@ var Charjs;
             var mirrorX = center + (center - x) - 1;
             AbstractMountain.drawPixel(ctx, mirrorX, y, this.pixSize, color);
         };
+        AbstractMountain.prototype.deepCopy = function (obj) {
+            return JSON.parse(JSON.stringify(obj));
+        };
         return AbstractMountain;
     }(Charjs.AbstractPixel));
     Charjs.AbstractMountain = AbstractMountain;
@@ -1315,12 +1310,58 @@ var Charjs;
         __extends(Mountain01, _super);
         function Mountain01() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.colors = ['#6daf91', '#5d9f81', '#4d8f71'];
+            _this.dataPattern = [{
+                    start: 0,
+                    pattern: [2, 2, 2, 1],
+                    fillPattern: [0, 2, 2, 2, 1],
+                    color: '#6daf91',
+                    isFill: false
+                }, {
+                    start: 2,
+                    pattern: [2, 2, 2, 1],
+                    fillPattern: [0, 2, 2, 1],
+                    color: '#5d9f81',
+                    isFill: false
+                }, {
+                    start: 4,
+                    pattern: [2, 3, 1],
+                    fillPattern: [],
+                    color: '#4d8f71',
+                    isFill: true
+                }];
             return _this;
         }
         return Mountain01;
     }(AbstractMountain));
     Charjs.Mountain01 = Mountain01;
+    var Mountain02 = (function (_super) {
+        __extends(Mountain02, _super);
+        function Mountain02() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.dataPattern = [{
+                    start: 0,
+                    pattern: [2, 3, 3, 2],
+                    fillPattern: [2, 3, 3, 2],
+                    color: '#98e0c0',
+                    isFill: false
+                }, {
+                    start: 2,
+                    pattern: [2, 4, 2],
+                    fillPattern: [0, 0, 2],
+                    color: '#88d0b0',
+                    isFill: false
+                }, {
+                    start: 3,
+                    pattern: [2],
+                    fillPattern: [],
+                    color: '#78c0a0',
+                    isFill: true
+                }];
+            return _this;
+        }
+        return Mountain02;
+    }(AbstractMountain));
+    Charjs.Mountain02 = Mountain02;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
