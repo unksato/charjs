@@ -1362,6 +1362,34 @@ var Charjs;
         return Mountain02;
     }(AbstractMountain));
     Charjs.Mountain02 = Mountain02;
+    var Mountain03 = (function (_super) {
+        __extends(Mountain03, _super);
+        function Mountain03() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.dataPattern = [{
+                    start: 0,
+                    pattern: [2, 3, 3, 2],
+                    fillPattern: [0, 2, 3, 1, 2],
+                    color: '#6daf91',
+                    isFill: false
+                }, {
+                    start: 2,
+                    pattern: [2, 5, 1, 2],
+                    fillPattern: [0, 0, 1, 1, 2],
+                    color: '#5d9f81',
+                    isFill: false
+                }, {
+                    start: 3,
+                    pattern: [5, 1, 1, 1, 2],
+                    fillPattern: [],
+                    color: '#4d8f71',
+                    isFill: true
+                }];
+            return _this;
+        }
+        return Mountain03;
+    }(AbstractMountain));
+    Charjs.Mountain03 = Mountain03;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {

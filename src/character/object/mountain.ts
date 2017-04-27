@@ -71,7 +71,6 @@ namespace Charjs {
         }];
     }
 
-
     export class Mountain02 extends AbstractMountain {
         dataPattern = [{
             start: 0,
@@ -93,4 +92,27 @@ namespace Charjs {
             isFill: true
         }];
     }
+
+    export class Mountain03 extends AbstractMountain {
+        dataPattern = [{
+            start: 0,
+            pattern: [2,3,3,2],
+            fillPattern: [0,2,3,1,2],
+            color:'#6daf91',
+            isFill: false
+        },{
+            start: 2,
+            pattern: [2,5,1,2],
+            fillPattern: [0,0,1,1,2],
+            color: '#5d9f81',
+            isFill: false
+        },{
+            start: 3,
+            pattern: [5,1,1,1,2],
+            fillPattern: [],
+            color: '#4d8f71',
+            isFill: true
+        }];
+    }
+
 }
