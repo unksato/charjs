@@ -23,19 +23,21 @@ namespace Charjs {
                 data.currentOffset = center;
             }
 
-            for (let i = 0; i < this.height; i++) {
+            let mountHeight = (( this.width / 2) - (datas[0].pattern.reduce(function(prev, current){ return prev + current;}) * this.pixSize)  ) / (datas[0].pattern[datas[0].pattern.length - 1] * this.pixSize) + datas[0].pattern.length;
+            let top = (this.height / this.pixSize) - mountHeight;
+
+            for (let i = 0; i < mountHeight; i++) {
                 for(let data of datas){
                     if(data.start <= i){
                         let start = data.currentOffset - data.pattern[Math.min(i - data.start ,data.pattern.length-1)];
                         let end =  data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start ,data.fillPattern.length-1)];
                         for(let w = start;w < end; w++){
-                            this.picWithMirror(center, ctx, w, i, data.color);
+                            this.picWithMirror(center, ctx, w, i + top, data.color);
                         }
                         data.currentOffset = start;
                     }
                 }
             }
-
             return element;
         }
 

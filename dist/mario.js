@@ -1280,14 +1280,16 @@ var Charjs;
                 var data = datas_1[_i];
                 data.currentOffset = center;
             }
-            for (var i = 0; i < this.height; i++) {
+            var mountHeight = ((this.width / 2) - (datas[0].pattern.reduce(function (prev, current) { return prev + current; }) * this.pixSize)) / (datas[0].pattern[datas[0].pattern.length - 1] * this.pixSize) + datas[0].pattern.length;
+            var top = (this.height / this.pixSize) - mountHeight;
+            for (var i = 0; i < mountHeight; i++) {
                 for (var _a = 0, datas_2 = datas; _a < datas_2.length; _a++) {
                     var data = datas_2[_a];
                     if (data.start <= i) {
                         var start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
                         var end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
                         for (var w = start; w < end; w++) {
-                            this.picWithMirror(center, ctx, w, i, data.color);
+                            this.picWithMirror(center, ctx, w, i + top, data.color);
                         }
                         data.currentOffset = start;
                     }
