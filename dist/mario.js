@@ -30,7 +30,36 @@ var Charjs;
         return Entity;
     }());
     Charjs.Entity = Entity;
-    var AbstractObject = (function () {
+    var AbstractPixel = (function () {
+        function AbstractPixel() {
+        }
+        AbstractPixel.drawPixel = function (ctx, x, y, size, color) {
+            ctx.beginPath();
+            ctx.rect(x * size, y * size, size, size);
+            ctx.fillStyle = color;
+            ctx.fill();
+        };
+        AbstractPixel.createCanvasElement = function (width, height, zIndex) {
+            var element = document.createElement("canvas");
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
+            element.style.cssText = "z-index: " + zIndex + "; position: absolute; bottom: 0;";
+            return element;
+        };
+        AbstractPixel.prototype.toImage = function (element) {
+            var q = MyQ.Deferred.defer();
+            var img = new Image();
+            img.onload = function () {
+                q.resolve(img);
+            };
+            img.src = element.toDataURL();
+            return q.promise;
+        };
+        return AbstractPixel;
+    }());
+    Charjs.AbstractPixel = AbstractPixel;
+    var AbstractObject = (function (_super) {
+        __extends(AbstractObject, _super);
         function AbstractObject(targetDom, pixSize, position, _direction, useLeft, useVertical, zIndex, frameInterval) {
             if (pixSize === void 0) { pixSize = 2; }
             if (position === void 0) { position = { x: 0, y: 0 }; }
@@ -39,24 +68,25 @@ var Charjs;
             if (useVertical === void 0) { useVertical = true; }
             if (zIndex === void 0) { zIndex = 2147483640; }
             if (frameInterval === void 0) { frameInterval = 45; }
-            this.targetDom = targetDom;
-            this.pixSize = pixSize;
-            this.position = position;
-            this._direction = _direction;
-            this.useLeft = useLeft;
-            this.useVertical = useVertical;
-            this.zIndex = zIndex;
-            this.frameInterval = frameInterval;
-            this._name = '';
-            this._gameMaster = null;
-            this.cssTextTemplate = "z-index: " + this.zIndex + "; position: absolute; bottom: 0;";
-            this.currentAction = null;
-            this._rightActions = [];
-            this._leftActions = [];
-            this._verticalRightActions = [];
-            this._verticalLeftActions = [];
-            this.size = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
-            this.entity = { ground: null, ceiling: null, right: null, left: null };
+            var _this = _super.call(this) || this;
+            _this.targetDom = targetDom;
+            _this.pixSize = pixSize;
+            _this.position = position;
+            _this._direction = _direction;
+            _this.useLeft = useLeft;
+            _this.useVertical = useVertical;
+            _this.zIndex = zIndex;
+            _this.frameInterval = frameInterval;
+            _this._name = '';
+            _this._gameMaster = null;
+            _this.currentAction = null;
+            _this._rightActions = [];
+            _this._leftActions = [];
+            _this._verticalRightActions = [];
+            _this._verticalLeftActions = [];
+            _this.size = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
+            _this.entity = { ground: null, ceiling: null, right: null, left: null };
+            return _this;
         }
         AbstractObject.prototype.uncompress = function () {
             if (this.cchars && this.cchars.length > 0) {
@@ -102,14 +132,10 @@ var Charjs;
         AbstractObject.prototype.createCharacterAction = function (charactorMap, isReverse, isVerticalRotation) {
             if (isReverse === void 0) { isReverse = false; }
             if (isVerticalRotation === void 0) { isVerticalRotation = false; }
-            var element = document.createElement("canvas");
-            var ctx = element.getContext("2d");
             this.size.width = this.pixSize * charactorMap[0].length;
             this.size.height = this.pixSize * charactorMap.length;
-            element.setAttribute("width", this.size.width.toString());
-            element.setAttribute("height", this.size.height.toString());
-            element.style.cssText = this.cssTextTemplate;
-            AbstractCharacter.drawCharacter(ctx, charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
+            var element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex);
+            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
             return element;
         };
         AbstractObject.drawCharacter = function (ctx, map, colors, size, reverse, vertical) {
@@ -120,10 +146,7 @@ var Charjs;
             for (var y = 0; y < map.length; y++) {
                 for (var x = 0; x < map[y].length; x++) {
                     if (map[y][x] != 0) {
-                        ctx.beginPath();
-                        ctx.rect(x * size, y * size, size, size);
-                        ctx.fillStyle = colors[map[y][x]];
-                        ctx.fill();
+                        AbstractObject.drawPixel(ctx, x, y, size, colors[map[y][x]]);
                     }
                 }
             }
@@ -174,7 +197,7 @@ var Charjs;
             return this.currentAction;
         };
         return AbstractObject;
-    }());
+    }(AbstractPixel));
     Charjs.AbstractObject = AbstractObject;
     var AbstractCharacter = (function (_super) {
         __extends(AbstractCharacter, _super);
@@ -363,19 +386,13 @@ var Charjs;
             return q.promise;
         };
         AbstractGround.prototype.createImage = function (map, reverse, vertical) {
-            var q = MyQ.Deferred.defer();
             var element = document.createElement('canvas');
             var ctx = element.getContext("2d");
             var size = this.pixSize * map.length;
             element.setAttribute("width", size.toString());
             element.setAttribute("height", size.toString());
             AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
-            var img = new Image();
-            img.onload = function () {
-                q.resolve(img);
-            };
-            img.src = element.toDataURL();
-            return q.promise;
+            return this.toImage(element);
         };
         return AbstractGround;
     }(AbstractObject));
@@ -1247,6 +1264,182 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
+    var AbstractMountain = (function (_super) {
+        __extends(AbstractMountain, _super);
+        function AbstractMountain(width, height, pixSize, type) {
+            var _this = _super.call(this) || this;
+            _this.width = width;
+            _this.height = height;
+            _this.pixSize = pixSize;
+            _this.type = type;
+            _this.element = null;
+            return _this;
+        }
+        AbstractMountain.prototype.createImage = function () {
+            return this.toImage(this.draw());
+        };
+        AbstractMountain.prototype.draw = function () {
+            if (!this.element) {
+                this.element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
+                var ctx = this.element.getContext("2d");
+                var center = this.width / this.pixSize / 2;
+                var datas = this.deepCopy(this.dataPattern);
+                for (var _i = 0, datas_1 = datas; _i < datas_1.length; _i++) {
+                    var data = datas_1[_i];
+                    data.currentOffset = center;
+                }
+                var mountHeight = Math.min(this.height / this.pixSize, ((this.width / 2) - (datas[0].pattern.reduce(function (prev, current) { return prev + current; }) * this.pixSize)) / (datas[0].pattern[datas[0].pattern.length - 1] * this.pixSize) + datas[0].pattern.length);
+                var top_1 = (this.height / this.pixSize) - mountHeight;
+                for (var i = 0; i < mountHeight; i++) {
+                    for (var _a = 0, datas_2 = datas; _a < datas_2.length; _a++) {
+                        var data = datas_2[_a];
+                        if (data.start <= i) {
+                            var start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
+                            var end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
+                            for (var w = start; w < end; w++) {
+                                this.picWithMirror(center, ctx, w, i + top_1, data.color);
+                            }
+                            data.currentOffset = start;
+                        }
+                    }
+                }
+            }
+            return this.element;
+        };
+        AbstractMountain.prototype.picWithMirror = function (center, ctx, x, y, color) {
+            AbstractMountain.drawPixel(ctx, x, y, this.pixSize, color);
+            var mirrorX = center + (center - x) - 1;
+            AbstractMountain.drawPixel(ctx, mirrorX, y, this.pixSize, color);
+        };
+        AbstractMountain.prototype.deepCopy = function (obj) {
+            return JSON.parse(JSON.stringify(obj));
+        };
+        return AbstractMountain;
+    }(Charjs.AbstractPixel));
+    Charjs.AbstractMountain = AbstractMountain;
+    var Mountain01 = (function (_super) {
+        __extends(Mountain01, _super);
+        function Mountain01() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.dataPattern = [{
+                    start: 0,
+                    pattern: [2, 2, 2, 1],
+                    fillPattern: [0, 2, 2, 2, 1],
+                    color: '#6daf91',
+                    isFill: false
+                }, {
+                    start: 2,
+                    pattern: [2, 2, 2, 1],
+                    fillPattern: [0, 2, 2, 1],
+                    color: '#5d9f81',
+                    isFill: false
+                }, {
+                    start: 4,
+                    pattern: [2, 3, 1],
+                    fillPattern: [],
+                    color: '#4d8f71',
+                    isFill: true
+                }];
+            return _this;
+        }
+        return Mountain01;
+    }(AbstractMountain));
+    Charjs.Mountain01 = Mountain01;
+    var Mountain02 = (function (_super) {
+        __extends(Mountain02, _super);
+        function Mountain02() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.dataPattern = [{
+                    start: 0,
+                    pattern: [2, 3, 3, 2],
+                    fillPattern: [2, 3, 3, 2],
+                    color: '#98e0c0',
+                    isFill: false
+                }, {
+                    start: 2,
+                    pattern: [2, 4, 2],
+                    fillPattern: [0, 0, 2],
+                    color: '#88d0b0',
+                    isFill: false
+                }, {
+                    start: 3,
+                    pattern: [2],
+                    fillPattern: [],
+                    color: '#78c0a0',
+                    isFill: true
+                }];
+            return _this;
+        }
+        return Mountain02;
+    }(AbstractMountain));
+    Charjs.Mountain02 = Mountain02;
+    var Mountain03 = (function (_super) {
+        __extends(Mountain03, _super);
+        function Mountain03() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.dataPattern = [{
+                    start: 0,
+                    pattern: [2, 3, 3, 2],
+                    fillPattern: [0, 2, 3, 1, 2],
+                    color: '#6daf91',
+                    isFill: false
+                }, {
+                    start: 2,
+                    pattern: [2, 5, 1, 2],
+                    fillPattern: [0, 0, 1, 1, 2],
+                    color: '#5d9f81',
+                    isFill: false
+                }, {
+                    start: 3,
+                    pattern: [5, 1, 1, 1, 2],
+                    fillPattern: [],
+                    color: '#4d8f71',
+                    isFill: true
+                }];
+            return _this;
+        }
+        return Mountain03;
+    }(AbstractMountain));
+    Charjs.Mountain03 = Mountain03;
+    var Mountains = (function () {
+        function Mountains(pixSize) {
+            this.pixSize = pixSize;
+            this.width = 1024;
+            this.height = 864;
+        }
+        Mountains.prototype.drawBackgroundImage = function (targetDom) {
+            targetDom.style.backgroundColor = "#99d9ea";
+            var element = document.createElement("canvas");
+            var ctx = element.getContext("2d");
+            element.setAttribute("width", this.width.toString());
+            element.setAttribute("height", this.height.toString());
+            var mountains = [];
+            var mount02 = new Mountain02(1100, 250, this.pixSize);
+            mountains.push({ mount: mount02, offsetX: -330, offsetY: 864 - 250 });
+            mountains.push({ mount: mount02, offsetX: 695, offsetY: 864 - 250 });
+            mountains.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 50, offsetY: 864 - 200 });
+            mountains.push({ mount: new Mountain02(700, 180, this.pixSize), offsetX: 350, offsetY: 864 - 180 });
+            mountains.push({ mount: new Mountain01(350, 150, this.pixSize), offsetX: 0, offsetY: 864 - 150 });
+            MyQ.Promise.reduce(mountains, this.composition(ctx)).then(function () {
+                targetDom.style.backgroundImage = "url(" + element.toDataURL() + ")";
+                targetDom.style.backgroundPosition = "left bottom";
+                targetDom.style.backgroundRepeat = "repeat-x";
+            });
+        };
+        Mountains.prototype.composition = function (ctx) {
+            return function (q, value) {
+                value.mount.createImage().then(function (img) {
+                    ctx.drawImage(img, value.offsetX, value.offsetY);
+                    q.resolve({});
+                });
+            };
+        };
+        return Mountains;
+    }());
+    Charjs.Mountains = Mountains;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
     var NormalGroundWorld = (function (_super) {
         __extends(NormalGroundWorld, _super);
         function NormalGroundWorld() {
@@ -1594,10 +1787,20 @@ var MyQ;
             this._finallyCalled = false;
         }
         Promise.prototype.resolve = function (arg) {
+            var _this = this;
             if (this._ok) {
                 try {
                     var ret = this._ok(arg);
-                    this._next.resolve(ret);
+                    if (ret instanceof Promise) {
+                        ret.then(function (arg) {
+                            _this._next.resolve(arg);
+                        }).catch(function (e) {
+                            _this.reject(e);
+                        });
+                    }
+                    else {
+                        this._next.resolve(ret);
+                    }
                 }
                 catch (e) {
                     this.reject(e);
@@ -1646,11 +1849,11 @@ var MyQ;
             return this;
         };
         Promise.when = function (arg) {
-            var Promise = new Promise();
+            var d = MyQ.Deferred.defer();
             setTimeout(function () {
-                Promise.resolve(arg);
+                d.resolve(arg);
             }, 0);
-            return Promise;
+            return d.promise;
         };
         Promise.all = function (Promises) {
             var PromiseLength = Promises.length;
@@ -1723,6 +1926,15 @@ var MyQ;
                 Promises[i].then(resolve).catch(reject);
             }
             return racePromise;
+        };
+        Promise.reduce = function (values, func) {
+            return values.reduce(function (prev, current) {
+                return prev.then(function () {
+                    var d = MyQ.Deferred.defer();
+                    func(d, current);
+                    return d.promise;
+                });
+            }, Promise.when());
         };
         return Promise;
     }());
