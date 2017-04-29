@@ -13,7 +13,15 @@ namespace MyQ {
             if (this._ok) {
                 try {
                     var ret = this._ok(arg);
-                    this._next.resolve(ret);
+                    if (ret instanceof Promise) {
+                        ret.then((arg) => {
+                            this._next.resolve(arg);
+                        }).catch((e) => {
+                            this.reject(e);
+                        });
+                    } else {
+                        this._next.resolve(ret);
+                    }
                 } catch (e) {
                     this.reject(e);
                 } finally {
@@ -38,7 +46,7 @@ namespace MyQ {
         public final() {
             if (this._next) {
                 this._next.final();
-                } else if (this._final) {
+            } else if (this._final) {
                 if (!this._finallyCalled) {
                     this._finallyCalled = true;
                     this._final();
@@ -62,14 +70,14 @@ namespace MyQ {
             return this;
         }
 
-        public static when<T>(arg: T): Promise<T> {
-            var Promise = new Promise<T>();
+        public static when<T>(arg?: T): Promise<T> {
+            let d = Deferred.defer();
 
             setTimeout(() => {
-            Promise.resolve(arg);
+                d.resolve(arg);
             }, 0);
 
-            return Promise;
+            return d.promise;
         }
 
         public static all(Promises: Promise<any>[]): Promise<any[]> {
@@ -78,17 +86,17 @@ namespace MyQ {
             var PromisesArgs = [];
             var allPromise = new Promise<any[]>();
 
-            var resolve = function(index: number) {
-                return function(arg) {
+            var resolve = function (index: number) {
+                return function (arg) {
                     callbackCount++;
                     PromisesArgs[index] = arg;
                     if (PromiseLength == callbackCount) {
-                    allPromise.resolve(PromisesArgs);
+                        allPromise.resolve(PromisesArgs);
                     }
                 }
             };
-            var reject = function(index: number) {
-                return function(e: any) {
+            var reject = function (index: number) {
+                return function (e: any) {
                     allPromise.reject(e);
                 }
             };
@@ -105,21 +113,21 @@ namespace MyQ {
             var results = [];
             var allPromise = new Promise<any[]>();
 
-            var resolve = function(index: number) {
-                return function(arg) {
+            var resolve = function (index: number) {
+                return function (arg) {
                     callbackCount++;
                     results[index] = { state: 'fulfilled', value: arg };
                     if (PromiseLength == callbackCount) {
-                    allPromise.resolve(results);
+                        allPromise.resolve(results);
                     }
                 }
             };
-            var reject = function(index: number) {
-                return function(e: any) {
+            var reject = function (index: number) {
+                return function (e: any) {
                     callbackCount++;
                     results[index] = { state: 'rejected', reason: e };
                     if (PromiseLength == callbackCount) {
-                    allPromise.resolve(results);
+                        allPromise.resolve(results);
                     }
                 }
             };
@@ -134,13 +142,13 @@ namespace MyQ {
             var racePromise = new Promise<any>();
             var raceCalled = false;
 
-            var resolve = function(arg) {
+            var resolve = function (arg) {
                 if (!raceCalled) {
                     raceCalled = true;
                     racePromise.resolve(arg);
                 }
             };
-            var reject = function(e: any) {
+            var reject = function (e: any) {
                 if (!raceCalled) {
                     raceCalled = true;
                     racePromise.reject(e);
@@ -152,6 +160,16 @@ namespace MyQ {
             }
 
             return racePromise;
+        }
+
+        public static reduce<T>(values: any[], func: { (defer: MyQ.Deferred<{}>, value: T) }): MyQ.Promise<{}> {
+            return values.reduce((prev: MyQ.Promise<{}>, current: T) => {
+                return prev.then(() => {
+                    let d = MyQ.Deferred.defer();
+                    func(d, current);
+                    return d.promise;
+                });
+            }, Promise.when());
         }
     }
 }

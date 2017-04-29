@@ -34,7 +34,8 @@
             // for(var i = 0; i < 8;i++)
             //     controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 100 + 32 * i, y: 0 });
 
-            document.body.appendChild(new Charjs.Mountain01(400, 300, 2).draw());
+            new Charjs.Mountains(2).drawBackgroundImage(document.body);
+            // document.body.appendChild(new Charjs.Mountain01(400, 300, 2).draw());
 
             controller.init();
             controller.start();
@@ -62,10 +63,10 @@
         <!-- body {
             margin: 0px;
             overflow: hidden;
-            /*background-image: url('./resource/01.png');*/
+            /*background-image: url('./resource/01.png');
             background-position: left bottom;
             background-repeat: repeat-x;
-            background-color: #99d9ea;
+            background-color: #99d9ea;*/
         }
         
         div#container {

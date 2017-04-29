@@ -73,6 +73,16 @@ namespace Charjs {
             element.style.cssText = `z-index: ${zIndex}; position: absolute; bottom: 0;`;
             return element;
         }
+
+        toImage(element: HTMLCanvasElement): MyQ.Promise<HTMLImageElement> {
+            let q = MyQ.Deferred.defer<HTMLImageElement>();
+            let img = new Image();
+            img.onload = () => {
+                q.resolve(img);
+            }
+            img.src = element.toDataURL();
+            return q.promise;
+        }
     }
 
     export abstract class AbstractObject extends AbstractPixel implements IObject {
@@ -422,24 +432,13 @@ namespace Charjs {
         }
 
         private createImage(map: number[][], reverse: boolean, vertical: boolean): MyQ.Promise<HTMLImageElement> {
-            let q = MyQ.Deferred.defer<HTMLImageElement>();
-
             let element = document.createElement('canvas');
             let ctx = element.getContext("2d");
-
             let size = this.pixSize * map.length;
-
             element.setAttribute("width", size.toString());
             element.setAttribute("height", size.toString());
-
             AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
-            let img = new Image();
-
-            img.onload = () => {
-                q.resolve(img);
-            }
-            img.src = element.toDataURL();
-            return q.promise;
+            return this.toImage(element);
         }
 
     }

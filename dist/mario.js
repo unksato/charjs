@@ -46,6 +46,15 @@ var Charjs;
             element.style.cssText = "z-index: " + zIndex + "; position: absolute; bottom: 0;";
             return element;
         };
+        AbstractPixel.prototype.toImage = function (element) {
+            var q = MyQ.Deferred.defer();
+            var img = new Image();
+            img.onload = function () {
+                q.resolve(img);
+            };
+            img.src = element.toDataURL();
+            return q.promise;
+        };
         return AbstractPixel;
     }());
     Charjs.AbstractPixel = AbstractPixel;
@@ -377,19 +386,13 @@ var Charjs;
             return q.promise;
         };
         AbstractGround.prototype.createImage = function (map, reverse, vertical) {
-            var q = MyQ.Deferred.defer();
             var element = document.createElement('canvas');
             var ctx = element.getContext("2d");
             var size = this.pixSize * map.length;
             element.setAttribute("width", size.toString());
             element.setAttribute("height", size.toString());
             AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
-            var img = new Image();
-            img.onload = function () {
-                q.resolve(img);
-            };
-            img.src = element.toDataURL();
-            return q.promise;
+            return this.toImage(element);
         };
         return AbstractGround;
     }(AbstractObject));
@@ -1271,6 +1274,9 @@ var Charjs;
             _this.type = type;
             return _this;
         }
+        AbstractMountain.prototype.createImage = function () {
+            return this.toImage(this.draw());
+        };
         AbstractMountain.prototype.draw = function () {
             var element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
             var ctx = element.getContext("2d");
@@ -1392,6 +1398,40 @@ var Charjs;
         return Mountain03;
     }(AbstractMountain));
     Charjs.Mountain03 = Mountain03;
+    var Mountains = (function () {
+        function Mountains(pixSize) {
+            this.pixSize = pixSize;
+            this.width = 1024;
+            this.height = 864;
+        }
+        Mountains.prototype.drawBackgroundImage = function (targetDom) {
+            targetDom.style.backgroundColor = "#99d9ea";
+            var element = document.createElement("canvas");
+            var ctx = element.getContext("2d");
+            element.setAttribute("width", this.width.toString());
+            element.setAttribute("height", this.height.toString());
+            var mountains = [];
+            mountains.push({ mount: new Mountain02(1120, 300, this.pixSize), offsetX: -340, offsetY: 864 - 235 });
+            mountains.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 0, offsetY: 864 - 200 });
+            mountains.push({ mount: new Mountain02(600, 170, this.pixSize), offsetX: 350, offsetY: 864 - 200 });
+            mountains.push({ mount: new Mountain01(350, 170, this.pixSize), offsetX: 0, offsetY: 864 - 170 });
+            MyQ.Promise.reduce(mountains, this.composition(ctx)).then(function () {
+                targetDom.style.backgroundImage = "url(" + element.toDataURL() + ")";
+                targetDom.style.backgroundPosition = "left bottom";
+                targetDom.style.backgroundRepeat = "repeat-x";
+            });
+        };
+        Mountains.prototype.composition = function (ctx) {
+            return function (q, value) {
+                value.mount.createImage().then(function (img) {
+                    ctx.drawImage(img, value.offsetX, value.offsetY);
+                    q.resolve({});
+                });
+            };
+        };
+        return Mountains;
+    }());
+    Charjs.Mountains = Mountains;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
@@ -1742,10 +1782,20 @@ var MyQ;
             this._finallyCalled = false;
         }
         Promise.prototype.resolve = function (arg) {
+            var _this = this;
             if (this._ok) {
                 try {
                     var ret = this._ok(arg);
-                    this._next.resolve(ret);
+                    if (ret instanceof Promise) {
+                        ret.then(function (arg) {
+                            _this._next.resolve(arg);
+                        }).catch(function (e) {
+                            _this.reject(e);
+                        });
+                    }
+                    else {
+                        this._next.resolve(ret);
+                    }
                 }
                 catch (e) {
                     this.reject(e);
@@ -1794,11 +1844,11 @@ var MyQ;
             return this;
         };
         Promise.when = function (arg) {
-            var Promise = new Promise();
+            var d = MyQ.Deferred.defer();
             setTimeout(function () {
-                Promise.resolve(arg);
+                d.resolve(arg);
             }, 0);
-            return Promise;
+            return d.promise;
         };
         Promise.all = function (Promises) {
             var PromiseLength = Promises.length;
@@ -1871,6 +1921,15 @@ var MyQ;
                 Promises[i].then(resolve).catch(reject);
             }
             return racePromise;
+        };
+        Promise.reduce = function (values, func) {
+            return values.reduce(function (prev, current) {
+                return prev.then(function () {
+                    var d = MyQ.Deferred.defer();
+                    func(d, current);
+                    return d.promise;
+                });
+            }, Promise.when());
         };
         return Promise;
     }());
