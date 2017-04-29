@@ -10,6 +10,9 @@ namespace Charjs {
 
     export abstract class AbstractMountain extends AbstractPixel {
         abstract dataPattern: IMountData[];
+
+        private element: HTMLCanvasElement = null;
+
         constructor(private width: number, private height: number, private pixSize: number, private type?: number) {
             super();
         }
@@ -19,30 +22,32 @@ namespace Charjs {
         }
 
         draw(): HTMLCanvasElement {
-            let element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
-            let ctx = element.getContext("2d");
-            let center = this.width / this.pixSize / 2;
-            let datas = this.deepCopy(this.dataPattern);
-            for (let data of datas) {
-                data.currentOffset = center;
-            }
-
-            let mountHeight = ((this.width / 2) - (datas[0].pattern.reduce(function (prev, current) { return prev + current; }) * this.pixSize)) / (datas[0].pattern[datas[0].pattern.length - 1] * this.pixSize) + datas[0].pattern.length;
-            let top = (this.height / this.pixSize) - mountHeight;
-
-            for (let i = 0; i < mountHeight; i++) {
+            if (!this.element) {
+                this.element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
+                let ctx = this.element.getContext("2d");
+                let center = this.width / this.pixSize / 2;
+                let datas = this.deepCopy(this.dataPattern);
                 for (let data of datas) {
-                    if (data.start <= i) {
-                        let start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
-                        let end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
-                        for (let w = start; w < end; w++) {
-                            this.picWithMirror(center, ctx, w, i + top, data.color);
+                    data.currentOffset = center;
+                }
+
+                let mountHeight = Math.min(this.height / this.pixSize, ((this.width / 2) - (datas[0].pattern.reduce(function (prev, current) { return prev + current; }) * this.pixSize)) / (datas[0].pattern[datas[0].pattern.length - 1] * this.pixSize) + datas[0].pattern.length);
+                let top = (this.height / this.pixSize) - mountHeight;
+
+                for (let i = 0; i < mountHeight; i++) {
+                    for (let data of datas) {
+                        if (data.start <= i) {
+                            let start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
+                            let end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
+                            for (let w = start; w < end; w++) {
+                                this.picWithMirror(center, ctx, w, i + top, data.color);
+                            }
+                            data.currentOffset = start;
                         }
-                        data.currentOffset = start;
                     }
                 }
             }
-            return element;
+            return this.element;
         }
         private picWithMirror(center: number, ctx: CanvasRenderingContext2D, x: number, y: number, color: string) {
             AbstractMountain.drawPixel(ctx, x, y, this.pixSize, color);
@@ -136,10 +141,12 @@ namespace Charjs {
             element.setAttribute("height", this.height.toString());
 
             let mountains = [];
-            mountains.push({ mount: new Mountain02(1120, 300, this.pixSize), offsetX: -340, offsetY: 864 - 235 });
-            mountains.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 0, offsetY: 864 - 200 });
-            mountains.push({ mount: new Mountain02(600, 170, this.pixSize), offsetX: 350, offsetY: 864 - 200 });
-            mountains.push({ mount: new Mountain01(350, 170, this.pixSize), offsetX: 0, offsetY: 864 - 170 });
+            let mount02 = new Mountain02(1100, 250, this.pixSize);
+            mountains.push({ mount: mount02, offsetX: -330, offsetY: 864 - 250 });
+            mountains.push({ mount: mount02, offsetX: 695, offsetY: 864 - 250 });
+            mountains.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 50, offsetY: 864 - 200 });
+            mountains.push({ mount: new Mountain02(700, 180, this.pixSize), offsetX: 350, offsetY: 864 - 180 });
+            mountains.push({ mount: new Mountain01(350, 150, this.pixSize), offsetX: 0, offsetY: 864 - 150 });
 
             MyQ.Promise.reduce(mountains, this.composition(ctx)).then(() => {
                 targetDom.style.backgroundImage = `url(${element.toDataURL()})`;
