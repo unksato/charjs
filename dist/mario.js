@@ -1292,9 +1292,12 @@ var Charjs;
                 for (var i = 0; i < numberOfLine; i++) {
                     for (var _a = 0, datas_2 = datas; _a < datas_2.length; _a++) {
                         var data = datas_2[_a];
-                        if (data.start <= i) {
+                        if (data.start <= i && (!data.end || data.end >= i)) {
                             var start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
                             var end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
+                            if (start == end) {
+                                end++;
+                            }
                             for (var w = start; w < end; w++) {
                                 this.picWithMirror(center, ctx, w, i + top, data.color);
                             }
@@ -1363,6 +1366,46 @@ var Charjs;
         return AbstractMountain;
     }(AbstractBackgroundObject));
     Charjs.AbstractMountain = AbstractMountain;
+    var Cloud = (function (_super) {
+        __extends(Cloud, _super);
+        function Cloud() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.dataPattern = [{
+                    start: 0,
+                    pattern: [8, 3, 2, 1, 1, 0, 1, 0, 0, 0, -1, 0, -1, -1, -2, -3],
+                    fillPattern: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 3, 5, 13],
+                    color: '#abe0f7',
+                    isFill: false
+                }, {
+                    start: 1,
+                    end: 14,
+                    pattern: [8, 3, 2, 1, 0, 1, 0, 0, 0, -1, 0, -1, -2, -3],
+                    fillPattern: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 13],
+                    color: '#c3f8f8',
+                    isFill: false
+                }, {
+                    start: 2,
+                    end: 13,
+                    pattern: [8, 3, 2, 0, 1, 0, 0, 0, -1, 0, -2, -3],
+                    fillPattern: [],
+                    color: '#e8f0f8',
+                    isFill: true
+                }];
+            return _this;
+        }
+        Cloud.prototype.drawCloud = function () {
+            var element = this.draw();
+            var ctx = element.getContext("2d");
+            var c = "#000";
+            for (var i = 4; i < 8; i++) {
+                Charjs.AbstractPixel.drawPixel(ctx, 11, i, this.pixSize, c);
+                Charjs.AbstractPixel.drawPixel(ctx, 15, i, this.pixSize, c);
+            }
+            return this.createImage(element);
+        };
+        return Cloud;
+    }(AbstractBackgroundObject));
+    Charjs.Cloud = Cloud;
     var Mountain01 = (function (_super) {
         __extends(Mountain01, _super);
         function Mountain01() {
@@ -1513,30 +1556,51 @@ var Charjs;
             this.height = 864;
         }
         Mountains.prototype.drawBackgroundImage = function (targetDom) {
+            var d = MyQ.Deferred.defer();
             targetDom.style.backgroundColor = "#99d9ea";
             var element = document.createElement("canvas");
             var ctx = element.getContext("2d");
             element.setAttribute("width", this.width.toString());
             element.setAttribute("height", this.height.toString());
-            var mountains = [];
+            var objs = [];
+            var cloud = new Cloud(32 * this.pixSize, 16 * this.pixSize, this.pixSize);
+            objs.push({ cloud: cloud, offsetX: 98, offsetY: 66 });
+            objs.push({ cloud: cloud, offsetX: 608, offsetY: 99 });
+            objs.push({ cloud: cloud, offsetX: 94, offsetY: 227 });
+            objs.push({ cloud: cloud, offsetX: 700, offsetY: 290 });
+            objs.push({ cloud: cloud, offsetX: 949, offsetY: 228 });
+            objs.push({ cloud: cloud, offsetX: 447, offsetY: 453 });
+            objs.push({ cloud: cloud, offsetX: 356, offsetY: 488 });
+            objs.push({ cloud: cloud, offsetX: 636, offsetY: 517 });
+            objs.push({ cloud: cloud, offsetX: 893, offsetY: 578 });
             var mount04 = new Mountain04(1100, 250, this.pixSize);
-            mountains.push({ mount: mount04, offsetX: -330, offsetY: 864 - 250 });
-            mountains.push({ mount: mount04, offsetX: 695, offsetY: 864 - 250 });
-            mountains.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 50, offsetY: 864 - 200 });
-            mountains.push({ mount: new Mountain02(700, 180, this.pixSize), offsetX: 350, offsetY: 864 - 180 });
-            mountains.push({ mount: new Mountain01(350, 150, this.pixSize), offsetX: 0, offsetY: 864 - 150 });
-            MyQ.Promise.reduce(mountains, this.composition(ctx)).then(function () {
+            objs.push({ mount: mount04, offsetX: -330, offsetY: 864 - 250 });
+            objs.push({ mount: mount04, offsetX: 695, offsetY: 864 - 250 });
+            objs.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 50, offsetY: 864 - 200 });
+            objs.push({ mount: new Mountain02(700, 180, this.pixSize), offsetX: 350, offsetY: 864 - 180 });
+            objs.push({ mount: new Mountain01(350, 150, this.pixSize), offsetX: 0, offsetY: 864 - 150 });
+            MyQ.Promise.reduce(objs, this.composition(ctx)).then(function () {
                 targetDom.style.backgroundImage = "url(" + element.toDataURL() + ")";
                 targetDom.style.backgroundPosition = "left bottom";
                 targetDom.style.backgroundRepeat = "repeat-x";
+                d.resolve({});
             });
+            return d.promise;
         };
         Mountains.prototype.composition = function (ctx) {
             return function (q, value) {
-                value.mount.drawMountain(value.mount.treePattern).then(function (img) {
-                    ctx.drawImage(img, value.offsetX, value.offsetY);
-                    q.resolve({});
-                });
+                if (value.cloud) {
+                    value.cloud.drawCloud().then(function (img) {
+                        ctx.drawImage(img, value.offsetX, value.offsetY);
+                        q.resolve({});
+                    });
+                }
+                else {
+                    value.mount.drawMountain(value.mount.treePattern).then(function (img) {
+                        ctx.drawImage(img, value.offsetX, value.offsetY);
+                        q.resolve({});
+                    });
+                }
             };
         };
         return Mountains;
