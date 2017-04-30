@@ -1,6 +1,7 @@
 namespace Charjs {
-    interface IMountData {
+    interface IBackgroundObjectData {
         start: number;
+        end?: number;
         pattern: number[];
         fillPattern: number[];
         color: string;
@@ -10,7 +11,7 @@ namespace Charjs {
 
     export abstract class AbstractBackgroundObject extends AbstractPixel {
         private _element: HTMLCanvasElement = null;
-        abstract dataPattern: IMountData[];
+        abstract dataPattern: IBackgroundObjectData[];
 
         constructor(protected width: number, protected height: number, protected pixSize: number) {
             super();
@@ -32,9 +33,12 @@ namespace Charjs {
 
                 for (let i = 0; i < numberOfLine; i++) {
                     for (let data of datas) {
-                        if (data.start <= i) {
+                        if (data.start <= i && (!data.end || data.end >= i)) {
                             let start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
                             let end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
+                            if (start == end) {
+                                end++;
+                            }
                             for (let w = start; w < end; w++) {
                                 this.picWithMirror(center, ctx, w, i + top, data.color);
                             }
@@ -101,6 +105,41 @@ namespace Charjs {
                 return this.toImage(treeElement);
             }
             return MyQ.Promise.when(this.treeImage);
+        }
+    }
+
+    export class Cloud extends AbstractBackgroundObject {
+        dataPattern = [{
+            start: 0,
+            pattern: [8, 3, 2, 1, 1, 0, 1, 0, 0, 0, -1, 0, -1, -1, -2, -3],
+            fillPattern: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 3, 5, 13],
+            color: '#abe0f7',
+            isFill: false
+        }, {
+            start: 1,
+            end: 14,
+            pattern: [8, 3, 2, 1, 0, 1, 0, 0, 0, -1, 0, -1, -2, -3],
+            fillPattern: [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 13],
+            color: '#c3f8f8',
+            isFill: false
+        }, {
+            start: 2,
+            end: 13,
+            pattern: [8, 3, 2, 0, 1, 0, 0, 0, -1, 0, -2, -3],
+            fillPattern: [],
+            color: '#e8f0f8',
+            isFill: true
+        }];
+
+        drawCloud(): MyQ.Promise<HTMLImageElement> {
+            let element = this.draw();
+            let ctx = element.getContext("2d");
+            let c = "#000";
+            for (let i = 4; i < 8; i++) {
+                AbstractPixel.drawPixel(ctx, 11, i, this.pixSize, c);
+                AbstractPixel.drawPixel(ctx, 15, i, this.pixSize, c);
+            }
+            return this.createImage(element);
         }
     }
 
@@ -229,7 +268,9 @@ namespace Charjs {
         height = 864;
 
         constructor(private pixSize: number) { }
-        drawBackgroundImage(targetDom: HTMLElement) {
+
+        drawBackgroundImage(targetDom: HTMLElement): MyQ.Promise<{}> {
+            let d = MyQ.Deferred.defer();
 
             targetDom.style.backgroundColor = "#99d9ea";
 
@@ -238,26 +279,47 @@ namespace Charjs {
             element.setAttribute("width", this.width.toString());
             element.setAttribute("height", this.height.toString());
 
-            let mountains = [];
-            let mount04 = new Mountain04(1100, 250, this.pixSize);
-            mountains.push({ mount: mount04, offsetX: -330, offsetY: 864 - 250 });
-            mountains.push({ mount: mount04, offsetX: 695, offsetY: 864 - 250 });
-            mountains.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 50, offsetY: 864 - 200 });
-            mountains.push({ mount: new Mountain02(700, 180, this.pixSize), offsetX: 350, offsetY: 864 - 180 });
-            mountains.push({ mount: new Mountain01(350, 150, this.pixSize), offsetX: 0, offsetY: 864 - 150 });
+            let objs = [];
+            let cloud = new Cloud(32 * this.pixSize, 16 * this.pixSize, this.pixSize);
+            objs.push({ cloud: cloud, offsetX: 98, offsetY: 66 });
+            objs.push({ cloud: cloud, offsetX: 608, offsetY: 99 });
+            objs.push({ cloud: cloud, offsetX: 94, offsetY: 227 });
+            objs.push({ cloud: cloud, offsetX: 700, offsetY: 290 });
+            objs.push({ cloud: cloud, offsetX: 949, offsetY: 228 });
+            objs.push({ cloud: cloud, offsetX: 447, offsetY: 453 });
+            objs.push({ cloud: cloud, offsetX: 356, offsetY: 488 });
+            objs.push({ cloud: cloud, offsetX: 636, offsetY: 517 });
+            objs.push({ cloud: cloud, offsetX: 893, offsetY: 578 });
 
-            MyQ.Promise.reduce(mountains, this.composition(ctx)).then(() => {
+            let mount04 = new Mountain04(1100, 250, this.pixSize);
+            objs.push({ mount: mount04, offsetX: -330, offsetY: 864 - 250 });
+            objs.push({ mount: mount04, offsetX: 695, offsetY: 864 - 250 });
+            objs.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 50, offsetY: 864 - 200 });
+            objs.push({ mount: new Mountain02(700, 180, this.pixSize), offsetX: 350, offsetY: 864 - 180 });
+            objs.push({ mount: new Mountain01(350, 150, this.pixSize), offsetX: 0, offsetY: 864 - 150 });
+
+            MyQ.Promise.reduce(objs, this.composition(ctx)).then(() => {
                 targetDom.style.backgroundImage = `url(${element.toDataURL()})`;
                 targetDom.style.backgroundPosition = "left bottom";
                 targetDom.style.backgroundRepeat = "repeat-x";
+                d.resolve({});
             });
+
+            return d.promise;
         }
         private composition(ctx: CanvasRenderingContext2D): { (q: MyQ.Deferred<{}>, value: { mount: AbstractMountain, offsetX: number, offsetY: number }) } {
-            return (q: MyQ.Deferred<{}>, value: { mount: AbstractMountain, offsetX: number, offsetY: number }) => {
-                value.mount.drawMountain(value.mount.treePattern).then((img) => {
-                    ctx.drawImage(img, value.offsetX, value.offsetY);
-                    q.resolve({});
-                });
+            return (q: MyQ.Deferred<{}>, value: { mount: AbstractMountain, cloud: Cloud, offsetX: number, offsetY: number }) => {
+                if (value.cloud) {
+                    value.cloud.drawCloud().then((img) => {
+                        ctx.drawImage(img, value.offsetX, value.offsetY);
+                        q.resolve({});
+                    });
+                } else {
+                    value.mount.drawMountain(value.mount.treePattern).then((img) => {
+                        ctx.drawImage(img, value.offsetX, value.offsetY);
+                        q.resolve({});
+                    });
+                }
             }
         }
     }
