@@ -1564,15 +1564,10 @@ var Charjs;
             element.setAttribute("height", this.height.toString());
             var objs = [];
             var cloud = new Cloud(32 * this.pixSize, 16 * this.pixSize, this.pixSize);
-            objs.push({ cloud: cloud, offsetX: 98, offsetY: 66 });
-            objs.push({ cloud: cloud, offsetX: 608, offsetY: 99 });
-            objs.push({ cloud: cloud, offsetX: 94, offsetY: 227 });
-            objs.push({ cloud: cloud, offsetX: 700, offsetY: 290 });
-            objs.push({ cloud: cloud, offsetX: 949, offsetY: 228 });
-            objs.push({ cloud: cloud, offsetX: 447, offsetY: 453 });
-            objs.push({ cloud: cloud, offsetX: 356, offsetY: 488 });
-            objs.push({ cloud: cloud, offsetX: 636, offsetY: 517 });
-            objs.push({ cloud: cloud, offsetX: 893, offsetY: 578 });
+            var rand = new RandomGenerator();
+            for (var i = 0; i < 10; i++) {
+                objs.push({ cloud: cloud, offsetX: rand.getCognitiveRandom(this.width - 32 * this.pixSize), offsetY: rand.getCognitiveRandom(this.height * 0.7) });
+            }
             var mount04 = new Mountain04(1100, 250, this.pixSize);
             objs.push({ mount: mount04, offsetX: -330, offsetY: 864 - 250 });
             objs.push({ mount: mount04, offsetX: 695, offsetY: 864 - 250 });
@@ -2109,4 +2104,29 @@ var MyQ;
     }());
     MyQ.Promise = Promise;
 })(MyQ || (MyQ = {}));
+var RandomGenerator = (function () {
+    function RandomGenerator() {
+    }
+    RandomGenerator.prototype.getCognitiveRandom = function (max, min, distance) {
+        if (min === void 0) { min = 0; }
+        if (distance === void 0) { distance = 0.3; }
+        var rand = Math.random();
+        while (Math.abs(this.lastValue - rand) < distance && Math.abs(this.lastValue2 - rand) < distance) {
+            rand = Math.random();
+        }
+        this.lastValue2 = this.lastValue;
+        this.lastValue = rand;
+        return Math.floor(rand * (max + 1 - min)) + min;
+    };
+    RandomGenerator.prototype.getNormdistRandom = function (max, min, normdist) {
+        if (min === void 0) { min = 0; }
+        if (normdist === void 0) { normdist = 6; }
+        var rands = [];
+        for (var i = 0; i < normdist; i++) {
+            rands.push(Math.random() * (max + 1 - min)) + min;
+        }
+        return Math.floor(rands.reduce(function (prev, current) { return prev + current; }) / normdist);
+    };
+    return RandomGenerator;
+}());
 //# sourceMappingURL=mario.js.map
