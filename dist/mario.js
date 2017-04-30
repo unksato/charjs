@@ -1264,63 +1264,119 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
-    var AbstractMountain = (function (_super) {
-        __extends(AbstractMountain, _super);
-        function AbstractMountain(width, height, pixSize, type) {
+    var AbstractBackgroundObject = (function (_super) {
+        __extends(AbstractBackgroundObject, _super);
+        function AbstractBackgroundObject(width, height, pixSize) {
             var _this = _super.call(this) || this;
             _this.width = width;
             _this.height = height;
             _this.pixSize = pixSize;
-            _this.type = type;
-            _this.element = null;
+            _this._element = null;
             return _this;
         }
-        AbstractMountain.prototype.createImage = function () {
-            return this.toImage(this.draw());
+        AbstractBackgroundObject.prototype.createImage = function (element) {
+            return this.toImage(element);
         };
-        AbstractMountain.prototype.draw = function () {
-            if (!this.element) {
-                this.element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
-                var ctx = this.element.getContext("2d");
+        AbstractBackgroundObject.prototype.draw = function (top, numberOfLine) {
+            if (top === void 0) { top = 0; }
+            if (numberOfLine === void 0) { numberOfLine = this.height; }
+            if (!this._element) {
+                this._element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
+                var ctx = this._element.getContext("2d");
                 var center = this.width / this.pixSize / 2;
                 var datas = this.deepCopy(this.dataPattern);
                 for (var _i = 0, datas_1 = datas; _i < datas_1.length; _i++) {
                     var data = datas_1[_i];
                     data.currentOffset = center;
                 }
-                var mountHeight = Math.min(this.height / this.pixSize, ((this.width / 2) - (datas[0].pattern.reduce(function (prev, current) { return prev + current; }) * this.pixSize)) / (datas[0].pattern[datas[0].pattern.length - 1] * this.pixSize) + datas[0].pattern.length);
-                var top_1 = (this.height / this.pixSize) - mountHeight;
-                for (var i = 0; i < mountHeight; i++) {
+                for (var i = 0; i < numberOfLine; i++) {
                     for (var _a = 0, datas_2 = datas; _a < datas_2.length; _a++) {
                         var data = datas_2[_a];
                         if (data.start <= i) {
                             var start = data.currentOffset - data.pattern[Math.min(i - data.start, data.pattern.length - 1)];
                             var end = data.isFill ? center : data.currentOffset + data.fillPattern[Math.min(i - data.start, data.fillPattern.length - 1)];
                             for (var w = start; w < end; w++) {
-                                this.picWithMirror(center, ctx, w, i + top_1, data.color);
+                                this.picWithMirror(center, ctx, w, i + top, data.color);
                             }
                             data.currentOffset = start;
                         }
                     }
                 }
             }
-            return this.element;
+            return this._element;
         };
-        AbstractMountain.prototype.picWithMirror = function (center, ctx, x, y, color) {
-            AbstractMountain.drawPixel(ctx, x, y, this.pixSize, color);
+        AbstractBackgroundObject.prototype.picWithMirror = function (center, ctx, x, y, color) {
+            Charjs.AbstractPixel.drawPixel(ctx, x, y, this.pixSize, color);
             var mirrorX = center + (center - x) - 1;
-            AbstractMountain.drawPixel(ctx, mirrorX, y, this.pixSize, color);
+            Charjs.AbstractPixel.drawPixel(ctx, mirrorX, y, this.pixSize, color);
         };
-        AbstractMountain.prototype.deepCopy = function (obj) {
+        AbstractBackgroundObject.prototype.deepCopy = function (obj) {
             return JSON.parse(JSON.stringify(obj));
         };
-        return AbstractMountain;
+        return AbstractBackgroundObject;
     }(Charjs.AbstractPixel));
+    Charjs.AbstractBackgroundObject = AbstractBackgroundObject;
+    var AbstractMountain = (function (_super) {
+        __extends(AbstractMountain, _super);
+        function AbstractMountain() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.tree = [[0, 0, 1, 1, 0, 0],
+                [0, 1, 1, 1, 2, 0],
+                [0, 1, 1, 2, 2, 0],
+                [1, 1, 1, 2, 2, 3],
+                [1, 1, 2, 2, 3, 3],
+                [1, 2, 2, 3, 3, 3],
+                [0, 3, 3, 3, 3, 0],
+                [0, 0, 3, 3, 0, 0]];
+            _this.treeImage = null;
+            return _this;
+        }
+        AbstractMountain.prototype.drawMountain = function (trees) {
+            var _this = this;
+            var mountHeight = Math.min(this.height / this.pixSize, ((this.width / 2) - (this.dataPattern[0].pattern.reduce(function (prev, current) { return prev + current; }) * this.pixSize)) / (this.dataPattern[0].pattern[this.dataPattern[0].pattern.length - 1] * this.pixSize) + this.dataPattern[0].pattern.length);
+            var top = (this.height / this.pixSize) - mountHeight;
+            var mountElement = this.draw(top, mountHeight);
+            return this.createTree().then(function (treeImage) {
+                _this.treeImage = treeImage;
+                for (var _i = 0, trees_1 = trees; _i < trees_1.length; _i++) {
+                    var tree = trees_1[_i];
+                    var ctx = mountElement.getContext("2d");
+                    ctx.drawImage(_this.treeImage, tree.x, tree.y);
+                }
+                return _this.createImage(mountElement);
+            });
+        };
+        AbstractMountain.prototype.createTree = function () {
+            if (!this.treeImage) {
+                var treeElement = Charjs.AbstractPixel.createCanvasElement(this.width, this.height, 0);
+                var ctx = treeElement.getContext("2d");
+                for (var y = 0; y < this.tree.length; y++) {
+                    for (var x = 0; x < this.tree[y].length; x++) {
+                        if (this.tree[y][x])
+                            Charjs.AbstractPixel.drawPixel(ctx, x, y, this.pixSize, this.treeColors[this.tree[y][x]]);
+                    }
+                }
+                return this.toImage(treeElement);
+            }
+            return MyQ.Promise.when(this.treeImage);
+        };
+        return AbstractMountain;
+    }(AbstractBackgroundObject));
     Charjs.AbstractMountain = AbstractMountain;
     var Mountain01 = (function (_super) {
         __extends(Mountain01, _super);
         function Mountain01() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.treeColors = ['#98e0c0', '#88d0b0', '#78c0a0'];
+            _this.treePattern = [{ x: 160, y: 40 },
+                { x: 128, y: 76 },
+                { x: 193, y: 76 },
+                { x: 240, y: 108 },
+                { x: 224, y: 125 },
+                { x: 80, y: 140 },
+                { x: 96, y: 140 },
+                { x: 160, y: 140 },
+                { x: 63, y: 160 }];
             _this.dataPattern = [{
                     start: 0,
                     pattern: [2, 2, 2, 1],
@@ -1349,6 +1405,18 @@ var Charjs;
         __extends(Mountain02, _super);
         function Mountain02() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.treeColors = ['#6daf91', '#5d9f81', '#4d8f71'];
+            _this.treePattern = [{ x: 300, y: 50 },
+                { x: 396, y: 80 },
+                { x: 427, y: 80 },
+                { x: 413, y: 95 },
+                { x: 180, y: 100 },
+                { x: 365, y: 100 },
+                { x: 382, y: 135 },
+                { x: 141, y: 135 },
+                { x: 267, y: 135 },
+                { x: 300, y: 135 },
+                { x: 557, y: 135 }];
             _this.dataPattern = [{
                     start: 0,
                     pattern: [2, 3, 3, 2],
@@ -1373,10 +1441,47 @@ var Charjs;
         return Mountain02;
     }(AbstractMountain));
     Charjs.Mountain02 = Mountain02;
+    var Mountain04 = (function (_super) {
+        __extends(Mountain04, _super);
+        function Mountain04() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.treePattern = [{ x: 517, y: 34 },
+                { x: 569, y: 34 },
+                { x: 584, y: 44 },
+                { x: 442, y: 69 },
+                { x: 632, y: 68 },
+                { x: 377, y: 100 },
+                { x: 409, y: 100 },
+                { x: 536, y: 100 },
+                { x: 666, y: 100 },
+                { x: 698, y: 100 },
+                { x: 394, y: 116 },
+                { x: 682, y: 116 },
+                { x: 314, y: 136 },
+                { x: 345, y: 136 },
+                { x: 601, y: 136 },
+                { x: 265, y: 165 },
+                { x: 343, y: 165 },
+                { x: 617, y: 150 }];
+            return _this;
+        }
+        return Mountain04;
+    }(Mountain02));
+    Charjs.Mountain04 = Mountain04;
     var Mountain03 = (function (_super) {
         __extends(Mountain03, _super);
         function Mountain03() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.treePattern = [{ x: 405, y: 37 },
+                { x: 452, y: 37 },
+                { x: 438, y: 55 },
+                { x: 372, y: 72 },
+                { x: 244, y: 103 },
+                { x: 196, y: 135 },
+                { x: 342, y: 135 },
+                { x: 182, y: 152 },
+                { x: 213, y: 167 },
+                { x: 245, y: 167 }];
             _this.dataPattern = [{
                     start: 0,
                     pattern: [2, 3, 3, 2],
@@ -1399,7 +1504,7 @@ var Charjs;
             return _this;
         }
         return Mountain03;
-    }(AbstractMountain));
+    }(Mountain01));
     Charjs.Mountain03 = Mountain03;
     var Mountains = (function () {
         function Mountains(pixSize) {
@@ -1414,9 +1519,9 @@ var Charjs;
             element.setAttribute("width", this.width.toString());
             element.setAttribute("height", this.height.toString());
             var mountains = [];
-            var mount02 = new Mountain02(1100, 250, this.pixSize);
-            mountains.push({ mount: mount02, offsetX: -330, offsetY: 864 - 250 });
-            mountains.push({ mount: mount02, offsetX: 695, offsetY: 864 - 250 });
+            var mount04 = new Mountain04(1100, 250, this.pixSize);
+            mountains.push({ mount: mount04, offsetX: -330, offsetY: 864 - 250 });
+            mountains.push({ mount: mount04, offsetX: 695, offsetY: 864 - 250 });
             mountains.push({ mount: new Mountain03(820, 200, this.pixSize), offsetX: 50, offsetY: 864 - 200 });
             mountains.push({ mount: new Mountain02(700, 180, this.pixSize), offsetX: 350, offsetY: 864 - 180 });
             mountains.push({ mount: new Mountain01(350, 150, this.pixSize), offsetX: 0, offsetY: 864 - 150 });
@@ -1428,7 +1533,7 @@ var Charjs;
         };
         Mountains.prototype.composition = function (ctx) {
             return function (q, value) {
-                value.mount.createImage().then(function (img) {
+                value.mount.drawMountain(value.mount.treePattern).then(function (img) {
                     ctx.drawImage(img, value.offsetX, value.offsetY);
                     q.resolve({});
                 });
