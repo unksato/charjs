@@ -281,15 +281,11 @@ namespace Charjs {
 
             let objs = [];
             let cloud = new Cloud(32 * this.pixSize, 16 * this.pixSize, this.pixSize);
-            objs.push({ cloud: cloud, offsetX: 98, offsetY: 66 });
-            objs.push({ cloud: cloud, offsetX: 608, offsetY: 99 });
-            objs.push({ cloud: cloud, offsetX: 94, offsetY: 227 });
-            objs.push({ cloud: cloud, offsetX: 700, offsetY: 290 });
-            objs.push({ cloud: cloud, offsetX: 949, offsetY: 228 });
-            objs.push({ cloud: cloud, offsetX: 447, offsetY: 453 });
-            objs.push({ cloud: cloud, offsetX: 356, offsetY: 488 });
-            objs.push({ cloud: cloud, offsetX: 636, offsetY: 517 });
-            objs.push({ cloud: cloud, offsetX: 893, offsetY: 578 });
+            let rand = new RandomGenerator();
+
+            for (let i = 0; i < 10; i++) {
+                objs.push({ cloud: cloud, offsetX: rand.getCognitiveRandom(this.width - 32 * this.pixSize), offsetY: rand.getCognitiveRandom(this.height * 0.7) });
+            }
 
             let mount04 = new Mountain04(1100, 250, this.pixSize);
             objs.push({ mount: mount04, offsetX: -330, offsetY: 864 - 250 });
