@@ -20,6 +20,13 @@ var Charjs;
         Vertical[Vertical["Up"] = 0] = "Up";
         Vertical[Vertical["Down"] = 1] = "Down";
     })(Vertical = Charjs.Vertical || (Charjs.Vertical = {}));
+    var HitStatus;
+    (function (HitStatus) {
+        HitStatus[HitStatus["none"] = 0] = "none";
+        HitStatus[HitStatus["dammage"] = 1] = "dammage";
+        HitStatus[HitStatus["attack"] = 2] = "attack";
+        HitStatus[HitStatus["grab"] = 3] = "grab";
+    })(HitStatus = Charjs.HitStatus || (Charjs.HitStatus = {}));
     var Entity = (function () {
         function Entity() {
             this.ground = null;
@@ -157,12 +164,13 @@ var Charjs;
                 this.currentAction = null;
             }
         };
-        AbstractObject.prototype.draw = function (index, position, direction, vertical, removeCurrent) {
+        AbstractObject.prototype.draw = function (index, position, direction, vertical, removeCurrent, drawOffset) {
             if (index === void 0) { index = 0; }
             if (position === void 0) { position = null; }
             if (direction === void 0) { direction = Direction.Right; }
             if (vertical === void 0) { vertical = Vertical.Up; }
             if (removeCurrent === void 0) { removeCurrent = false; }
+            if (drawOffset === void 0) { drawOffset = this.pixSize; }
             if (removeCurrent)
                 this.removeCharacter();
             position = position || this.position;
@@ -173,7 +181,7 @@ var Charjs;
                 this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
             }
             this.currentAction.style.left = position.x + 'px';
-            this.currentAction.style.bottom = position.y + 'px';
+            this.currentAction.style.bottom = (position.y - drawOffset) + 'px';
             this.currentAction.style.zIndex = this.zIndex.toString();
             this.targetDom.appendChild(this.currentAction);
         };
@@ -463,7 +471,7 @@ var Charjs;
         };
         NormalBlockWorld.prototype.init = function () {
             _super.prototype.init.call(this);
-            this.draw(0);
+            this.draw(0, undefined, undefined, undefined, undefined, 0);
         };
         NormalBlockWorld.prototype.start = function () {
             var _this = this;
@@ -482,7 +490,7 @@ var Charjs;
                     var pos = { x: _this.position.x, y: _this.position.y };
                     if (_this.animation[_this._animationIndex].yOffset)
                         pos.y += _this.animation[_this._animationIndex].yOffset;
-                    _this.draw(_this.animation[_this._animationIndex].index, pos, Charjs.Direction.Right, Charjs.Vertical.Up, true);
+                    _this.draw(_this.animation[_this._animationIndex].index, pos, Charjs.Direction.Right, Charjs.Vertical.Up, true, 0);
                     if (_this.animation[_this._animationIndex].wait) {
                         _this.animation[_this._animationIndex].wait--;
                     }
@@ -533,7 +541,7 @@ var Charjs;
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
             _this.colors = ['', '#000000', '#ffffff', '#b82800', '#f88800', '#f87800', '#f8c000', '#f8f800'];
-            _this.cchars = [[[0, 16], [0, 6, 1, 4, 0, 6], [0, 4, 1, 2, 3, 4, 1, 2, 0, 4], [0, 3, 1, 1, 4, 1, 1, 4, 3, 3, 1, 4], [0, 2, 1, 1, 4, 1, 2, 1, 4, 1, 3, 1, 1, 3, 3, 1, 1, 3, 0, 2], [0, 1, 1, 1, 3, 2, 4, 1, 3, 3, 2, 1, 1, 3, 2, 1, 3, 1, 1, 1, 0, 1], [0, 1, 1, 1, 3, 5, 2, 3, 3, 1, 2, 3, 3, 1, 1, 1], [1, 1, 3, 6, 2, 2, 1, 1, 3, 1, 1, 1, 2, 2, 3, 1, 1, 1], [1, 1, 3, 7, 2, 2, 3, 1, 2, 2, 3, 2, 1, 1], [1, 1, 3, 6, 4, 6, 3, 2, 1, 1], [0, 1, 1, 1, 3, 3, 4, 2, 2, 1, 1, 4, 2, 1, 3, 1, 1, 1, 0, 1], [0, 1, 5, 3, 4, 2, 1, 2, 4, 4, 1, 1, 4, 2, 0, 1], [5, 1, 6, 2, 7, 1, 5, 2, 4, 7, 1, 1, 4, 1, 0, 1], [1, 1, 6, 2, 7, 2, 2, 1, 5, 1, 0, 4, 1, 2, 7, 1, 2, 1, 1, 1], [0, 1, 1, 2, 6, 1, 7, 2, 5, 1, 1, 4, 6, 2, 1, 2, 0, 1], [0, 3, 1, 4, 0, 2, 1, 4, 0, 3]], [[0, 5, 1, 4, 0, 6], [0, 4, 1, 2, 3, 4, 1, 2, 0, 4], [0, 3, 1, 1, 4, 1, 3, 3, 1, 3, 3, 1, 1, 3, 0, 1], [0, 2, 1, 1, 4, 1, 2, 1, 4, 1, 3, 4, 1, 2, 3, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 2, 4, 1, 3, 5, 2, 1, 1, 3, 2, 1, 0, 1], [0, 1, 1, 1, 3, 7, 2, 3, 1, 1, 2, 2, 0, 1], [1, 1, 3, 8, 2, 2, 1, 1, 3, 1, 1, 1, 2, 1, 1, 1], [1, 1, 3, 9, 2, 2, 3, 1, 2, 2, 1, 1], [1, 1, 3, 8, 4, 6, 1, 1], [0, 1, 1, 1, 3, 5, 4, 2, 2, 1, 1, 5, 0, 1], [0, 1, 1, 1, 3, 4, 4, 2, 1, 2, 4, 4, 1, 1, 0, 1], [0, 2, 1, 1, 3, 2, 4, 8, 1, 1, 0, 2], [0, 3, 1, 2, 5, 5, 4, 1, 1, 2, 0, 3], [0, 5, 5, 1, 6, 2, 7, 2, 5, 1, 0, 5], [0, 5, 5, 1, 6, 4, 2, 1, 5, 1, 0, 4], [0, 5, 1, 7, 0, 4]]];
+            _this.cchars = [[[0, 16], [0, 6, 1, 4, 0, 6], [0, 4, 1, 2, 3, 4, 1, 2, 0, 4], [0, 3, 1, 1, 4, 1, 1, 4, 3, 3, 1, 4], [0, 2, 1, 1, 4, 1, 2, 1, 4, 1, 3, 1, 1, 3, 3, 1, 1, 3, 0, 2], [0, 1, 1, 1, 3, 2, 4, 1, 3, 3, 2, 1, 1, 3, 2, 1, 3, 1, 1, 1, 0, 1], [0, 1, 1, 1, 3, 5, 2, 3, 3, 1, 2, 3, 3, 1, 1, 1], [1, 1, 3, 6, 2, 2, 1, 1, 3, 1, 1, 1, 2, 2, 3, 1, 1, 1], [1, 1, 3, 7, 2, 2, 3, 1, 2, 2, 3, 2, 1, 1], [1, 1, 3, 6, 4, 6, 3, 2, 1, 1], [0, 1, 1, 1, 3, 3, 4, 2, 2, 1, 1, 4, 2, 1, 3, 1, 1, 1, 0, 1], [0, 1, 5, 3, 4, 2, 1, 2, 4, 4, 1, 1, 4, 2, 0, 1], [5, 1, 6, 2, 7, 1, 5, 2, 4, 7, 1, 1, 4, 1, 0, 1], [1, 1, 6, 2, 7, 2, 2, 1, 5, 1, 4, 4, 1, 2, 7, 1, 2, 1, 1, 1], [0, 1, 1, 2, 6, 1, 7, 2, 5, 1, 1, 4, 6, 2, 1, 2, 0, 1], [0, 3, 1, 4, 0, 2, 1, 4, 0, 3]], [[0, 5, 1, 4, 0, 6], [0, 4, 1, 2, 3, 4, 1, 2, 0, 4], [0, 3, 1, 1, 4, 1, 3, 3, 1, 3, 3, 1, 1, 3, 0, 1], [0, 2, 1, 1, 4, 1, 2, 1, 4, 1, 3, 4, 1, 2, 3, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 2, 4, 1, 3, 5, 2, 1, 1, 3, 2, 1, 0, 1], [0, 1, 1, 1, 3, 7, 2, 3, 1, 1, 2, 2, 0, 1], [1, 1, 3, 8, 2, 2, 1, 1, 3, 1, 1, 1, 2, 1, 1, 1], [1, 1, 3, 9, 2, 2, 3, 1, 2, 2, 1, 1], [1, 1, 3, 8, 4, 6, 1, 1], [0, 1, 1, 1, 3, 5, 4, 2, 2, 1, 1, 5, 0, 1], [0, 1, 1, 1, 3, 4, 4, 2, 1, 2, 4, 4, 1, 1, 0, 1], [0, 2, 1, 1, 3, 2, 4, 8, 1, 1, 0, 2], [0, 3, 1, 2, 5, 5, 4, 1, 1, 2, 0, 3], [0, 5, 5, 1, 6, 2, 7, 2, 5, 1, 0, 5], [0, 5, 5, 1, 6, 4, 2, 1, 5, 1, 0, 4], [0, 5, 1, 7, 0, 4]]];
             _this.chars = null;
             _this._speed = GoombaWorld.DEFAULT_SPEED;
             _this._step = GoombaWorld.STEP;
@@ -542,7 +550,8 @@ var Charjs;
             _this._isKilled = false;
             _this._yVector = 0;
             _this._jumpPower = 12;
-            _this._isJumping = false;
+            _this._isKickBound = false;
+            _this._isRevivalJumping = false;
             _this._grabbedPlayer = null;
             _this._vertical = Charjs.Vertical.Up;
             _this._steppedTimeout = 0;
@@ -554,7 +563,7 @@ var Charjs;
         };
         GoombaWorld.prototype.executeJump = function () {
             var ground = this.entity.ground || 0;
-            if (this._isJumping) {
+            if (this._isKickBound) {
                 this._yVector -= this._gravity * this.pixSize;
                 if (this.entity.ceiling != null) {
                     this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
@@ -566,7 +575,25 @@ var Charjs;
                     this.position.y = this.position.y + this._yVector;
                 }
                 if (this.position.y <= ground) {
-                    this._isJumping = false;
+                    this.position.y = ground;
+                    this._speed = 0;
+                    this._yVector = 0;
+                    this._isKickBound = false;
+                }
+            }
+            if (this._isRevivalJumping) {
+                this._yVector -= this._gravity * this.pixSize;
+                if (this.entity.ceiling != null) {
+                    this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
+                    if (this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0) {
+                        this._yVector = 0;
+                    }
+                }
+                else {
+                    this.position.y = this.position.y + this._yVector;
+                }
+                if (this.position.y <= ground) {
+                    this._isRevivalJumping = false;
                     this._yVector = 0;
                     this.position.y = ground;
                     this._speed = GoombaWorld.DEFAULT_SPEED;
@@ -594,6 +621,7 @@ var Charjs;
         GoombaWorld.prototype.onAction = function () {
             if (this._steppedTimeout > 0) {
                 this._steppedTimeout -= this.frameInterval;
+                this._revivedTimeout = 0;
                 if (this._steppedTimeout <= 0) {
                     this._step = 1;
                     this._revivedTimeout = 2000;
@@ -613,7 +641,7 @@ var Charjs;
                     }
                     else {
                         this._step = GoombaWorld.STEP;
-                        this._isJumping = true;
+                        this._isRevivalJumping = true;
                         this._yVector = this._jumpPower * this.pixSize;
                     }
                 }
@@ -647,6 +675,10 @@ var Charjs;
         GoombaWorld.prototype.isStepped = function () {
             return this._vertical == Charjs.Vertical.Down;
         };
+        GoombaWorld.prototype.onKilled = function () {
+            this._isKilled = true;
+            this.destroy();
+        };
         GoombaWorld.prototype.onStepped = function () {
             this._vertical = Charjs.Vertical.Down;
             this._speed = 0;
@@ -656,29 +688,12 @@ var Charjs;
             this._grabbedPlayer = player;
         };
         GoombaWorld.prototype.onKicked = function (kickDirection, kickPower) {
-            var _this = this;
-            this.stop();
-            this._isKilled = true;
-            var yVector = 10 * this.pixSize;
-            var direction = kickDirection == Charjs.Direction.Right ? 1 : -1;
-            var killTimer = this.getTimer(function () {
-                yVector -= _this._gravity * _this.pixSize;
-                _this.position.y = _this.position.y + yVector;
-                _this.position.x += kickPower * direction;
-                if (_this.position.y < _this.size.height * 5 * -1) {
-                    _this.removeTimer(killTimer);
-                    _this.destroy();
-                    return;
-                }
-                if (_this._currentStep < GoombaWorld.STEP) {
-                    _this._currentStep++;
-                }
-                else {
-                    _this._currentStep = 0;
-                    _this._actionIndex = _this._actionIndex ^ 1;
-                }
-                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
-            }, this.frameInterval);
+            this._yVector = 8 * this.pixSize;
+            this._isKickBound = true;
+            this._speed = 10;
+            this._direction = kickDirection;
+            this._steppedTimeout = 5000;
+            return Charjs.HitStatus.none;
         };
         GoombaWorld.prototype.doHitTestWithOtherEnemy = function () {
             if (this._gameMaster) {
@@ -711,13 +726,6 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
-    var HitStatus;
-    (function (HitStatus) {
-        HitStatus[HitStatus["none"] = 0] = "none";
-        HitStatus[HitStatus["dammage"] = 1] = "dammage";
-        HitStatus[HitStatus["attack"] = 2] = "attack";
-        HitStatus[HitStatus["grab"] = 3] = "grab";
-    })(HitStatus || (HitStatus = {}));
     var MarioWorld = (function (_super) {
         __extends(MarioWorld, _super);
         function MarioWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
@@ -757,17 +765,17 @@ var Charjs;
             var _this = this;
             this.updateEntity();
             switch (this.doHitTest()) {
-                case HitStatus.dammage:
+                case Charjs.HitStatus.dammage:
                     this.gameOver();
                     break;
-                case HitStatus.attack:
+                case Charjs.HitStatus.attack:
                     this.draw(11, null, this._attackDirection, Charjs.Vertical.Up, true);
                     this.stop();
                     setTimeout(function () {
                         _this.start();
-                    }, this.frameInterval * 3);
+                    }, this.frameInterval);
                     break;
-                case HitStatus.grab:
+                case Charjs.HitStatus.grab:
                     this.moveGrabedEnemy();
                     this.draw(14, null, this._direction, Charjs.Vertical.Up, true);
                     this.stop();
@@ -826,23 +834,25 @@ var Charjs;
                             continue;
                         if (enemys[name_2].isStepped()) {
                             if (!this._grabbing) {
-                                var playerCenter = this.position.x + this.size.width / 2;
-                                var enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left;
-                                enemys[name_2].onKicked(this._attackDirection, this._speed * 3);
-                                return HitStatus.attack;
+                                if (this._isSpecial) {
+                                    enemys[name_2].onKilled();
+                                    return Charjs.HitStatus.none;
+                                }
+                                else {
+                                    var playerCenter = this.position.x + this.size.width / 2;
+                                    var enemyCenter = ePos.x + eSize.width / 2;
+                                    this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left;
+                                    return enemys[name_2].onKicked(this._attackDirection, this._speed * 3);
+                                }
                             }
                             else {
                                 this.grabEnemy(enemys[name_2]);
-                                return HitStatus.grab;
+                                return Charjs.HitStatus.grab;
                             }
                         }
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
-                                var playerCenter = this.position.x + this.size.width / 2;
-                                var enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left;
-                                enemys[name_2].onKicked(this._attackDirection, this._speed * 3);
+                                enemys[name_2].onKilled();
                             }
                             else {
                                 enemys[name_2].onStepped();
@@ -850,11 +860,11 @@ var Charjs;
                             this._yVector = 12 * this.pixSize;
                             continue;
                         }
-                        return HitStatus.dammage;
+                        return Charjs.HitStatus.dammage;
                     }
                 }
             }
-            return HitStatus.none;
+            return Charjs.HitStatus.none;
         };
         MarioWorld.prototype.executeJump = function () {
             var ground = this.entity.ground || 0;
@@ -2107,15 +2117,18 @@ var MyQ;
 var RandomGenerator = (function () {
     function RandomGenerator() {
     }
+    RandomGenerator.prototype.getRandom = function (max, min) {
+        return Math.floor(Math.random() * (max + 1 - min)) + min;
+    };
     RandomGenerator.prototype.getCognitiveRandom = function (max, min, distance) {
         if (min === void 0) { min = 0; }
         if (distance === void 0) { distance = 0.3; }
         var rand = Math.random();
-        while (Math.abs(this.lastValue - rand) < distance && Math.abs(this.lastValue2 - rand) < distance) {
+        while (Math.abs(this.lastRandom - rand) < distance && Math.abs(this.lastRandom2 - rand) < distance) {
             rand = Math.random();
         }
-        this.lastValue2 = this.lastValue;
-        this.lastValue = rand;
+        this.lastRandom2 = this.lastRandom;
+        this.lastRandom = rand;
         return Math.floor(rand * (max + 1 - min)) + min;
     };
     RandomGenerator.prototype.getNormdistRandom = function (max, min, normdist) {

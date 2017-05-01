@@ -118,7 +118,7 @@ namespace Charjs {
 
         init(): void {
             super.init();
-            this.draw(0);
+            this.draw(0, undefined, undefined, undefined, undefined, 0);
         }
 
         private start(): void {
@@ -137,7 +137,7 @@ namespace Charjs {
                     let pos: IPosition = { x: this.position.x, y: this.position.y };
                     if (this.animation[this._animationIndex].yOffset)
                         pos.y += this.animation[this._animationIndex].yOffset;
-                    this.draw(this.animation[this._animationIndex].index, pos, Direction.Right, Vertical.Up, true);
+                    this.draw(this.animation[this._animationIndex].index, pos, Direction.Right, Vertical.Up, true, 0);
                     if (this.animation[this._animationIndex].wait) {
                         this.animation[this._animationIndex].wait--;
                     } else {

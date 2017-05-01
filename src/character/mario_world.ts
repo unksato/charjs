@@ -1,11 +1,6 @@
 namespace Charjs {
 
-    enum HitStatus {
-        none,
-        dammage,
-        attack,
-        grab
-    }
+
 
     export class MarioWorld extends AbstractPlayer {
         private static STEP = 2;
@@ -45,7 +40,7 @@ namespace Charjs {
                     this.stop();
                     setTimeout(() => {
                         this.start();
-                    }, this.frameInterval * 3);
+                    }, this.frameInterval);
                     break;
                 case HitStatus.grab:
                     this.moveGrabedEnemy();
@@ -114,11 +109,15 @@ namespace Charjs {
 
                         if (enemys[name].isStepped()) {
                             if (!this._grabbing) {
-                                let playerCenter = this.position.x + this.size.width / 2;
-                                let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
-                                enemys[name].onKicked(this._attackDirection, this._speed * 3);
-                                return HitStatus.attack;
+                                if (this._isSpecial) {
+                                    enemys[name].onKilled();
+                                    return HitStatus.none;
+                                } else {
+                                    let playerCenter = this.position.x + this.size.width / 2;
+                                    let enemyCenter = ePos.x + eSize.width / 2;
+                                    this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
+                                    return enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                                }
                             } else {
                                 this.grabEnemy(enemys[name]);
                                 return HitStatus.grab;
@@ -127,10 +126,7 @@ namespace Charjs {
 
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
-                                let playerCenter = this.position.x + this.size.width / 2;
-                                let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
-                                enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                                enemys[name].onKilled();
                             } else {
                                 enemys[name].onStepped();
                             }

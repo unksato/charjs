@@ -9,6 +9,13 @@ namespace Charjs {
         Down
     }
 
+    export enum HitStatus {
+        none,
+        dammage,
+        attack,
+        grab
+    }
+
     export interface IPosition {
         x: number;
         y: number;
@@ -53,7 +60,8 @@ namespace Charjs {
     export interface IEnemy extends ICharacter {
         onStepped(): void;
         onGrabed(player: IPlayer): void;
-        onKicked(direction: number, kickPower: number): void;
+        onKicked(direction: number, kickPower: number): HitStatus;
+        onKilled(): void;
         isKilled(): boolean;
         isStepped(): boolean;
         drawAction(): void;
@@ -116,9 +124,10 @@ namespace Charjs {
             } else {
                 //// for debbuging code
                 // this.cchars = [];
-                // for(let char of this.chars){
+                // for (let char of this.chars) {
                 //     this.cchars.push(Util.Compression.RLE(char));
                 // }
+                // console.log(JSON.stringify(this.cchars));
             }
         }
 
@@ -181,7 +190,7 @@ namespace Charjs {
             }
         }
 
-        public draw(index: number = 0, position: IPosition = null, direction: Direction = Direction.Right, vertical: Vertical = Vertical.Up, removeCurrent = false): void {
+        public draw(index: number = 0, position: IPosition = null, direction: Direction = Direction.Right, vertical: Vertical = Vertical.Up, removeCurrent = false, drawOffset = this.pixSize): void {
             if (removeCurrent) this.removeCharacter();
             position = position || this.position;
             if (vertical == Vertical.Up) {
@@ -190,7 +199,7 @@ namespace Charjs {
                 this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
             }
             this.currentAction.style.left = position.x + 'px';
-            this.currentAction.style.bottom = position.y + 'px';
+            this.currentAction.style.bottom = (position.y - drawOffset) + 'px';
             this.currentAction.style.zIndex = this.zIndex.toString();
             this.targetDom.appendChild(this.currentAction);
         }
@@ -365,10 +374,11 @@ namespace Charjs {
     export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
         abstract onStepped(): void;
         abstract onGrabed(player: IPlayer): void;
-        abstract onKicked(direction: number, kickPower: number): void;
+        abstract onKicked(direction: number, kickPower: number): HitStatus;
         abstract isKilled(): boolean;
         abstract isStepped(): boolean;
         abstract drawAction(): void;
+        abstract onKilled(): void;
     }
 
     export interface IOtherObject extends IObject {
