@@ -648,8 +648,20 @@ var Charjs;
             }
             if (!this._grabbedPlayer) {
                 var directionUpdated = this.updateDirection();
-                if (this.doHitTestWithOtherEnemy()) {
-                    this._direction = this._direction == Charjs.Direction.Right ? Charjs.Direction.Left : Charjs.Direction.Right;
+                var targetEnemy = this.doHitTestWithOtherEnemy();
+                if (targetEnemy) {
+                    if (this._isKickBound) {
+                        var targetEnemyCenter = targetEnemy.getPosition().x + targetEnemy.getCharSize().width / 2;
+                        var enemyCenter = this.position.x + this.size.width / 2;
+                        targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left, 10);
+                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                        return;
+                    }
+                    else {
+                        if (!this.isStepped()) {
+                            this._direction = this._direction == Charjs.Direction.Right ? Charjs.Direction.Left : Charjs.Direction.Right;
+                        }
+                    }
                 }
                 this.updateEntity();
                 this.executeJump();
@@ -695,6 +707,31 @@ var Charjs;
             this._steppedTimeout = 5000;
             return Charjs.HitStatus.none;
         };
+        GoombaWorld.prototype.onEnemyAttack = function (attackDirection, kickPower) {
+            var _this = this;
+            this.stop();
+            this._isKilled = true;
+            var yVector = 10 * this.pixSize;
+            var direction = attackDirection == Charjs.Direction.Right ? 1 : -1;
+            var killTimer = this.getTimer(function () {
+                yVector -= _this._gravity * _this.pixSize;
+                _this.position.y = _this.position.y + yVector;
+                _this.position.x += kickPower * direction;
+                if (_this.position.y < _this.size.height * 5 * -1) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                    return;
+                }
+                if (_this._currentStep < GoombaWorld.STEP) {
+                    _this._currentStep++;
+                }
+                else {
+                    _this._currentStep = 0;
+                    _this._actionIndex = _this._actionIndex ^ 1;
+                }
+                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
+            }, this.frameInterval);
+        };
         GoombaWorld.prototype.doHitTestWithOtherEnemy = function () {
             if (this._gameMaster) {
                 var enemys = this._gameMaster.getEnemys();
@@ -710,11 +747,11 @@ var Charjs;
                             continue;
                         if (ePos.x > this.position.x + this.size.width)
                             continue;
-                        return true;
+                        return enemys[name_1];
                     }
                 }
             }
-            return false;
+            return null;
         };
         GoombaWorld.prototype.registerActionCommand = function () {
         };
@@ -811,8 +848,8 @@ var Charjs;
                     return;
                 var grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
                 var enemyCenter = ePos.x + eSize.width / 2;
-                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left, this._speed * 3);
-                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, this._speed * 3);
+                enemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left, this._speed * 3);
+                this._grabedEnemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, this._speed * 3);
                 this._grabedEnemy = null;
             }
         };

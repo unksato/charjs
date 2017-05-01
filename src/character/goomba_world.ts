@@ -52,7 +52,6 @@ namespace Charjs {
         private _isRevivalJumping = false;
         private _grabbedPlayer: IPlayer = null;
 
-
         private _vertical: Vertical = Vertical.Up;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
@@ -153,12 +152,22 @@ namespace Charjs {
             if (!this._grabbedPlayer) {
                 let directionUpdated = this.updateDirection();
 
-                if (this.doHitTestWithOtherEnemy()) {
-                    this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
+                let targetEnemy = this.doHitTestWithOtherEnemy();
+                if (targetEnemy) {
+                    if (this._isKickBound) {
+                        let targetEnemyCenter = targetEnemy.getPosition().x + targetEnemy.getCharSize().width / 2;
+                        let enemyCenter = this.position.x + this.size.width / 2;
+                        targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, 10);
+                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10)
+                        return;
+                    } else {
+                        if (!this.isStepped()) {
+                            this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
+                        }
+                    }
                 }
 
                 this.updateEntity();
-
                 this.executeJump();
 
                 if (this._direction == Direction.Right) {
@@ -241,7 +250,7 @@ namespace Charjs {
         }
 
 
-        private doHitTestWithOtherEnemy(): boolean {
+        private doHitTestWithOtherEnemy(): IEnemy {
             if (this._gameMaster) {
                 let enemys = this._gameMaster.getEnemys();
                 for (let name in enemys) {
@@ -256,11 +265,11 @@ namespace Charjs {
                             continue;
                         if (ePos.x > this.position.x + this.size.width)
                             continue;
-                        return true;
+                        return enemys[name];
                     }
                 }
             }
-            return false;
+            return null;
         }
 
         registerActionCommand(): void {
