@@ -62,6 +62,7 @@ namespace Charjs {
         onGrabed(player: IPlayer): void;
         onKicked(direction: number, kickPower: number): HitStatus;
         onKilled(): void;
+        onEnemyAttack(attackDirection: Direction, kickPower: number): void;
         isKilled(): boolean;
         isStepped(): boolean;
         drawAction(): void;
@@ -379,6 +380,7 @@ namespace Charjs {
         abstract isStepped(): boolean;
         abstract drawAction(): void;
         abstract onKilled(): void;
+        abstract onEnemyAttack(attackDirection: Direction, kickPower: number): void;
     }
 
     export interface IOtherObject extends IObject {

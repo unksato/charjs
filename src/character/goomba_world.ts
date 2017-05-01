@@ -210,6 +210,37 @@ namespace Charjs {
             return HitStatus.none;
         }
 
+        onEnemyAttack(attackDirection: Direction, kickPower: number): void {
+            this.stop();
+            this._isKilled = true;
+            let yVector = 10 * this.pixSize;
+            let direction = attackDirection == Direction.Right ? 1 : -1;
+
+            let killTimer = this.getTimer(() => {
+
+                yVector -= this._gravity * this.pixSize;
+                this.position.y = this.position.y + yVector;
+                this.position.x += kickPower * direction;
+
+                if (this.position.y < this.size.height * 5 * -1) {
+                    this.removeTimer(killTimer);
+                    this.destroy();
+                    return;
+                }
+
+                if (this._currentStep < GoombaWorld.STEP) {
+                    this._currentStep++;
+                } else {
+                    this._currentStep = 0;
+                    this._actionIndex = this._actionIndex ^ 1;
+                }
+
+                this.draw(this._actionIndex, null, this._direction, Vertical.Down, true);
+
+            }, this.frameInterval);
+        }
+
+
         private doHitTestWithOtherEnemy(): boolean {
             if (this._gameMaster) {
                 let enemys = this._gameMaster.getEnemys();
@@ -230,7 +261,6 @@ namespace Charjs {
                 }
             }
             return false;
-
         }
 
         registerActionCommand(): void {

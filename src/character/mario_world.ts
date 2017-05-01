@@ -82,8 +82,8 @@ namespace Charjs {
 
                 let grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
                 let enemyCenter = ePos.x + eSize.width / 2;
-                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, this._speed * 3);
-                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3)
+                enemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, this._speed * 3);
+                this._grabedEnemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3)
                 this._grabedEnemy = null;
             }
         }
