@@ -51,11 +51,12 @@ namespace Charjs {
         private _isKickBound = false;
         private _isRevivalJumping = false;
         private _grabbedPlayer: IPlayer = null;
-
+        private _star_effect: StarEffect = null;
         private _vertical: Vertical = Vertical.Up;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
+            this._star_effect = new StarEffect(targetDom, pixSize).init();
         }
 
         isKilled(): boolean {
@@ -155,10 +156,14 @@ namespace Charjs {
                 let targetEnemy = this.doHitTestWithOtherEnemy();
                 if (targetEnemy) {
                     if (this._isKickBound) {
-                        let targetEnemyCenter = targetEnemy.getPosition().x + targetEnemy.getCharSize().width / 2;
+                        let ePos = targetEnemy.getPosition();
+                        let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                         let enemyCenter = this.position.x + this.size.width / 2;
                         targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, 10);
-                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10)
+                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
+
+                        let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                        this._star_effect.drawEffect(effectPos);
                         return;
                     } else {
                         if (!this.isStepped()) {

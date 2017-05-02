@@ -25,8 +25,13 @@ namespace Charjs {
         private _isSquat = false;
         private _attackDirection: Direction = Direction.Right;
 
+        private _star_effect: StarEffect = null;
+        private _special_effect: SpecialEffect = null;
+
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, false, zIndex, frameInterval);
+            this._star_effect = new StarEffect(targetDom, pixSize).init();
+            this._special_effect = new SpecialEffect(targetDom, pixSize).init();
         }
 
         onAction(): void {
@@ -110,6 +115,7 @@ namespace Charjs {
                         if (enemys[name].isStepped()) {
                             if (!this._grabbing) {
                                 if (this._isSpecial) {
+                                    this._special_effect.drawEffect(enemys[name].getPosition());
                                     enemys[name].onKilled();
                                     return HitStatus.none;
                                 } else {
@@ -126,9 +132,12 @@ namespace Charjs {
 
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
+                                this._special_effect.drawEffect(enemys[name].getPosition());
                                 enemys[name].onKilled();
                             } else {
                                 enemys[name].onStepped();
+                                let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                                this._star_effect.drawEffect(effectPos);
                             }
                             this._yVector = 12 * this.pixSize;
                             continue;

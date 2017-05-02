@@ -135,6 +135,7 @@ var Charjs;
                         this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
                 }
             }
+            return this;
         };
         AbstractObject.prototype.createCharacterAction = function (charactorMap, isReverse, isVerticalRotation) {
             if (isReverse === void 0) { isReverse = false; }
@@ -158,32 +159,52 @@ var Charjs;
                 }
             }
         };
-        AbstractObject.prototype.removeCharacter = function () {
-            if (this.currentAction != null) {
-                this.targetDom.removeChild(this.currentAction);
-                this.currentAction = null;
+        AbstractObject.prototype.removeCharacter = function (target) {
+            if (target) {
+                this.targetDom.removeChild(target);
+            }
+            else {
+                if (this.currentAction != null) {
+                    this.targetDom.removeChild(this.currentAction);
+                    this.currentAction = null;
+                }
             }
         };
-        AbstractObject.prototype.draw = function (index, position, direction, vertical, removeCurrent, drawOffset) {
+        AbstractObject.prototype.draw = function (index, position, direction, vertical, removeCurrent, drawOffset, clone) {
             if (index === void 0) { index = 0; }
             if (position === void 0) { position = null; }
             if (direction === void 0) { direction = Direction.Right; }
             if (vertical === void 0) { vertical = Vertical.Up; }
             if (removeCurrent === void 0) { removeCurrent = false; }
             if (drawOffset === void 0) { drawOffset = this.pixSize; }
-            if (removeCurrent)
+            if (clone === void 0) { clone = false; }
+            if (removeCurrent && !clone)
                 this.removeCharacter();
             position = position || this.position;
+            var action = null;
             if (vertical == Vertical.Up) {
-                this.currentAction = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index];
+                action = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index];
             }
             else {
-                this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
+                action = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
             }
-            this.currentAction.style.left = position.x + 'px';
-            this.currentAction.style.bottom = (position.y - drawOffset) + 'px';
-            this.currentAction.style.zIndex = this.zIndex.toString();
-            this.targetDom.appendChild(this.currentAction);
+            if (clone) {
+                action = this.cloneCanvas(action);
+            }
+            else {
+                this.currentAction = action;
+            }
+            action.style.left = position.x + 'px';
+            action.style.bottom = (position.y - drawOffset) + 'px';
+            action.style.zIndex = this.zIndex.toString();
+            this.targetDom.appendChild(action);
+            return action;
+        };
+        AbstractObject.prototype.cloneCanvas = function (oldCanvas) {
+            var canvas = AbstractPixel.createCanvasElement(oldCanvas.width, oldCanvas.height, this.zIndex + 1);
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(oldCanvas, 0, 0);
+            return canvas;
         };
         AbstractObject.prototype.refresh = function () {
             this.currentAction.style.left = this.position.x + 'px';
@@ -239,6 +260,7 @@ var Charjs;
         AbstractCharacter.prototype.init = function () {
             _super.prototype.init.call(this);
             this.registerCommand();
+            return this;
         };
         AbstractCharacter.prototype.start = function () {
             var _this = this;
@@ -408,128 +430,83 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
-    var NormalBlockWorld = (function (_super) {
-        __extends(NormalBlockWorld, _super);
-        function NormalBlockWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
-            if (direction === void 0) { direction = Charjs.Direction.Right; }
-            if (zIndex === void 0) { zIndex = 2147483640; }
-            if (frameInterval === void 0) { frameInterval = 45; }
-            var _this = _super.call(this, targetDom, pixSize, position, direction, false, true, zIndex - 2, frameInterval) || this;
-            _this.colors = ['', '#000000', '#ffffff', '#fee13d', '#ddae50'];
-            _this.cchars = [[[0, 2, 1, 12, 0, 2], [0, 1, 1, 1, 2, 3, 4, 9, 1, 1, 0, 1], [1, 1, 2, 2, 3, 9, 4, 3, 1, 1], [1, 1, 2, 1, 3, 11, 4, 2, 1, 1], [1, 1, 2, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 2, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 2, 3, 9, 4, 3, 1, 1], [1, 1, 4, 14, 1, 1], [0, 1, 1, 1, 4, 12, 1, 1, 0, 1], [0, 2, 1, 12, 0, 2]], [[0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 2, 2, 3, 4, 9, 1, 2], [1, 1, 2, 1, 1, 12, 4, 1, 1, 1], [1, 2, 3, 11, 4, 1, 1, 2], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 10, 4, 3, 1, 1], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 1, 4, 14, 1, 1], [1, 1, 4, 14, 1, 1], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 2, 2, 10, 3, 1, 2, 1, 1, 2], [1, 1, 2, 8, 3, 1, 2, 1, 3, 1, 2, 1, 3, 2, 1, 1], [1, 1, 2, 4, 4, 1, 2, 2, 3, 1, 2, 1, 4, 1, 3, 4, 1, 1], [1, 1, 2, 4, 4, 1, 2, 1, 3, 1, 2, 1, 3, 1, 4, 1, 3, 4, 1, 1], [1, 1, 2, 1, 3, 1, 2, 1, 3, 1, 2, 1, 3, 1, 2, 1, 3, 7, 1, 1], [1, 2, 3, 12, 1, 2], [1, 1, 3, 1, 1, 12, 4, 1, 1, 1], [1, 2, 3, 9, 4, 3, 1, 2], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16]]];
+    var SpecialEffect = (function (_super) {
+        __extends(SpecialEffect, _super);
+        function SpecialEffect() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.cchars = [[[0, 3, 1, 4, 0, 9], [0, 2, 1, 6, 0, 1, 1, 4, 0, 3], [0, 1, 1, 13, 0, 2], [1, 15, 0, 1], [1, 15, 0, 1], [1, 15, 0, 1], [1, 14, 0, 2], [1, 15, 0, 1], [0, 1, 1, 14, 0, 1], [0, 2, 1, 14], [0, 2, 1, 14], [0, 1, 1, 15], [0, 1, 1, 14, 0, 1], [0, 1, 1, 14, 0, 1], [0, 2, 1, 11, 0, 3], [0, 6, 1, 4, 0, 6]], [[0, 16], [0, 3, 1, 2, 0, 4, 1, 1, 0, 6], [0, 2, 1, 4, 0, 2, 1, 3, 0, 5], [0, 2, 1, 4, 0, 3, 1, 1, 0, 2, 1, 1, 0, 3], [0, 2, 1, 4, 0, 5, 1, 3, 0, 2], [0, 3, 1, 2, 0, 6, 1, 3, 0, 2], [0, 12, 1, 1, 0, 3], [0, 8, 1, 2, 0, 6], [0, 7, 1, 4, 0, 5], [0, 8, 1, 2, 0, 6], [0, 4, 1, 1, 0, 7, 1, 1, 0, 3], [0, 3, 1, 3, 0, 5, 1, 3, 0, 2], [0, 3, 1, 3, 0, 1, 1, 1, 0, 3, 1, 3, 0, 2], [0, 4, 1, 1, 0, 1, 1, 3, 0, 3, 1, 1, 0, 3], [0, 7, 1, 1, 0, 8], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 3, 1, 2, 0, 4, 1, 1, 0, 6], [0, 2, 1, 4, 0, 5, 1, 2, 0, 3], [0, 3, 1, 2, 0, 6, 1, 2, 0, 3], [0, 16], [0, 16], [0, 16], [0, 9, 1, 1, 0, 6], [0, 8, 1, 3, 0, 5], [0, 3, 1, 2, 0, 4, 1, 1, 0, 6], [0, 3, 1, 2, 0, 11], [0, 11, 1, 2, 0, 3], [0, 8, 1, 1, 0, 7], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 3, 1, 1, 0, 12], [0, 16], [0, 12, 1, 1, 0, 3], [0, 16], [0, 16], [0, 9, 1, 1, 0, 6], [0, 16], [0, 3, 1, 1, 0, 12], [0, 12, 1, 1, 0, 3], [0, 16], [0, 16], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 8, 2, 1, 0, 7], [0, 8, 2, 1, 0, 7], [0, 5, 2, 7, 0, 4], [0, 6, 2, 5, 0, 5], [0, 7, 2, 3, 0, 6], [0, 6, 2, 5, 0, 5], [0, 5, 2, 2, 0, 3, 2, 2, 0, 4], [0, 16], [0, 16], [0, 16], [0, 16]]];
+            _this.colors = ['', '#fff', '#fffd34'];
             _this.chars = null;
-            _this.animation = null;
-            _this._animationIndex = null;
-            _this._isStarting = false;
-            _this._pushedUpTimer = null;
-            _this.defaultCommand = function (e) {
-                if (e.keyCode == 32) {
-                    if (_this._isStarting) {
-                        _this.stop();
-                    }
-                    else {
-                        _this.start();
-                    }
-                }
-            };
+            _this.currentIndex = 0;
+            _this.prevStars = [];
             return _this;
         }
-        NormalBlockWorld.getAnimation = function (size) {
-            return [
-                { yOffset: size * 4, index: 0, wait: 0 },
-                { yOffset: size * 8, index: 0, wait: 0 },
-                { yOffset: size * 10, index: 0, wait: 2 },
-                { yOffset: size * 8, index: 0, wait: 0 },
-                { yOffset: 0, index: 2, wait: 2 },
-                { yOffset: 0, index: 3, wait: 2 },
-                { yOffset: 0, index: 0, wait: 2 },
-                { yOffset: 0, index: 1, wait: 2 },
-                { yOffset: 0, index: 2, wait: 2 },
-                { yOffset: 0, index: 3, wait: 2 },
-                { yOffset: 0, index: 0, wait: 2 },
-                { yOffset: 0, index: 1, wait: 2 },
-                { yOffset: 0, index: 2, wait: 2 },
-                { yOffset: 0, index: 3, wait: 2 },
-                { yOffset: 0, index: 0, wait: 2 },
-                { yOffset: 0, index: 1, wait: 2 },
-                { yOffset: 0, index: 2, wait: 2 },
-                { yOffset: 0, index: 3, wait: 2 },
-                { yOffset: 0, index: 0, wait: 2 },
-                { yOffset: 0, index: 1, wait: 2 },
-                { yOffset: 0, index: 2, wait: 2 },
-                { yOffset: 0, index: 3, wait: 2 },
-                { yOffset: 0, index: 0, wait: 2 },
-                { yOffset: 0, index: 1, wait: 2 },
-                { yOffset: 0, index: 2, wait: 2 },
-                { yOffset: 0, index: 3, wait: 2 },
-                { yOffset: 0, index: 0, wait: 2 },
-                { yOffset: 0, index: 1, wait: 2 },
-                { yOffset: 0, index: 2, wait: 2 },
-                { yOffset: 0, index: 3, wait: 2 },
-                { yOffset: 0, index: 0, wait: 2 }
-            ];
-        };
-        NormalBlockWorld.prototype.init = function () {
+        SpecialEffect.prototype.init = function () {
             _super.prototype.init.call(this);
-            this.draw(0, undefined, undefined, undefined, undefined, 0);
+            return this;
         };
-        NormalBlockWorld.prototype.start = function () {
+        SpecialEffect.prototype.drawEffect = function (pos) {
             var _this = this;
-            if (this._animationIndex !== null && this.animation != null) {
-                this.isActive = false;
-                this._isStarting = true;
-                this._pushedUpTimer = this.getTimer(function () {
-                    if (_this._animationIndex >= _this.animation.length) {
-                        _this.animation = null;
-                        _this.isActive = true;
-                        _this._animationIndex = null;
-                        _this.removeCommand();
-                        _this.stop();
-                        return;
-                    }
-                    var pos = { x: _this.position.x, y: _this.position.y };
-                    if (_this.animation[_this._animationIndex].yOffset)
-                        pos.y += _this.animation[_this._animationIndex].yOffset;
-                    _this.draw(_this.animation[_this._animationIndex].index, pos, Charjs.Direction.Right, Charjs.Vertical.Up, true, 0);
-                    if (_this.animation[_this._animationIndex].wait) {
-                        _this.animation[_this._animationIndex].wait--;
-                    }
-                    else {
-                        _this._animationIndex++;
-                    }
-                }, this.frameInterval);
+            var tEffect = this.getTimer(function () {
+                if (_this.currentIndex > 3) {
+                    _this.removeStars();
+                    _this.destroy();
+                    _this.removeTimer(tEffect);
+                    _this.currentIndex = 0;
+                }
+                else {
+                    _this.draw(_this.currentIndex, pos, undefined, undefined, true);
+                    _this.drawStars(pos, _this.currentIndex);
+                    _this.currentIndex++;
+                }
+            }, this.frameInterval);
+        };
+        SpecialEffect.prototype.drawStars = function (pos, count) {
+            this.removeStars();
+            var offset = count * this.pixSize * 5;
+            this.prevStars.push(this.draw(4, { x: pos.x - offset, y: pos.y - offset }, undefined, undefined, false, 0, true));
+            this.prevStars.push(this.draw(4, { x: pos.x + offset, y: pos.y - offset }, undefined, undefined, false, 0, true));
+            this.prevStars.push(this.draw(4, { x: pos.x - offset, y: pos.y + offset }, undefined, undefined, false, 0, true));
+            this.prevStars.push(this.draw(4, { x: pos.x + offset, y: pos.y + offset }, undefined, undefined, false, 0, true));
+        };
+        SpecialEffect.prototype.removeStars = function () {
+            if (this.prevStars.length > 0) {
+                var prev = null;
+                while (prev = this.prevStars.shift()) {
+                    this.removeCharacter(prev);
+                }
             }
         };
-        NormalBlockWorld.prototype.stop = function () {
-            this._isStarting = false;
-            if (this._pushedUpTimer) {
-                this.removeTimer(this._pushedUpTimer);
-                this._pushedUpTimer = null;
-            }
+        return SpecialEffect;
+    }(Charjs.AbstractObject));
+    Charjs.SpecialEffect = SpecialEffect;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
+    var StarEffect = (function (_super) {
+        __extends(StarEffect, _super);
+        function StarEffect() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.cchars = [[[0, 7, 1, 2, 0, 7], [0, 7, 1, 2, 0, 5, 1, 2], [0, 6, 1, 3, 0, 3, 1, 4], [0, 6, 1, 9, 0, 1], [0, 6, 1, 9, 0, 1], [0, 5, 1, 9, 0, 2], [1, 14, 0, 2], [1, 13, 0, 3], [0, 1, 1, 13, 0, 2], [0, 2, 1, 13, 0, 1], [0, 3, 1, 13], [0, 2, 1, 14], [0, 1, 1, 9, 0, 6], [0, 1, 1, 8, 0, 7], [1, 4, 0, 2, 1, 3, 0, 7], [1, 2, 0, 5, 1, 1, 0, 8]]];
+            _this.colors = ['', '#fff'];
+            _this.chars = null;
+            return _this;
+        }
+        StarEffect.prototype.init = function () {
+            _super.prototype.init.call(this);
+            return this;
         };
-        NormalBlockWorld.prototype.onPushedUp = function () {
-            for (var _i = 0, _a = this.entityEnemies; _i < _a.length; _i++) {
-                var enemy = _a[_i];
-                enemy.onKicked(Charjs.Direction.Right, 0);
-            }
-            if (!this._pushedUpTimer) {
-                this.animation = NormalBlockWorld.getAnimation(this.pixSize);
-                this._animationIndex = 0;
-                this.registerCommand();
-                this.start();
-            }
+        StarEffect.prototype.drawEffect = function (pos) {
+            var _this = this;
+            this.draw(0, pos);
+            var tEffect = this.getTimer(function () {
+                _this.destroy();
+                _this.removeTimer(tEffect);
+            }, this.frameInterval);
         };
-        NormalBlockWorld.prototype.onTrampled = function () {
-        };
-        NormalBlockWorld.prototype.registerCommand = function () {
-            document.addEventListener('keypress', this.defaultCommand);
-        };
-        NormalBlockWorld.prototype.removeCommand = function () {
-            document.removeEventListener('keypress', this.defaultCommand);
-        };
-        return NormalBlockWorld;
-    }(Charjs.AbstractOtherObject));
-    Charjs.NormalBlockWorld = NormalBlockWorld;
+        return StarEffect;
+    }(Charjs.AbstractObject));
+    Charjs.StarEffect = StarEffect;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
@@ -553,9 +530,11 @@ var Charjs;
             _this._isKickBound = false;
             _this._isRevivalJumping = false;
             _this._grabbedPlayer = null;
+            _this._star_effect = null;
             _this._vertical = Charjs.Vertical.Up;
             _this._steppedTimeout = 0;
             _this._revivedTimeout = 0;
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
             return _this;
         }
         GoombaWorld.prototype.isKilled = function () {
@@ -651,10 +630,13 @@ var Charjs;
                 var targetEnemy = this.doHitTestWithOtherEnemy();
                 if (targetEnemy) {
                     if (this._isKickBound) {
-                        var targetEnemyCenter = targetEnemy.getPosition().x + targetEnemy.getCharSize().width / 2;
+                        var ePos = targetEnemy.getPosition();
+                        var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                         var enemyCenter = this.position.x + this.size.width / 2;
                         targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left, 10);
                         this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                        var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                        this._star_effect.drawEffect(effectPos);
                         return;
                     }
                     else {
@@ -785,6 +767,8 @@ var Charjs;
             _this._isBraking = false;
             _this._isSquat = false;
             _this._attackDirection = Charjs.Direction.Right;
+            _this._star_effect = null;
+            _this._special_effect = null;
             _this._specialAnimationIndex = 0;
             _this._specialAnimation = [{ index: 0, direction: Charjs.Direction.Right }, { index: 12, direction: Charjs.Direction.Right }, { index: 0, direction: Charjs.Direction.Left }, { index: 13, direction: Charjs.Direction.Right }];
             _this._grabedEnemy = null;
@@ -796,6 +780,8 @@ var Charjs;
             _this.colors = ['', '#000000', '#ffffff', '#520000', '#8c5a18', '#21318c', '#ff4273', '#b52963', '#ffde73', '#dea539', '#ffd6c6', '#ff736b', '#84dece', '#42849c'];
             _this.cchars = [[[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 4, 3, 1, 7, 1, 4, 4, 5, 1, 0, 5], [0, 3, 3, 1, 7, 2, 6, 1, 13, 2, 12, 2, 5, 1, 0, 4], [0, 3, 3, 1, 4, 3, 13, 1, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 4, 1, 2, 3, 4, 1, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 4, 1, 2, 2, 4, 1, 13, 3, 12, 2, 5, 1, 0, 3], [0, 3, 4, 1, 2, 2, 4, 1, 13, 2, 5, 1, 13, 1, 5, 1, 0, 4], [0, 4, 4, 4, 1, 1, 4, 1, 1, 1, 0, 5], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 4], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 3, 4, 1, 7, 3, 4, 3, 5, 1, 0, 5], [0, 3, 4, 4, 13, 2, 12, 2, 5, 1, 0, 4], [0, 2, 1, 1, 4, 1, 2, 3, 4, 1, 2, 2, 12, 1, 2, 1, 5, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 4, 1, 2, 2, 4, 2, 2, 2, 12, 1, 2, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 1, 4, 1, 2, 2, 4, 1, 13, 3, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 3, 1, 1, 1, 4, 2, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2], [0, 16], [0, 16]], [[0, 12, 4, 2, 0, 2], [0, 11, 4, 1, 2, 2, 4, 1, 0, 1], [0, 10, 4, 1, 2, 4, 4, 1], [0, 7, 3, 5, 2, 3, 4, 1], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 2, 1, 4, 1, 0, 1], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 4, 2, 0, 1], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 3, 1, 0, 3], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 1, 4, 3, 7, 1, 4, 1, 11, 3, 1, 4, 0, 3], [4, 2, 2, 2, 4, 1, 7, 1, 4, 4, 5, 1, 0, 5], [4, 1, 2, 4, 4, 1, 7, 1, 13, 2, 12, 2, 5, 1, 0, 4], [4, 1, 2, 4, 4, 1, 13, 2, 2, 2, 12, 1, 2, 1, 5, 1, 1, 2, 0, 1], [0, 1, 4, 1, 2, 2, 4, 1, 13, 3, 2, 2, 12, 1, 2, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 1, 4, 1, 13, 6, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 3, 1, 5, 3, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 7, 1, 1, 5, 11, 1, 1, 2, 0, 4], [0, 1, 3, 1, 7, 2, 1, 2, 10, 6, 0, 4], [0, 1, 3, 1, 7, 1, 10, 1, 1, 2, 10, 2, 1, 1, 10, 1, 1, 1, 10, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 10, 2, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 1, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 2, 1, 1, 11, 2, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 1, 4, 1, 2, 2, 3, 1, 11, 2, 1, 7, 2, 1, 3, 1], [4, 1, 2, 4, 3, 1, 11, 3, 1, 4, 2, 2, 3, 1], [4, 1, 2, 4, 3, 1, 4, 4, 5, 1, 4, 1, 2, 1, 1, 2, 0, 1], [0, 1, 4, 1, 2, 2, 3, 1, 13, 4, 12, 2, 5, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 2, 5, 1, 13, 3, 2, 2, 12, 1, 2, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 4, 2, 5, 1, 13, 3, 2, 2, 12, 1, 2, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 4, 1, 8, 1, 5, 2, 13, 4, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 2, 1, 2, 0, 1, 5, 2, 13, 3, 5, 1, 0, 2, 1, 2, 0, 1], [0, 6, 5, 4, 0, 6], [0, 16]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [4, 6, 11, 3, 1, 4, 0, 3], [4, 1, 2, 3, 4, 1, 7, 1, 4, 4, 5, 1, 0, 5], [0, 1, 4, 1, 2, 2, 4, 1, 7, 2, 13, 2, 12, 2, 5, 1, 0, 4], [0, 2, 4, 2, 7, 2, 13, 2, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 5, 1, 13, 4, 2, 2, 12, 1, 2, 1, 5, 1, 0, 3], [0, 3, 5, 1, 13, 6, 12, 2, 5, 1, 0, 3], [0, 3, 5, 2, 13, 4, 5, 1, 13, 1, 5, 1, 0, 4], [0, 4, 4, 4, 1, 1, 4, 1, 1, 1, 0, 5], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 4], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [4, 6, 11, 3, 1, 4, 0, 3], [4, 1, 2, 3, 4, 1, 7, 1, 4, 4, 5, 1, 0, 5], [0, 1, 4, 1, 2, 2, 4, 1, 7, 1, 13, 3, 12, 2, 5, 1, 0, 4], [0, 2, 4, 2, 7, 2, 13, 2, 2, 2, 12, 1, 2, 1, 5, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 2, 13, 4, 2, 2, 12, 1, 2, 1, 1, 1, 8, 1, 1, 2], [0, 1, 1, 1, 3, 2, 13, 6, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 3, 1, 1, 1, 5, 2, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 3, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2], [0, 16], [0, 16]], [[0, 16], [0, 5, 3, 5, 0, 6], [0, 4, 3, 1, 6, 1, 8, 1, 6, 3, 3, 2, 0, 4], [0, 4, 3, 1, 2, 1, 8, 2, 7, 4, 3, 1, 0, 3], [0, 3, 1, 6, 7, 4, 3, 1, 0, 2], [0, 2, 1, 9, 7, 3, 3, 1, 0, 1], [0, 4, 11, 5, 1, 4, 7, 1, 3, 1, 0, 1], [0, 4, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 11, 1, 1, 2, 10, 1, 7, 2, 3, 1], [0, 2, 4, 2, 10, 1, 1, 1, 10, 1, 1, 1, 10, 2, 1, 1, 10, 1, 4, 1, 10, 1, 7, 1, 3, 1], [0, 1, 4, 1, 10, 7, 1, 2, 10, 1, 4, 1, 11, 1, 7, 1, 3, 1], [0, 1, 4, 1, 11, 5, 1, 1, 10, 2, 1, 1, 10, 1, 11, 1, 1, 1, 3, 1, 0, 1], [0, 2, 1, 6, 4, 3, 11, 1, 1, 2, 7, 1, 3, 1], [0, 3, 1, 4, 4, 1, 2, 2, 4, 2, 1, 1, 2, 1, 7, 1, 3, 1], [0, 4, 3, 1, 7, 2, 2, 4, 4, 1, 2, 3, 4, 1], [0, 4, 5, 1, 3, 2, 2, 4, 4, 1, 2, 3, 4, 1], [0, 4, 5, 1, 13, 1, 3, 3, 2, 1, 4, 3, 2, 1, 4, 1, 0, 1], [0, 4, 5, 1, 13, 1, 4, 1, 8, 1, 4, 2, 13, 1, 2, 2, 4, 1, 0, 2], [0, 5, 1, 1, 4, 2, 1, 2, 13, 3, 5, 1, 0, 2], [0, 5, 1, 1, 4, 1, 1, 3, 5, 1, 13, 3, 5, 1, 0, 1], [0, 6, 1, 3, 0, 2, 1, 1, 4, 2, 1, 1, 0, 1], [0, 11, 1, 1, 4, 2, 8, 1, 1, 1], [0, 11, 1, 5]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 1, 1, 2, 4, 9, 0, 4], [1, 1, 8, 1, 4, 1, 2, 3, 4, 1, 7, 1, 4, 1, 12, 1, 5, 1, 0, 5], [0, 1, 1, 1, 4, 2, 2, 2, 4, 1, 7, 1, 4, 1, 12, 2, 5, 1, 0, 4], [0, 3, 5, 1, 4, 3, 2, 2, 12, 1, 2, 1, 5, 1, 0, 4], [0, 3, 1, 2, 13, 3, 2, 1, 12, 1, 2, 1, 5, 1, 0, 4], [0, 2, 1, 1, 4, 2, 5, 1, 13, 4, 5, 1, 0, 5], [0, 2, 1, 1, 4, 3, 5, 1, 13, 1, 5, 2, 0, 6], [0, 2, 1, 1, 8, 1, 1, 2, 5, 3, 0, 7], [0, 3, 1, 1, 0, 12]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 5, 3, 4, 0, 7], [0, 3, 3, 2, 6, 4, 3, 2, 0, 5], [0, 2, 3, 1, 6, 5, 7, 1, 6, 2, 3, 1, 0, 4], [0, 1, 3, 1, 7, 2, 3, 2, 6, 1, 7, 1, 6, 2, 8, 1, 6, 1, 3, 1, 0, 3], [0, 1, 3, 1, 7, 1, 3, 1, 2, 2, 3, 1, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 1, 3, 2, 2, 4, 3, 1, 7, 1, 6, 1, 1, 4, 0, 2], [0, 1, 5, 1, 3, 1, 2, 4, 3, 1, 1, 7, 0, 1], [5, 1, 13, 1, 1, 1, 3, 4, 7, 1, 10, 6, 4, 1, 0, 1], [5, 1, 13, 1, 3, 1, 7, 3, 3, 1, 12, 1, 1, 1, 11, 5, 4, 1, 0, 1], [5, 1, 13, 1, 3, 1, 7, 2, 3, 1, 13, 2, 5, 1, 1, 5, 0, 2], [5, 1, 13, 2, 3, 2, 13, 1, 5, 2, 12, 1, 5, 1, 1, 3, 0, 3], [5, 2, 13, 2, 5, 2, 4, 1, 1, 1, 4, 1, 1, 1, 0, 6], [0, 1, 5, 3, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 5], [0, 4, 1, 7, 0, 5]], [[0, 6, 3, 4, 0, 6], [0, 4, 3, 2, 6, 1, 8, 2, 6, 1, 3, 2, 0, 4], [0, 3, 3, 1, 6, 2, 2, 1, 8, 2, 2, 1, 6, 2, 3, 1, 0, 3], [0, 2, 3, 1, 6, 3, 1, 4, 6, 3, 3, 1, 0, 2], [0, 2, 3, 1, 6, 1, 1, 8, 6, 1, 3, 1, 0, 2], [0, 2, 3, 1, 1, 10, 3, 1, 0, 2], [0, 3, 3, 1, 1, 1, 6, 1, 1, 1, 6, 2, 1, 1, 6, 1, 1, 1, 3, 1, 0, 3], [0, 2, 1, 2, 6, 8, 1, 2, 0, 2], [0, 3, 1, 1, 6, 8, 1, 1, 0, 3], [0, 2, 1, 2, 6, 1, 11, 1, 1, 1, 11, 2, 1, 1, 11, 1, 6, 1, 1, 2, 0, 2], [0, 1, 4, 1, 10, 1, 1, 1, 11, 2, 2, 4, 11, 2, 1, 1, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 10, 1, 1, 2, 10, 6, 1, 2, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 11, 1, 1, 1, 10, 1, 1, 1, 11, 4, 1, 1, 10, 1, 1, 1, 11, 1, 4, 1, 0, 1], [4, 1, 2, 1, 4, 1, 10, 1, 1, 8, 10, 1, 4, 1, 0, 2], [4, 1, 2, 2, 4, 1, 10, 3, 3, 2, 10, 3, 4, 3, 0, 1], [0, 1, 4, 1, 6, 2, 4, 2, 10, 1, 7, 2, 10, 1, 4, 2, 6, 1, 2, 2, 4, 1], [0, 1, 4, 1, 3, 1, 6, 1, 5, 1, 4, 1, 10, 1, 6, 2, 10, 1, 4, 1, 1, 3, 2, 1, 4, 1], [0, 3, 5, 1, 12, 2, 4, 1, 10, 2, 4, 1, 2, 1, 1, 4, 0, 1], [0, 3, 5, 1, 12, 1, 2, 2, 4, 2, 2, 2, 1, 4, 0, 1], [0, 2, 1, 3, 2, 2, 13, 3, 5, 1, 1, 4, 0, 1], [0, 1, 1, 1, 8, 1, 4, 2, 1, 1, 5, 4, 0, 1, 1, 4, 0, 1], [0, 1, 1, 4, 4, 1, 1, 1, 0, 5, 1, 2, 0, 2], [0, 4, 1, 3, 0, 9]], [[0, 16], [0, 7, 3, 4, 0, 5], [0, 5, 3, 2, 6, 1, 8, 2, 6, 1, 3, 2, 0, 3], [1, 2, 0, 1, 1, 2, 6, 2, 2, 1, 8, 2, 2, 1, 6, 2, 3, 1, 0, 2], [1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 6, 2, 1, 4, 6, 3, 3, 1, 0, 1], [0, 1, 1, 1, 2, 2, 1, 9, 6, 1, 3, 1, 0, 1], [1, 1, 2, 1, 1, 3, 11, 2, 1, 1, 11, 2, 1, 1, 11, 2, 1, 1, 3, 1, 0, 1], [1, 3, 2, 1, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 4, 1, 0, 1], [1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 10, 6, 1, 2, 10, 1, 4, 1], [0, 1, 1, 3, 3, 1, 10, 1, 1, 1, 11, 4, 1, 1, 10, 1, 4, 1, 11, 1, 4, 1], [0, 1, 3, 1, 7, 1, 6, 1, 3, 1, 11, 1, 1, 6, 11, 1, 4, 2, 0, 1], [0, 2, 3, 1, 7, 1, 6, 1, 4, 1, 11, 1, 1, 4, 11, 1, 4, 1, 7, 2, 4, 1], [0, 2, 3, 1, 7, 1, 6, 1, 3, 1, 4, 6, 7, 1, 4, 3], [0, 3, 3, 1, 6, 1, 5, 1, 12, 5, 7, 2, 2, 2, 4, 1], [0, 4, 5, 1, 13, 1, 12, 1, 2, 2, 12, 2, 2, 1, 4, 1, 2, 2, 4, 1], [0, 4, 5, 1, 13, 2, 2, 2, 12, 2, 2, 1, 5, 1, 4, 2, 0, 1], [0, 3, 5, 1, 13, 5, 12, 4, 5, 1, 0, 2], [0, 3, 5, 1, 13, 7, 12, 2, 5, 1, 0, 2], [0, 2, 5, 1, 13, 10, 5, 1, 0, 2], [0, 1, 1, 1, 4, 3, 5, 6, 4, 3, 1, 1, 0, 1], [1, 1, 4, 1, 8, 1, 4, 1, 1, 1, 0, 6, 1, 1, 4, 1, 8, 1, 4, 1, 1, 1], [1, 4, 0, 8, 1, 4]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 4, 0, 3], [0, 2, 4, 1, 6, 3, 4, 4, 5, 1, 0, 5], [0, 1, 4, 2, 6, 2, 7, 1, 13, 2, 12, 3, 5, 1, 0, 1, 1, 2, 0, 1], [4, 1, 2, 2, 4, 1, 7, 1, 13, 2, 2, 2, 12, 1, 2, 2, 5, 1, 8, 1, 1, 2], [4, 1, 2, 3, 4, 1, 13, 2, 2, 2, 12, 1, 2, 2, 1, 1, 4, 1, 1, 2], [4, 1, 2, 2, 4, 1, 5, 1, 13, 4, 12, 3, 1, 1, 4, 1, 1, 2], [0, 1, 4, 2, 0, 2, 5, 1, 13, 3, 5, 3, 1, 1, 4, 1, 1, 2], [0, 4, 1, 1, 4, 3, 1, 1, 0, 4, 1, 2, 0, 1], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 0, 6], [0, 4, 1, 6, 0, 6]], [[0, 16], [0, 16], [0, 6, 3, 4, 0, 6], [0, 4, 3, 2, 6, 1, 8, 2, 6, 1, 3, 2, 0, 4], [0, 3, 3, 1, 6, 2, 8, 3, 2, 1, 6, 2, 3, 1, 0, 3], [0, 2, 3, 1, 7, 3, 1, 4, 6, 3, 3, 1, 0, 2], [0, 2, 3, 1, 7, 1, 1, 8, 6, 1, 3, 1, 0, 2], [0, 2, 4, 1, 1, 1, 11, 2, 1, 1, 11, 2, 1, 1, 11, 2, 1, 1, 4, 1, 0, 2], [0, 1, 4, 1, 10, 1, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 10, 2, 1, 1, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 11, 1, 1, 2, 10, 6, 1, 2, 11, 1, 4, 1, 0, 1], [0, 2, 4, 1, 1, 1, 10, 1, 1, 1, 11, 4, 1, 1, 10, 1, 1, 1, 4, 1, 0, 2], [0, 3, 4, 1, 11, 1, 1, 6, 11, 1, 4, 1, 0, 3], [0, 4, 4, 1, 11, 1, 1, 4, 11, 1, 4, 1, 0, 4], [0, 3, 3, 1, 7, 1, 4, 6, 6, 1, 3, 1, 0, 3], [0, 2, 3, 1, 7, 2, 13, 1, 12, 5, 7, 1, 6, 1, 3, 1, 0, 2], [0, 2, 4, 1, 7, 1, 13, 1, 2, 2, 12, 2, 2, 2, 12, 1, 7, 1, 4, 1, 0, 2], [0, 1, 4, 1, 2, 1, 4, 1, 13, 1, 2, 2, 12, 2, 2, 2, 12, 1, 4, 1, 2, 1, 4, 1, 0, 1], [0, 1, 4, 1, 2, 1, 4, 1, 13, 4, 12, 4, 4, 1, 2, 1, 4, 1, 0, 1], [0, 2, 4, 2, 5, 1, 13, 2, 5, 2, 13, 2, 5, 1, 4, 2, 0, 2], [0, 4, 1, 1, 4, 6, 1, 1, 0, 4], [0, 3, 1, 1, 4, 1, 8, 1, 4, 1, 1, 2, 4, 1, 8, 1, 4, 1, 1, 1, 0, 3], [0, 3, 1, 10, 0, 3]], [[0, 16], [0, 16], [0, 6, 3, 4, 0, 6], [0, 4, 3, 2, 6, 4, 3, 2, 0, 4], [0, 3, 3, 1, 6, 8, 3, 1, 0, 3], [0, 2, 3, 1, 6, 10, 3, 1, 0, 2], [0, 2, 3, 1, 7, 1, 6, 9, 3, 1, 0, 2], [0, 2, 4, 1, 7, 1, 6, 8, 7, 1, 4, 1, 0, 2], [0, 2, 4, 1, 3, 1, 7, 2, 6, 4, 7, 2, 3, 1, 4, 1, 0, 2], [0, 1, 4, 1, 10, 1, 1, 1, 3, 2, 7, 4, 3, 2, 1, 1, 10, 1, 4, 1, 0, 1], [0, 1, 4, 1, 11, 1, 1, 3, 3, 4, 1, 3, 11, 1, 4, 1, 0, 1], [0, 2, 4, 2, 1, 8, 4, 2, 0, 2], [0, 4, 11, 1, 1, 6, 11, 1, 0, 4], [0, 3, 3, 2, 12, 2, 1, 2, 12, 2, 3, 2, 0, 3], [0, 2, 3, 1, 7, 1, 5, 1, 12, 2, 8, 2, 12, 2, 5, 1, 7, 1, 3, 1, 0, 2], [0, 2, 3, 1, 5, 1, 12, 8, 5, 1, 3, 1, 0, 2], [0, 2, 3, 1, 5, 3, 12, 4, 5, 3, 3, 1, 0, 2], [0, 3, 5, 1, 12, 2, 5, 1, 12, 2, 5, 1, 13, 2, 5, 1, 0, 3], [0, 4, 5, 1, 13, 1, 5, 4, 13, 1, 5, 1, 0, 4], [0, 4, 1, 1, 4, 6, 1, 1, 0, 4], [0, 3, 1, 1, 4, 3, 1, 2, 4, 3, 1, 1, 0, 3], [0, 3, 1, 10, 0, 3]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 8, 2, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 6, 2, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 0, 4], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 2, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [5, 1, 13, 4, 11, 2, 1, 7, 0, 2], [5, 1, 13, 5, 3, 1, 6, 3, 4, 4, 0, 2], [5, 1, 13, 3, 5, 2, 3, 1, 7, 2, 6, 2, 3, 1, 2, 1, 4, 3], [5, 1, 13, 6, 3, 2, 7, 2, 3, 1, 2, 3, 4, 1], [0, 1, 5, 1, 13, 2, 1, 1, 4, 3, 1, 1, 3, 3, 2, 3, 4, 1], [0, 2, 5, 2, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 4, 3, 0, 1], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 2, 11, 3, 1, 2, 4, 3, 0, 2], [0, 4, 5, 1, 13, 1, 4, 5, 3, 1, 2, 1, 4, 3], [0, 3, 5, 1, 13, 2, 3, 1, 6, 4, 3, 1, 2, 3, 4, 1], [0, 3, 5, 1, 13, 2, 3, 1, 7, 4, 3, 1, 2, 3, 4, 1], [0, 3, 5, 1, 13, 3, 3, 5, 4, 3, 0, 1], [0, 3, 5, 1, 13, 6, 12, 2, 5, 1, 0, 3], [0, 3, 5, 1, 13, 5, 5, 1, 13, 1, 5, 1, 0, 4], [0, 4, 5, 1, 4, 3, 1, 1, 4, 1, 1, 1, 0, 5], [0, 4, 1, 1, 4, 3, 8, 1, 1, 1, 8, 1, 1, 1, 0, 4], [0, 4, 1, 8, 0, 4]], [[0, 16], [0, 7, 3, 5, 0, 4], [0, 5, 3, 2, 6, 3, 8, 1, 6, 1, 3, 1, 0, 3], [0, 4, 3, 1, 6, 2, 7, 2, 9, 1, 8, 1, 2, 1, 3, 1, 0, 3], [0, 3, 3, 1, 7, 1, 6, 1, 7, 2, 1, 6, 0, 2], [0, 2, 3, 1, 7, 3, 1, 9, 0, 1], [0, 2, 3, 1, 10, 1, 1, 3, 11, 1, 1, 1, 11, 1, 1, 1, 11, 1, 0, 4], [0, 1, 3, 1, 10, 1, 4, 1, 10, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 1, 1, 1, 10, 1, 4, 2, 0, 2], [0, 1, 3, 1, 11, 1, 4, 1, 10, 1, 1, 2, 10, 7, 4, 1, 0, 1], [0, 1, 3, 1, 1, 1, 11, 1, 10, 1, 1, 1, 10, 2, 1, 1, 11, 5, 4, 1, 0, 1], [0, 2, 1, 2, 11, 2, 10, 1, 1, 7, 0, 2], [0, 3, 1, 1, 4, 1, 11, 4, 1, 2, 4, 3, 0, 2], [0, 4, 5, 1, 4, 6, 3, 1, 2, 1, 4, 3], [0, 3, 5, 2, 13, 1, 3, 1, 6, 4, 3, 1, 2, 3, 4, 1], [0, 2, 1, 1, 5, 1, 13, 2, 3, 1, 7, 4, 3, 1, 2, 3, 4, 1], [0, 1, 1, 1, 4, 1, 5, 1, 13, 3, 3, 5, 4, 3, 1, 1], [0, 1, 1, 1, 4, 1, 5, 1, 13, 6, 12, 1, 5, 1, 1, 1, 4, 1, 1, 2], [0, 1, 1, 1, 4, 1, 1, 1, 5, 2, 13, 4, 5, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 1, 1, 1, 4, 1, 8, 1, 1, 1, 0, 1, 5, 4, 0, 1, 1, 1, 4, 1, 1, 2, 0, 1], [0, 2, 1, 2, 0, 8, 1, 2, 0, 2], [0, 16], [0, 16]]];
             _this.chars = null;
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
+            _this._special_effect = new Charjs.SpecialEffect(targetDom, pixSize).init();
             return _this;
         }
         MarioWorld.prototype.onAction = function () {
@@ -872,6 +858,7 @@ var Charjs;
                         if (enemys[name_2].isStepped()) {
                             if (!this._grabbing) {
                                 if (this._isSpecial) {
+                                    this._special_effect.drawEffect(enemys[name_2].getPosition());
                                     enemys[name_2].onKilled();
                                     return Charjs.HitStatus.none;
                                 }
@@ -889,10 +876,13 @@ var Charjs;
                         }
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
+                                this._special_effect.drawEffect(enemys[name_2].getPosition());
                                 enemys[name_2].onKilled();
                             }
                             else {
                                 enemys[name_2].onStepped();
+                                var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                                this._star_effect.drawEffect(effectPos);
                             }
                             this._yVector = 12 * this.pixSize;
                             continue;
@@ -1308,6 +1298,137 @@ var Charjs;
     MarioWorld.STEP = 2;
     MarioWorld.DEFAULT_SPEED = 2;
     Charjs.MarioWorld = MarioWorld;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
+    var NormalBlockWorld = (function (_super) {
+        __extends(NormalBlockWorld, _super);
+        function NormalBlockWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
+            if (zIndex === void 0) { zIndex = 2147483640; }
+            if (frameInterval === void 0) { frameInterval = 45; }
+            var _this = _super.call(this, targetDom, pixSize, position, direction, false, true, zIndex - 2, frameInterval) || this;
+            _this.colors = ['', '#000000', '#ffffff', '#fee13d', '#ddae50'];
+            _this.cchars = [[[0, 2, 1, 12, 0, 2], [0, 1, 1, 1, 2, 3, 4, 9, 1, 1, 0, 1], [1, 1, 2, 2, 3, 9, 4, 3, 1, 1], [1, 1, 2, 1, 3, 11, 4, 2, 1, 1], [1, 1, 2, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 2, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 2, 3, 9, 4, 3, 1, 1], [1, 1, 4, 14, 1, 1], [0, 1, 1, 1, 4, 12, 1, 1, 0, 1], [0, 2, 1, 12, 0, 2]], [[0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 2, 2, 3, 4, 9, 1, 2], [1, 1, 2, 1, 1, 12, 4, 1, 1, 1], [1, 2, 3, 11, 4, 1, 1, 2], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 3, 1, 1, 3, 4, 1, 1, 3, 2, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 11, 4, 2, 1, 1], [1, 1, 4, 1, 3, 10, 4, 3, 1, 1], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 1, 4, 14, 1, 1], [1, 1, 4, 14, 1, 1], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16]], [[0, 16], [0, 16], [0, 16], [0, 1, 1, 14, 0, 1], [1, 2, 2, 10, 3, 1, 2, 1, 1, 2], [1, 1, 2, 8, 3, 1, 2, 1, 3, 1, 2, 1, 3, 2, 1, 1], [1, 1, 2, 4, 4, 1, 2, 2, 3, 1, 2, 1, 4, 1, 3, 4, 1, 1], [1, 1, 2, 4, 4, 1, 2, 1, 3, 1, 2, 1, 3, 1, 4, 1, 3, 4, 1, 1], [1, 1, 2, 1, 3, 1, 2, 1, 3, 1, 2, 1, 3, 1, 2, 1, 3, 7, 1, 1], [1, 2, 3, 12, 1, 2], [1, 1, 3, 1, 1, 12, 4, 1, 1, 1], [1, 2, 3, 9, 4, 3, 1, 2], [0, 1, 1, 14, 0, 1], [0, 16], [0, 16], [0, 16]]];
+            _this.chars = null;
+            _this.animation = null;
+            _this._animationIndex = null;
+            _this._isStarting = false;
+            _this._star_effect = null;
+            _this._pushedUpTimer = null;
+            _this.defaultCommand = function (e) {
+                if (e.keyCode == 32) {
+                    if (_this._isStarting) {
+                        _this.stop();
+                    }
+                    else {
+                        _this.start();
+                    }
+                }
+            };
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
+            return _this;
+        }
+        NormalBlockWorld.getAnimation = function (size) {
+            return [
+                { yOffset: size * 4, index: 0, wait: 0 },
+                { yOffset: size * 8, index: 0, wait: 0 },
+                { yOffset: size * 10, index: 0, wait: 2 },
+                { yOffset: size * 8, index: 0, wait: 0 },
+                { yOffset: 0, index: 2, wait: 2 },
+                { yOffset: 0, index: 3, wait: 2 },
+                { yOffset: 0, index: 0, wait: 2 },
+                { yOffset: 0, index: 1, wait: 2 },
+                { yOffset: 0, index: 2, wait: 2 },
+                { yOffset: 0, index: 3, wait: 2 },
+                { yOffset: 0, index: 0, wait: 2 },
+                { yOffset: 0, index: 1, wait: 2 },
+                { yOffset: 0, index: 2, wait: 2 },
+                { yOffset: 0, index: 3, wait: 2 },
+                { yOffset: 0, index: 0, wait: 2 },
+                { yOffset: 0, index: 1, wait: 2 },
+                { yOffset: 0, index: 2, wait: 2 },
+                { yOffset: 0, index: 3, wait: 2 },
+                { yOffset: 0, index: 0, wait: 2 },
+                { yOffset: 0, index: 1, wait: 2 },
+                { yOffset: 0, index: 2, wait: 2 },
+                { yOffset: 0, index: 3, wait: 2 },
+                { yOffset: 0, index: 0, wait: 2 },
+                { yOffset: 0, index: 1, wait: 2 },
+                { yOffset: 0, index: 2, wait: 2 },
+                { yOffset: 0, index: 3, wait: 2 },
+                { yOffset: 0, index: 0, wait: 2 },
+                { yOffset: 0, index: 1, wait: 2 },
+                { yOffset: 0, index: 2, wait: 2 },
+                { yOffset: 0, index: 3, wait: 2 },
+                { yOffset: 0, index: 0, wait: 2 }
+            ];
+        };
+        NormalBlockWorld.prototype.init = function () {
+            _super.prototype.init.call(this);
+            this.draw(0, undefined, undefined, undefined, undefined, 0);
+            return this;
+        };
+        NormalBlockWorld.prototype.start = function () {
+            var _this = this;
+            if (this._animationIndex !== null && this.animation != null) {
+                this.isActive = false;
+                this._isStarting = true;
+                this._pushedUpTimer = this.getTimer(function () {
+                    if (_this._animationIndex >= _this.animation.length) {
+                        _this.animation = null;
+                        _this.isActive = true;
+                        _this._animationIndex = null;
+                        _this.removeCommand();
+                        _this.stop();
+                        return;
+                    }
+                    var pos = { x: _this.position.x, y: _this.position.y };
+                    if (_this.animation[_this._animationIndex].yOffset)
+                        pos.y += _this.animation[_this._animationIndex].yOffset;
+                    _this.draw(_this.animation[_this._animationIndex].index, pos, Charjs.Direction.Right, Charjs.Vertical.Up, true, 0);
+                    if (_this.animation[_this._animationIndex].wait) {
+                        _this.animation[_this._animationIndex].wait--;
+                    }
+                    else {
+                        _this._animationIndex++;
+                    }
+                }, this.frameInterval);
+            }
+        };
+        NormalBlockWorld.prototype.stop = function () {
+            this._isStarting = false;
+            if (this._pushedUpTimer) {
+                this.removeTimer(this._pushedUpTimer);
+                this._pushedUpTimer = null;
+            }
+        };
+        NormalBlockWorld.prototype.onPushedUp = function () {
+            for (var _i = 0, _a = this.entityEnemies; _i < _a.length; _i++) {
+                var enemy = _a[_i];
+                var ePos = enemy.getPosition();
+                var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                this._star_effect.drawEffect(effectPos);
+                enemy.onEnemyAttack(Charjs.Direction.Right, 0);
+            }
+            if (!this._pushedUpTimer) {
+                this.animation = NormalBlockWorld.getAnimation(this.pixSize);
+                this._animationIndex = 0;
+                this.registerCommand();
+                this.start();
+            }
+        };
+        NormalBlockWorld.prototype.onTrampled = function () {
+        };
+        NormalBlockWorld.prototype.registerCommand = function () {
+            document.addEventListener('keypress', this.defaultCommand);
+        };
+        NormalBlockWorld.prototype.removeCommand = function () {
+            document.removeEventListener('keypress', this.defaultCommand);
+        };
+        return NormalBlockWorld;
+    }(Charjs.AbstractOtherObject));
+    Charjs.NormalBlockWorld = NormalBlockWorld;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {

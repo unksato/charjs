@@ -111,14 +111,17 @@ namespace Charjs {
         private animation = null;
         private _animationIndex = null;
         private _isStarting = false;
+        private _star_effect: StarEffect = null;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, false, true, zIndex - 2, frameInterval);
+            this._star_effect = new StarEffect(targetDom, pixSize).init();
         }
 
-        init(): void {
+        init() {
             super.init();
             this.draw(0, undefined, undefined, undefined, undefined, 0);
+            return this;
         }
 
         private start(): void {
@@ -160,7 +163,10 @@ namespace Charjs {
 
         onPushedUp(): void {
             for (let enemy of this.entityEnemies) {
-                enemy.onKicked(Direction.Right, 0);
+                let ePos = enemy.getPosition();
+                let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                this._star_effect.drawEffect(effectPos);
+                enemy.onEnemyAttack(Direction.Right, 0);
             }
 
             if (!this._pushedUpTimer) {

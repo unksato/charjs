@@ -148,7 +148,7 @@ namespace Charjs {
             }
         }
 
-        init(): void {
+        init(): AbstractObject {
             this.uncompress();
             for (let charactor of this.chars) {
                 this._rightActions.push(this.createCharacterAction(charactor));
@@ -160,6 +160,7 @@ namespace Charjs {
                         this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
                 }
             }
+            return this;
         }
 
         private createCharacterAction(charactorMap: number[][], isReverse: boolean = false, isVerticalRotation: boolean = false): HTMLCanvasElement {
@@ -184,25 +185,45 @@ namespace Charjs {
             }
         }
 
-        protected removeCharacter(): void {
-            if (this.currentAction != null) {
-                this.targetDom.removeChild(this.currentAction);
-                this.currentAction = null;
+        protected removeCharacter(target?: HTMLCanvasElement): void {
+            if (target) {
+                this.targetDom.removeChild(target);
+            } else {
+                if (this.currentAction != null) {
+                    this.targetDom.removeChild(this.currentAction);
+                    this.currentAction = null;
+                }
             }
         }
 
-        public draw(index: number = 0, position: IPosition = null, direction: Direction = Direction.Right, vertical: Vertical = Vertical.Up, removeCurrent = false, drawOffset = this.pixSize): void {
-            if (removeCurrent) this.removeCharacter();
+        public draw(index: number = 0, position: IPosition = null, direction: Direction = Direction.Right, vertical: Vertical = Vertical.Up, removeCurrent = false, drawOffset = this.pixSize, clone = false): HTMLCanvasElement {
+            if (removeCurrent && !clone) this.removeCharacter();
             position = position || this.position;
+            let action = null;
             if (vertical == Vertical.Up) {
-                this.currentAction = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index];
+                action = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index];
             } else {
-                this.currentAction = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
+                action = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
             }
-            this.currentAction.style.left = position.x + 'px';
-            this.currentAction.style.bottom = (position.y - drawOffset) + 'px';
-            this.currentAction.style.zIndex = this.zIndex.toString();
-            this.targetDom.appendChild(this.currentAction);
+            if (clone) {
+                action = this.cloneCanvas(action);
+            } else {
+                this.currentAction = action;
+            }
+
+            action.style.left = position.x + 'px';
+            action.style.bottom = (position.y - drawOffset) + 'px';
+            action.style.zIndex = this.zIndex.toString();
+            this.targetDom.appendChild(action);
+
+            return action;
+        }
+
+        private cloneCanvas(oldCanvas: HTMLCanvasElement): HTMLCanvasElement {
+            let canvas = AbstractPixel.createCanvasElement(oldCanvas.width, oldCanvas.height, this.zIndex + 1);
+            let ctx = canvas.getContext("2d");
+            ctx.drawImage(oldCanvas, 0, 0);
+            return canvas;
         }
 
         public refresh() {
@@ -259,6 +280,7 @@ namespace Charjs {
         public init() {
             super.init();
             this.registerCommand();
+            return this;
         }
 
         public start(): void {
