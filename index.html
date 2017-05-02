@@ -3,14 +3,14 @@
 <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <title>Charjs Sample</title>
-    <script type="text/javascript" src="./dist/mario.js"></script>
+    <script type="text/javascript" src="./dist/mario.min.js"></script>
     <script>
         window.onload = function () {
             var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2);
             controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
-            controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 180, y: 0 }, Charjs.Direction.Left);
+            controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.Right);
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
 

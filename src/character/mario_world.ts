@@ -1,11 +1,6 @@
 namespace Charjs {
 
-    enum HitStatus {
-        none,
-        dammage,
-        attack,
-        grab
-    }
+
 
     export class MarioWorld extends AbstractPlayer {
         private static STEP = 2;
@@ -30,8 +25,13 @@ namespace Charjs {
         private _isSquat = false;
         private _attackDirection: Direction = Direction.Right;
 
+        private _star_effect: StarEffect = null;
+        private _special_effect: SpecialEffect = null;
+
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, false, zIndex, frameInterval);
+            this._star_effect = new StarEffect(targetDom, pixSize).init();
+            this._special_effect = new SpecialEffect(targetDom, pixSize).init();
         }
 
         onAction(): void {
@@ -45,7 +45,7 @@ namespace Charjs {
                     this.stop();
                     setTimeout(() => {
                         this.start();
-                    }, this.frameInterval * 3);
+                    }, this.frameInterval);
                     break;
                 case HitStatus.grab:
                     this.moveGrabedEnemy();
@@ -87,8 +87,8 @@ namespace Charjs {
 
                 let grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
                 let enemyCenter = ePos.x + eSize.width / 2;
-                enemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, this._speed * 3);
-                this._grabedEnemy.onKicked(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3)
+                enemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, this._speed * 3);
+                this._grabedEnemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3)
                 this._grabedEnemy = null;
             }
         }
@@ -114,11 +114,16 @@ namespace Charjs {
 
                         if (enemys[name].isStepped()) {
                             if (!this._grabbing) {
-                                let playerCenter = this.position.x + this.size.width / 2;
-                                let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
-                                enemys[name].onKicked(this._attackDirection, this._speed * 3);
-                                return HitStatus.attack;
+                                if (this._isSpecial) {
+                                    this._special_effect.drawEffect(enemys[name].getPosition());
+                                    enemys[name].onKilled();
+                                    return HitStatus.none;
+                                } else {
+                                    let playerCenter = this.position.x + this.size.width / 2;
+                                    let enemyCenter = ePos.x + eSize.width / 2;
+                                    this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
+                                    return enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                                }
                             } else {
                                 this.grabEnemy(enemys[name]);
                                 return HitStatus.grab;
@@ -127,12 +132,12 @@ namespace Charjs {
 
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
-                                let playerCenter = this.position.x + this.size.width / 2;
-                                let enemyCenter = ePos.x + eSize.width / 2;
-                                this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
-                                enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                                this._special_effect.drawEffect(enemys[name].getPosition());
+                                enemys[name].onKilled();
                             } else {
                                 enemys[name].onStepped();
+                                let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                                this._star_effect.drawEffect(effectPos);
                             }
                             this._yVector = 12 * this.pixSize;
                             continue;
