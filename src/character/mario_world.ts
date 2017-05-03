@@ -302,12 +302,12 @@ namespace Charjs {
         private onAbortGrab(): void {
             this._grabbing = false;
             if (this._grabedEnemy) {
-                this.draw(11, null, this._direction, Vertical.Up, true);
+                this.draw(14, null, this._direction, Vertical.Up, true);
                 this.stop();
                 setTimeout(() => {
                     this.start();
-                }, this.frameInterval * 3);
-                this._grabedEnemy.onKicked(this._direction, this._speed * 3);
+                }, this.frameInterval);
+                this._grabedEnemy.onGrabed(null);
                 this._grabedEnemy = null;
             }
         }
