@@ -38,7 +38,7 @@ namespace Charjs {
     export interface IObject {
         _name: string;
         zIndex: number;
-        init(): void;
+        init(shadow?: boolean): void;
         destroy(): void;
         getPosition(): IPosition;
         setPosition(position: IPosition): void;
@@ -69,14 +69,22 @@ namespace Charjs {
     }
 
     export abstract class AbstractPixel {
-        protected static drawPixel(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
+        protected static SHADOW_SIZE = 1;
+
+        protected static drawPixel(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, alpha: number = 1) {
+            ctx.globalAlpha = alpha;
             ctx.beginPath();
             ctx.rect(x * size, y * size, size, size);
             ctx.fillStyle = color;
             ctx.fill();
+            ctx.globalAlpha = 1;
         }
-        protected static createCanvasElement(width: number, height: number, zIndex: number): HTMLCanvasElement {
+        protected static createCanvasElement(width: number, height: number, zIndex: number, shadow: boolean = false): HTMLCanvasElement {
             let element = document.createElement("canvas");
+            if (shadow) {
+                width += AbstractPixel.SHADOW_SIZE;
+                height += AbstractPixel.SHADOW_SIZE;
+            }
             element.setAttribute("width", width.toString());
             element.setAttribute("height", height.toString());
             element.style.cssText = `z-index: ${zIndex}; position: absolute; bottom: 0;`;
@@ -91,6 +99,10 @@ namespace Charjs {
             }
             img.src = element.toDataURL();
             return q.promise;
+        }
+
+        static deepCopy<T>(obj: T): T {
+            return JSON.parse(JSON.stringify(obj));
         }
     }
 
@@ -148,34 +160,44 @@ namespace Charjs {
             }
         }
 
-        init(): AbstractObject {
+        init(shadow: boolean = false): AbstractObject {
             this.uncompress();
             for (let charactor of this.chars) {
-                this._rightActions.push(this.createCharacterAction(charactor));
+                this._rightActions.push(this.createCharacterAction(charactor, shadow));
                 if (this.useLeft)
-                    this._leftActions.push(this.createCharacterAction(charactor, true));
+                    this._leftActions.push(this.createCharacterAction(charactor, shadow, true));
                 if (this.useVertical) {
-                    this._verticalRightActions.push(this.createCharacterAction(charactor, false, true));
+                    this._verticalRightActions.push(this.createCharacterAction(charactor, shadow, false, true));
                     if (this.useLeft)
-                        this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
+                        this._verticalLeftActions.push(this.createCharacterAction(charactor, shadow, true, true));
                 }
             }
             return this;
         }
 
-        private createCharacterAction(charactorMap: number[][], isReverse: boolean = false, isVerticalRotation: boolean = false): HTMLCanvasElement {
+        private createCharacterAction(charactorMap: number[][], shadow: boolean, isReverse: boolean = false, isVerticalRotation: boolean = false): HTMLCanvasElement {
             this.size.width = this.pixSize * charactorMap[0].length;
             this.size.height = this.pixSize * charactorMap.length;
-            let element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex);
-            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
+            let element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex, shadow);
+            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation, shadow);
             return element;
         }
 
-        protected static drawCharacter(ctx: CanvasRenderingContext2D, map: number[][], colors: string[], size: number, reverse: boolean, vertical: boolean): void {
+        protected static drawCharacter(ctx: CanvasRenderingContext2D, map: number[][], colors: string[], size: number, reverse: boolean, vertical: boolean, shadow: boolean): void {
             if (reverse)
                 ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
             if (vertical)
                 ctx.transform(1, 0, 0, -1, 0, map.length * size);
+
+            if (shadow) {
+                for (let y = 0; y < map.length; y++) {
+                    for (let x = 0; x < map[y].length; x++) {
+                        if (map[y][x] != 0) {
+                            AbstractObject.drawPixel(ctx, x + (1 * (reverse ? -1 : 1)), y + (1 * (vertical ? -1 : 1)), size * AbstractPixel.SHADOW_SIZE, '#000', 0.3);
+                        }
+                    }
+                }
+            }
             for (let y = 0; y < map.length; y++) {
                 for (let x = 0; x < map[y].length; x++) {
                     if (map[y][x] != 0) {
@@ -277,8 +299,8 @@ namespace Charjs {
             }
         }
 
-        public init() {
-            super.init();
+        public init(shadow: boolean = false) {
+            super.init(shadow);
             this.registerCommand();
             return this;
         }
@@ -471,7 +493,7 @@ namespace Charjs {
             let size = this.pixSize * map.length;
             element.setAttribute("width", size.toString());
             element.setAttribute("height", size.toString());
-            AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
+            AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical, false);
             return this.toImage(element);
         }
 

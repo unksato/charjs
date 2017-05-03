@@ -126,13 +126,13 @@ namespace Charjs {
 
         public init(): void {
             if (this._player) {
-                this._player.init();
+                this._player.init(true);
             }
             for (let name in this._enemys) {
-                this._enemys[name].init();
+                this._enemys[name].init(true);
             }
             for (let name in this._objects) {
-                this._objects[name].init();
+                this._objects[name].init(true);
             }
 
             for (let name in this._enemys) {

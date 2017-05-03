@@ -26,7 +26,7 @@ namespace Charjs {
                 this._element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
                 let ctx = this._element.getContext("2d");
                 let center = this.width / this.pixSize / 2;
-                let datas = this.deepCopy(this.dataPattern);
+                let datas = AbstractPixel.deepCopy(this.dataPattern);
                 for (let data of datas) {
                     data.currentOffset = center;
                 }
@@ -53,9 +53,6 @@ namespace Charjs {
             AbstractPixel.drawPixel(ctx, x, y, this.pixSize, color);
             let mirrorX = center + (center - x) - 1;
             AbstractPixel.drawPixel(ctx, mirrorX, y, this.pixSize, color);
-        }
-        private deepCopy<T>(obj: T): T {
-            return JSON.parse(JSON.stringify(obj));
         }
 
     }

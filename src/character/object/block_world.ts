@@ -118,8 +118,8 @@ namespace Charjs {
             this._star_effect = new StarEffect(targetDom, pixSize).init();
         }
 
-        init() {
-            super.init();
+        init(shadow: boolean = false) {
+            super.init(shadow);
             this.draw(0, undefined, undefined, undefined, undefined, 0);
             return this;
         }

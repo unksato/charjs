@@ -40,14 +40,22 @@ var Charjs;
     var AbstractPixel = (function () {
         function AbstractPixel() {
         }
-        AbstractPixel.drawPixel = function (ctx, x, y, size, color) {
+        AbstractPixel.drawPixel = function (ctx, x, y, size, color, alpha) {
+            if (alpha === void 0) { alpha = 1; }
+            ctx.globalAlpha = alpha;
             ctx.beginPath();
             ctx.rect(x * size, y * size, size, size);
             ctx.fillStyle = color;
             ctx.fill();
+            ctx.globalAlpha = 1;
         };
-        AbstractPixel.createCanvasElement = function (width, height, zIndex) {
+        AbstractPixel.createCanvasElement = function (width, height, zIndex, shadow) {
+            if (shadow === void 0) { shadow = false; }
             var element = document.createElement("canvas");
+            if (shadow) {
+                width += AbstractPixel.SHADOW_SIZE;
+                height += AbstractPixel.SHADOW_SIZE;
+            }
             element.setAttribute("width", width.toString());
             element.setAttribute("height", height.toString());
             element.style.cssText = "z-index: " + zIndex + "; position: absolute; bottom: 0;";
@@ -62,8 +70,12 @@ var Charjs;
             img.src = element.toDataURL();
             return q.promise;
         };
+        AbstractPixel.deepCopy = function (obj) {
+            return JSON.parse(JSON.stringify(obj));
+        };
         return AbstractPixel;
     }());
+    AbstractPixel.SHADOW_SIZE = 1;
     Charjs.AbstractPixel = AbstractPixel;
     var AbstractObject = (function (_super) {
         __extends(AbstractObject, _super);
@@ -122,35 +134,45 @@ var Charjs;
                 clearInterval(id);
             }
         };
-        AbstractObject.prototype.init = function () {
+        AbstractObject.prototype.init = function (shadow) {
+            if (shadow === void 0) { shadow = false; }
             this.uncompress();
             for (var _i = 0, _a = this.chars; _i < _a.length; _i++) {
                 var charactor = _a[_i];
-                this._rightActions.push(this.createCharacterAction(charactor));
+                this._rightActions.push(this.createCharacterAction(charactor, shadow));
                 if (this.useLeft)
-                    this._leftActions.push(this.createCharacterAction(charactor, true));
+                    this._leftActions.push(this.createCharacterAction(charactor, shadow, true));
                 if (this.useVertical) {
-                    this._verticalRightActions.push(this.createCharacterAction(charactor, false, true));
+                    this._verticalRightActions.push(this.createCharacterAction(charactor, shadow, false, true));
                     if (this.useLeft)
-                        this._verticalLeftActions.push(this.createCharacterAction(charactor, true, true));
+                        this._verticalLeftActions.push(this.createCharacterAction(charactor, shadow, true, true));
                 }
             }
             return this;
         };
-        AbstractObject.prototype.createCharacterAction = function (charactorMap, isReverse, isVerticalRotation) {
+        AbstractObject.prototype.createCharacterAction = function (charactorMap, shadow, isReverse, isVerticalRotation) {
             if (isReverse === void 0) { isReverse = false; }
             if (isVerticalRotation === void 0) { isVerticalRotation = false; }
             this.size.width = this.pixSize * charactorMap[0].length;
             this.size.height = this.pixSize * charactorMap.length;
-            var element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex);
-            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation);
+            var element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex, shadow);
+            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation, shadow);
             return element;
         };
-        AbstractObject.drawCharacter = function (ctx, map, colors, size, reverse, vertical) {
+        AbstractObject.drawCharacter = function (ctx, map, colors, size, reverse, vertical, shadow) {
             if (reverse)
                 ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
             if (vertical)
                 ctx.transform(1, 0, 0, -1, 0, map.length * size);
+            if (shadow) {
+                for (var y = 0; y < map.length; y++) {
+                    for (var x = 0; x < map[y].length; x++) {
+                        if (map[y][x] != 0) {
+                            AbstractObject.drawPixel(ctx, x + (1 * (reverse ? -1 : 1)), y + (1 * (vertical ? -1 : 1)), size * AbstractPixel.SHADOW_SIZE, '#000', 0.3);
+                        }
+                    }
+                }
+            }
             for (var y = 0; y < map.length; y++) {
                 for (var x = 0; x < map[y].length; x++) {
                     if (map[y][x] != 0) {
@@ -257,8 +279,9 @@ var Charjs;
             }
             this.registerActionCommand();
         };
-        AbstractCharacter.prototype.init = function () {
-            _super.prototype.init.call(this);
+        AbstractCharacter.prototype.init = function (shadow) {
+            if (shadow === void 0) { shadow = false; }
+            _super.prototype.init.call(this, shadow);
             this.registerCommand();
             return this;
         };
@@ -421,7 +444,7 @@ var Charjs;
             var size = this.pixSize * map.length;
             element.setAttribute("width", size.toString());
             element.setAttribute("height", size.toString());
-            AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical);
+            AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical, false);
             return this.toImage(element);
         };
         return AbstractGround;
@@ -1364,8 +1387,9 @@ var Charjs;
                 { yOffset: 0, index: 0, wait: 2 }
             ];
         };
-        NormalBlockWorld.prototype.init = function () {
-            _super.prototype.init.call(this);
+        NormalBlockWorld.prototype.init = function (shadow) {
+            if (shadow === void 0) { shadow = false; }
+            _super.prototype.init.call(this, shadow);
             this.draw(0, undefined, undefined, undefined, undefined, 0);
             return this;
         };
@@ -1452,7 +1476,7 @@ var Charjs;
                 this._element = AbstractMountain.createCanvasElement(this.width, this.height, 0);
                 var ctx = this._element.getContext("2d");
                 var center = this.width / this.pixSize / 2;
-                var datas = this.deepCopy(this.dataPattern);
+                var datas = Charjs.AbstractPixel.deepCopy(this.dataPattern);
                 for (var _i = 0, datas_1 = datas; _i < datas_1.length; _i++) {
                     var data = datas_1[_i];
                     data.currentOffset = center;
@@ -1480,9 +1504,6 @@ var Charjs;
             Charjs.AbstractPixel.drawPixel(ctx, x, y, this.pixSize, color);
             var mirrorX = center + (center - x) - 1;
             Charjs.AbstractPixel.drawPixel(ctx, mirrorX, y, this.pixSize, color);
-        };
-        AbstractBackgroundObject.prototype.deepCopy = function (obj) {
-            return JSON.parse(JSON.stringify(obj));
         };
         return AbstractBackgroundObject;
     }(Charjs.AbstractPixel));
@@ -1921,13 +1942,13 @@ var Charjs;
         };
         GameMaster.prototype.init = function () {
             if (this._player) {
-                this._player.init();
+                this._player.init(true);
             }
             for (var name_5 in this._enemys) {
-                this._enemys[name_5].init();
+                this._enemys[name_5].init(true);
             }
             for (var name_6 in this._objects) {
-                this._objects[name_6].init();
+                this._objects[name_6].init(true);
             }
             for (var name_7 in this._enemys) {
                 this._enemys[name_7].start();
