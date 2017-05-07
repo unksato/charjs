@@ -28,7 +28,7 @@ namespace Charjs {
         private _star_effect: StarEffect = null;
         private _special_effect: SpecialEffect = null;
 
-        constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
+        constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, false, zIndex, frameInterval);
             this._star_effect = new StarEffect(targetDom, pixSize).init();
             this._special_effect = new SpecialEffect(targetDom, pixSize).init();

@@ -54,7 +54,6 @@ var Charjs;
             var element = document.createElement("canvas");
             if (shadow) {
                 width += AbstractPixel.SHADOW_SIZE;
-                height += AbstractPixel.SHADOW_SIZE;
             }
             element.setAttribute("width", width.toString());
             element.setAttribute("height", height.toString());
@@ -75,7 +74,7 @@ var Charjs;
         };
         return AbstractPixel;
     }());
-    AbstractPixel.SHADOW_SIZE = 1;
+    AbstractPixel.SHADOW_SIZE = 2;
     Charjs.AbstractPixel = AbstractPixel;
     var AbstractObject = (function (_super) {
         __extends(AbstractObject, _super);
@@ -85,7 +84,7 @@ var Charjs;
             if (_direction === void 0) { _direction = Direction.Right; }
             if (useLeft === void 0) { useLeft = true; }
             if (useVertical === void 0) { useVertical = true; }
-            if (zIndex === void 0) { zIndex = 2147483640; }
+            if (zIndex === void 0) { zIndex = 100; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this) || this;
             _this.targetDom = targetDom;
@@ -168,7 +167,7 @@ var Charjs;
                 for (var y = 0; y < map.length; y++) {
                     for (var x = 0; x < map[y].length; x++) {
                         if (map[y][x] != 0) {
-                            AbstractObject.drawPixel(ctx, x + (1 * (reverse ? -1 : 1)), y + (1 * (vertical ? -1 : 1)), size * AbstractPixel.SHADOW_SIZE, '#000', 0.3);
+                            AbstractObject.drawPixel(ctx, x + (1 * (reverse ? -1 : 1)), y + (1 * (vertical ? -1 : 1)), size, '#000', 0.3);
                         }
                     }
                 }
@@ -537,7 +536,7 @@ var Charjs;
         __extends(GoombaWorld, _super);
         function GoombaWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
             if (direction === void 0) { direction = Charjs.Direction.Right; }
-            if (zIndex === void 0) { zIndex = 2147483640; }
+            if (zIndex === void 0) { zIndex = 100; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
             _this.colors = ['', '#000000', '#ffffff', '#b82800', '#f88800', '#f87800', '#f8c000', '#f8f800'];
@@ -772,7 +771,7 @@ var Charjs;
         __extends(MarioWorld, _super);
         function MarioWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
             if (direction === void 0) { direction = Charjs.Direction.Right; }
-            if (zIndex === void 0) { zIndex = 2147483640; }
+            if (zIndex === void 0) { zIndex = 100; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this, targetDom, pixSize, position, direction, true, false, zIndex, frameInterval) || this;
             _this._runIndex = 0;
@@ -1328,7 +1327,7 @@ var Charjs;
         __extends(NormalBlockWorld, _super);
         function NormalBlockWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
             if (direction === void 0) { direction = Charjs.Direction.Right; }
-            if (zIndex === void 0) { zIndex = 2147483640; }
+            if (zIndex === void 0) { zIndex = 90; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = _super.call(this, targetDom, pixSize, position, direction, false, true, zIndex - 2, frameInterval) || this;
             _this.colors = ['', '#000000', '#ffffff', '#fee13d', '#ddae50'];
@@ -1881,7 +1880,7 @@ var Charjs;
         };
         GameMaster.prototype.CreatePlayerInstance = function (clz, position, direction) {
             if (direction === void 0) { direction = Charjs.Direction.Right; }
-            var char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
+            var char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
             char._name = 'player';
             this._player = char;
             char._gameMaster = this;
@@ -1889,7 +1888,7 @@ var Charjs;
         };
         GameMaster.prototype.CreateEnemyInstance = function (clz, position, direction) {
             if (direction === void 0) { direction = Charjs.Direction.Right; }
-            var char = new clz(this.targetDom, this.charSize, position, direction, this.frameInterval);
+            var char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
             char._name = 'enemy_' + this._enemyCount;
             this._enemyCount++;
             this._enemys[char._name] = char;
@@ -1897,7 +1896,7 @@ var Charjs;
             return char;
         };
         GameMaster.prototype.CreateObjectInstance = function (clz, position) {
-            var char = new clz(this.targetDom, this.charSize, position, Charjs.Direction.Right, this.frameInterval);
+            var char = new clz(this.targetDom, this.charSize, position, Charjs.Direction.Right, 90, this.frameInterval);
             char._name = 'obj_' + this._objectCount;
             this._objectCount++;
             this._objects[char._name] = char;

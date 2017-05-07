@@ -69,7 +69,7 @@ namespace Charjs {
     }
 
     export abstract class AbstractPixel {
-        protected static SHADOW_SIZE = 1;
+        protected static SHADOW_SIZE = 2;
 
         protected static drawPixel(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, alpha: number = 1) {
             ctx.globalAlpha = alpha;
@@ -83,7 +83,6 @@ namespace Charjs {
             let element = document.createElement("canvas");
             if (shadow) {
                 width += AbstractPixel.SHADOW_SIZE;
-                height += AbstractPixel.SHADOW_SIZE;
             }
             element.setAttribute("width", width.toString());
             element.setAttribute("height", height.toString());
@@ -124,7 +123,7 @@ namespace Charjs {
         protected size: ISize = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
         protected entity: Entity = { ground: null, ceiling: null, right: null, left: null };
 
-        constructor(protected targetDom: HTMLElement, protected pixSize = 2, protected position: IPosition = { x: 0, y: 0 }, protected _direction = Direction.Right, private useLeft = true, private useVertical = true, public zIndex = 2147483640, protected frameInterval = 45) {
+        constructor(protected targetDom: HTMLElement, protected pixSize = 2, protected position: IPosition = { x: 0, y: 0 }, protected _direction = Direction.Right, private useLeft = true, private useVertical = true, public zIndex = 100, protected frameInterval = 45) {
             super();
         }
 
@@ -193,7 +192,7 @@ namespace Charjs {
                 for (let y = 0; y < map.length; y++) {
                     for (let x = 0; x < map[y].length; x++) {
                         if (map[y][x] != 0) {
-                            AbstractObject.drawPixel(ctx, x + (1 * (reverse ? -1 : 1)), y + (1 * (vertical ? -1 : 1)), size * AbstractPixel.SHADOW_SIZE, '#000', 0.3);
+                            AbstractObject.drawPixel(ctx, x + (1 * (reverse ? -1 : 1)), y + (1 * (vertical ? -1 : 1)), size, '#000', 0.3);
                         }
                     }
                 }

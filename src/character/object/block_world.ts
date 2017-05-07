@@ -113,7 +113,7 @@ namespace Charjs {
         private _isStarting = false;
         private _star_effect: StarEffect = null;
 
-        constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
+        constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 90, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, false, true, zIndex - 2, frameInterval);
             this._star_effect = new StarEffect(targetDom, pixSize).init();
         }

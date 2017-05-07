@@ -55,7 +55,7 @@ namespace Charjs {
         private _star_effect: StarEffect = null;
         private _vertical: Vertical = Vertical.Up;
 
-        constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 2147483640, frameInterval = 45) {
+        constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
             this._star_effect = new StarEffect(targetDom, pixSize).init();
         }
