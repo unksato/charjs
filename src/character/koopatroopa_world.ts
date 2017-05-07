@@ -60,90 +60,6 @@ namespace Charjs {
             [0, 1, 7, 7, 1, 1, 0, 0, 1, 7, 7, 7, 1, 0, 0, 0],
             [0, 0, 1, 7, 7, 2, 1, 0, 0, 1, 7, 7, 1, 0, 0, 0],
             [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0]
-        ], [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 5, 1, 6, 6, 2, 2, 1, 5, 0, 0, 0, 0],
-            [0, 0, 0, 5, 6, 6, 1, 1, 1, 2, 2, 6, 5, 0, 0, 0],
-            [0, 0, 5, 6, 6, 1, 7, 7, 7, 7, 1, 6, 6, 5, 0, 0],
-            [0, 0, 1, 6, 1, 7, 7, 7, 7, 7, 7, 1, 6, 1, 0, 0],
-            [0, 5, 6, 1, 7, 7, 7, 7, 7, 7, 7, 7, 1, 6, 5, 0],
-            [0, 5, 1, 6, 1, 7, 7, 7, 7, 7, 7, 1, 6, 1, 5, 0],
-            [5, 1, 5, 6, 6, 1, 7, 7, 7, 7, 1, 6, 6, 5, 1, 5],
-            [1, 5, 5, 5, 6, 6, 1, 1, 1, 1, 6, 6, 5, 5, 5, 1],
-            [2, 2, 2, 5, 5, 1, 0, 0, 0, 0, 1, 5, 5, 2, 2, 2],
-            [2, 2, 2, 2, 1, 5, 5, 5, 5, 5, 5, 1, 2, 2, 2, 2],
-            [1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1],
-            [0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0],
-            [0, 0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 0, 0],
-            [0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0],
-            [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-        ], [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 5, 5, 1, 5, 5, 5, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 5, 5, 2, 2, 1, 6, 5, 5, 0, 0, 0, 0],
-            [0, 0, 0, 5, 6, 2, 2, 7, 7, 1, 1, 1, 5, 0, 0, 0],
-            [0, 0, 1, 5, 6, 7, 7, 7, 1, 7, 6, 6, 1, 5, 0, 0],
-            [0, 0, 5, 1, 7, 7, 7, 1, 7, 7, 7, 6, 6, 1, 0, 0],
-            [0, 5, 6, 6, 1, 1, 1, 7, 7, 7, 7, 6, 6, 6, 1, 0],
-            [0, 5, 6, 1, 6, 6, 6, 1, 7, 7, 6, 6, 6, 1, 5, 0],
-            [5, 5, 1, 2, 2, 2, 2, 2, 1, 6, 6, 6, 1, 6, 5, 5],
-            [1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 6, 5, 5, 5],
-            [5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 1, 5, 5, 0],
-            [2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2],
-            [0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 1, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 0],
-            [0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0, 0],
-            [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
-        ], [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 5, 1, 5, 5, 1, 5, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 5, 1, 2, 2, 6, 6, 1, 5, 0, 0, 0, 0],
-            [0, 0, 0, 1, 1, 2, 2, 7, 7, 7, 7, 1, 1, 0, 0, 0],
-            [0, 0, 5, 5, 6, 1, 7, 7, 7, 7, 1, 6, 5, 5, 0, 0],
-            [0, 0, 5, 6, 7, 7, 1, 7, 7, 1, 7, 7, 6, 5, 0, 0],
-            [0, 5, 5, 6, 7, 7, 7, 1, 1, 7, 7, 7, 6, 5, 5, 0],
-            [0, 5, 5, 6, 6, 7, 1, 7, 7, 1, 7, 6, 6, 5, 5, 0],
-            [0, 1, 5, 5, 6, 1, 2, 2, 2, 2, 1, 6, 5, 5, 1, 0],
-            [0, 5, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 5, 5],
-            [5, 1, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 1, 5],
-            [1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1],
-            [2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2],
-            [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
-            [0, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 0],
-            [0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 0],
-            [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
         ]];
 
         private static DEFAULT_SPEED = 1;
@@ -153,12 +69,8 @@ namespace Charjs {
         private _currentStep = 0;
         private _actionIndex = 0;
         private _isKilled = false;
-        private _isStepped = false;
         private _yVector = 0;
-        private _jumpPower = 12;
-        private _isKickBound = false;
         private _isRevivalJumping = false;
-        private _grabbedPlayer: IPlayer = null;
         private _star_effect: StarEffect = null;
         private _vertical: Vertical = Vertical.Up;
 
@@ -185,80 +97,42 @@ namespace Charjs {
             }
         }
 
-        private _steppedTimeout = 0;
-        private _revivedTimeout = 0;
-
         onAction(): void {
-            if (!this._grabbedPlayer) {
-                let directionUpdated = this.updateDirection();
+            let directionUpdated = this.updateDirection();
 
-                let targetEnemy = this.doHitTestWithOtherEnemy();
-                if (targetEnemy) {
-                    if (this._isKickBound) {
-                        let ePos = targetEnemy.getPosition();
-                        let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
-                        let enemyCenter = this.position.x + this.size.width / 2;
-                        targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, 10);
-                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
-
-                        let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
-                        this._star_effect.drawEffect(effectPos);
-                        return;
-                    } else {
-                        if (!this.isStepped()) {
-                            this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
-                        }
-                    }
-                }
-
-                this.updateEntity();
-                this.executeJump();
-
-                if (this._direction == Direction.Right) {
-                    this.position.x += this.pixSize * this._speed;
-                } else {
-                    this.position.x -= this.pixSize * this._speed;
-                }
-
-                this.drawAction();
+            let targetEnemy = this.doHitTestWithOtherEnemy();
+            if (targetEnemy) {
+                this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
             }
+
+            this.updateEntity();
+            this.executeJump();
+
+            if (this._direction == Direction.Right) {
+                this.position.x += this.pixSize * this._speed;
+            } else {
+                this.position.x -= this.pixSize * this._speed;
+            }
+
+            this.drawAction();
         }
 
-        private static animation = [
-            { index: 4, direction: Direction.Right },
-            { index: 3, direction: Direction.Left },
-            { index: 2, direction: Direction.Right },
-            { index: 3, direction: Direction.Right }
-        ]
-        private animationIndex = 0;
 
         drawAction(): void {
             let direction = this._direction;
-            if (this._isStepped) {
-                if (this._speed > 0) {
-                    if (this.animationIndex >= KoopatroopaWorld.animation.length) {
-                        this.animationIndex = 0;
-                    }
-                    this._actionIndex = KoopatroopaWorld.animation[this.animationIndex].index;
-                    direction = KoopatroopaWorld.animation[this.animationIndex].direction;
-                    this.animationIndex++;
-                } else {
-                    this._actionIndex = 4;
-                }
+
+            if (this._currentStep < this._step) {
+                this._currentStep++;
             } else {
-                if (this._currentStep < this._step) {
-                    this._currentStep++;
-                } else {
-                    this._currentStep = 0;
-                    this._actionIndex = this._actionIndex ^ 1;
-                }
+                this._currentStep = 0;
+                this._actionIndex = this._actionIndex ^ 1;
             }
 
             this.draw(this._actionIndex, null, direction, this._vertical, true);
         }
 
         isStepped(): boolean {
-            return this._isStepped;
+            return false;
         }
 
         onKilled(): void {
@@ -267,21 +141,22 @@ namespace Charjs {
         }
 
         onStepped(): void {
-            this._isStepped = true;
-            this._speed = 0;
-            this._steppedTimeout = 5000;
+
         }
 
         onGrabed(player: IPlayer): void {
-            this._grabbedPlayer = player;
         }
 
         onKicked(kickDirection: Direction, kickPower: number): HitStatus {
-            this._yVector = 8 * this.pixSize;
-            this._isKickBound = true;
-            this._speed = 10;
-            this._direction = kickDirection;
-            this._steppedTimeout = 5000;
+            // if (this._isKickBound) {
+            //     this._isKickBound = false;
+            //     this._speed = 0;
+            // } else {
+            //     this._isKickBound = true;
+            //     this._speed = 10;
+            //     this._direction = kickDirection;
+            // }
+
             return HitStatus.none;
         }
 
@@ -313,29 +188,6 @@ namespace Charjs {
                 this.draw(this._actionIndex, null, this._direction, Vertical.Down, true);
 
             }, this.frameInterval);
-        }
-
-
-        private doHitTestWithOtherEnemy(): IEnemy {
-            if (this._gameMaster) {
-                let enemys = this._gameMaster.getEnemys();
-                for (let name in enemys) {
-                    if (enemys[name] != this) {
-                        let ePos = enemys[name].getPosition();
-                        let eSize = enemys[name].getCharSize()
-                        if (this.position.y > ePos.y + eSize.height)
-                            continue;
-                        if (ePos.y > this.position.y + this.size.height)
-                            continue;
-                        if (this.position.x > ePos.x + eSize.width)
-                            continue;
-                        if (ePos.x > this.position.x + this.size.width)
-                            continue;
-                        return enemys[name];
-                    }
-                }
-            }
-            return null;
         }
 
         registerActionCommand(): void {

@@ -424,6 +424,29 @@ namespace Charjs {
         abstract drawAction(): void;
         abstract onKilled(): void;
         abstract onEnemyAttack(attackDirection: Direction, kickPower: number): void;
+
+        protected doHitTestWithOtherEnemy(): IEnemy {
+            if (this._gameMaster) {
+                let enemys = this._gameMaster.getEnemys();
+                for (let name in enemys) {
+                    if (enemys[name] != this) {
+                        let ePos = enemys[name].getPosition();
+                        let eSize = enemys[name].getCharSize()
+                        if (this.position.y > ePos.y + eSize.height)
+                            continue;
+                        if (ePos.y > this.position.y + this.size.height)
+                            continue;
+                        if (this.position.x > ePos.x + eSize.width)
+                            continue;
+                        if (ePos.x > this.position.x + this.size.width)
+                            continue;
+                        return enemys[name];
+                    }
+                }
+            }
+            return null;
+        }
+
     }
 
     export interface IOtherObject extends IObject {
