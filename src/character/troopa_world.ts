@@ -57,10 +57,10 @@ namespace Charjs {
         ]];
 
         private static animation = [
-            { index: 4, direction: Direction.Right },
-            { index: 3, direction: Direction.Left },
             { index: 2, direction: Direction.Right },
-            { index: 3, direction: Direction.Right }
+            { index: 1, direction: Direction.Left },
+            { index: 0, direction: Direction.Right },
+            { index: 1, direction: Direction.Right }
         ]
 
         private animationIndex = 4;
