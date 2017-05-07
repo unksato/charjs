@@ -1,5 +1,7 @@
 namespace Charjs {
     export class TroopaWorld extends AbstractEnemy {
+        colors = ['', '#000000', '#f8f8f8', '#b52b0f', '#f58820', '#17770f', '#28b61d', '#3af52a'];
+
         cchars = null;
         chars = [[
             [0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0],
@@ -67,7 +69,7 @@ namespace Charjs {
         private _star_effect: StarEffect = null;
         private _yVector = 0;
         private _grabbedPlayer: IPlayer = null;
-
+        private _isKilled = false;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
@@ -86,6 +88,10 @@ namespace Charjs {
             } else {
                 this._yVector = 0;
             }
+        }
+
+        isKilled(): boolean {
+            return this._isKilled;
         }
 
         onAction(): void {
@@ -149,6 +155,7 @@ namespace Charjs {
         }
 
         onEnemyAttack(attackDirection: Direction, kickPower: number): void {
+            this._isKilled = true;
             this.stop();
             let yVector = 10 * this.pixSize;
             let direction = (attackDirection == Direction.Right ? 1 : -1);
@@ -172,8 +179,6 @@ namespace Charjs {
 
         registerActionCommand(): void {
         }
-
-
 
     }
 }
