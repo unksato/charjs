@@ -117,6 +117,7 @@ namespace Charjs {
                                 if (this._isSpecial) {
                                     this._special_effect.drawEffect(enemys[name].getPosition());
                                     enemys[name].onKilled();
+                                    this._yVector = 12 * this.pixSize;                            
                                     return HitStatus.none;
                                 } else {
                                     let playerCenter = this.position.x + this.size.width / 2;

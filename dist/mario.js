@@ -882,6 +882,7 @@ var Charjs;
                                 if (this._isSpecial) {
                                     this._special_effect.drawEffect(enemys[name_2].getPosition());
                                     enemys[name_2].onKilled();
+                                    this._yVector = 12 * this.pixSize;
                                     return Charjs.HitStatus.none;
                                 }
                                 else {
