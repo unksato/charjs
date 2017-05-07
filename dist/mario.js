@@ -452,6 +452,61 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
+    var SlipEffect = (function (_super) {
+        __extends(SlipEffect, _super);
+        function SlipEffect() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.cchars = null;
+            _this.colors = ['', '#fff'];
+            _this.chars = [
+                [
+                    [0, 1, 1, 0],
+                    [1, 1, 1, 1],
+                    [1, 1, 1, 1],
+                    [0, 1, 1, 0]
+                ],
+                [
+                    [0, 1, 1, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 1, 0],
+                    [0, 0, 0, 0]
+                ],
+                [
+                    [0, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0]
+                ]
+            ];
+            return _this;
+        }
+        SlipEffect.prototype.init = function () {
+            _super.prototype.init.call(this);
+            return this;
+        };
+        SlipEffect.prototype.drawEffect = function (pos) {
+            var _this = this;
+            var count = 0;
+            var current = this.draw(count, pos, undefined, undefined, true, undefined, true);
+            count++;
+            var tEffect = this.getTimer(function () {
+                _this.removeCharacter(current);
+                if (count > _this.chars.length) {
+                    _this.destroy();
+                    _this.removeTimer(tEffect);
+                }
+                else {
+                    current = _this.draw(count, pos, undefined, undefined, true, undefined, true);
+                    count++;
+                }
+            }, this.frameInterval * 2);
+        };
+        return SlipEffect;
+    }(Charjs.AbstractObject));
+    Charjs.SlipEffect = SlipEffect;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
     var SpecialEffect = (function (_super) {
         __extends(SpecialEffect, _super);
         function SpecialEffect() {
@@ -791,6 +846,7 @@ var Charjs;
             _this._attackDirection = Charjs.Direction.Right;
             _this._star_effect = null;
             _this._special_effect = null;
+            _this._slip_effect = null;
             _this._specialAnimationIndex = 0;
             _this._specialAnimation = [{ index: 0, direction: Charjs.Direction.Right }, { index: 12, direction: Charjs.Direction.Right }, { index: 0, direction: Charjs.Direction.Left }, { index: 13, direction: Charjs.Direction.Right }];
             _this._grabedEnemy = null;
@@ -804,6 +860,7 @@ var Charjs;
             _this.chars = null;
             _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
             _this._special_effect = new Charjs.SpecialEffect(targetDom, pixSize).init();
+            _this._slip_effect = new Charjs.SlipEffect(targetDom, _this.pixSize).init();
             return _this;
         }
         MarioWorld.prototype.onAction = function () {
@@ -1029,6 +1086,7 @@ var Charjs;
                             if (this._speed > 2)
                                 this._speed--;
                             this._isBraking = true;
+                            this._slip_effect.drawEffect(this.position);
                         }
                     }
                     else {

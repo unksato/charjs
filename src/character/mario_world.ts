@@ -27,11 +27,13 @@ namespace Charjs {
 
         private _star_effect: StarEffect = null;
         private _special_effect: SpecialEffect = null;
+        private _slip_effect: SlipEffect = null;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, false, zIndex, frameInterval);
             this._star_effect = new StarEffect(targetDom, pixSize).init();
             this._special_effect = new SpecialEffect(targetDom, pixSize).init();
+            this._slip_effect = new SlipEffect(targetDom,this.pixSize).init();
         }
 
         onAction(): void {
@@ -271,6 +273,7 @@ namespace Charjs {
                             if (this._speed > 2)
                                 this._speed--;
                             this._isBraking = true;
+                            this._slip_effect.drawEffect(this.position);
                         }
                     } else {
                         this._isBraking = false;
