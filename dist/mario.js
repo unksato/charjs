@@ -803,12 +803,10 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
-    var KoopaWorld = (function (_super) {
-        __extends(KoopaWorld, _super);
+    var KoopaWorld = (function () {
         function KoopaWorld() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.cchars = null;
-            _this.chars = [[
+            this.cchars = null;
+            this.chars = [[
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [1, 2, 7, 7, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -877,10 +875,9 @@ var Charjs;
                     [0, 1, 6, 6, 1, 7, 7, 7, 7, 2, 1, 0, 0, 0, 0, 0],
                     [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
                 ]];
-            return _this;
         }
         return KoopaWorld;
-    }(Charjs.KoopatroopaWorld));
+    }());
     Charjs.KoopaWorld = KoopaWorld;
 })(Charjs || (Charjs = {}));
 var Charjs;
@@ -2113,8 +2110,12 @@ var Charjs;
 (function (Charjs) {
     var TroopaWorld = (function (_super) {
         __extends(TroopaWorld, _super);
-        function TroopaWorld() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
+        function TroopaWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
+            if (zIndex === void 0) { zIndex = 100; }
+            if (frameInterval === void 0) { frameInterval = 45; }
+            var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
+            _this.colors = ['', '#000000', '#f8f8f8', '#b52b0f', '#f58820', '#17770f', '#28b61d', '#3af52a'];
             _this.cchars = null;
             _this.chars = [[
                     [0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0],
@@ -2168,28 +2169,103 @@ var Charjs;
                     [0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 0],
                     [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
                 ]];
-            _this.animationIndex = 0;
-            _this.__speed = 0;
-            _this.__actionIndex = 0;
+            _this.animationIndex = 4;
+            _this._speed = 0;
+            _this._actionIndex = 0;
+            _this._star_effect = null;
+            _this._yVector = 0;
+            _this._grabbedPlayer = null;
+            _this._isKilled = false;
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
             return _this;
         }
+        TroopaWorld.prototype.executeJump = function () {
+            var ground = this.entity.ground || 0;
+            if (this.position.y > ground) {
+                this._yVector -= this._gravity * this.pixSize;
+                this.position.y += this._yVector;
+                if (this.position.y < ground) {
+                    this.position.y = ground;
+                }
+            }
+            else {
+                this._yVector = 0;
+            }
+        };
+        TroopaWorld.prototype.isKilled = function () {
+            return this._isKilled;
+        };
+        TroopaWorld.prototype.onAction = function () {
+            var directionUpdated = this.updateDirection();
+            var targetEnemy = this.doHitTestWithOtherEnemy();
+            if (targetEnemy) {
+                var ePos = targetEnemy.getPosition();
+                var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
+                var enemyCenter = this.position.x + this.size.width / 2;
+                targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                this._star_effect.drawEffect(effectPos);
+            }
+            this.updateEntity();
+            this.executeJump();
+            if (this._direction == Charjs.Direction.Right) {
+                this.position.x += this.pixSize * this._speed;
+            }
+            else {
+                this.position.x -= this.pixSize * this._speed;
+            }
+            this.drawAction();
+        };
         TroopaWorld.prototype.drawAction = function () {
             var direction = this._direction;
-            if (this.__speed > 0) {
+            if (this._speed > 0) {
                 if (this.animationIndex >= TroopaWorld.animation.length) {
                     this.animationIndex = 0;
                 }
-                this.__actionIndex = TroopaWorld.animation[this.animationIndex].index;
+                this._actionIndex = TroopaWorld.animation[this.animationIndex].index;
                 direction = TroopaWorld.animation[this.animationIndex].direction;
                 this.animationIndex++;
             }
-            else {
-                this.__actionIndex = 4;
-            }
-            this.draw(this.__actionIndex, null, direction, Charjs.Vertical.Up, true);
+            this.draw(this._actionIndex, null, direction, Charjs.Vertical.Up, true);
+        };
+        TroopaWorld.prototype.isStepped = function () {
+            return true;
+        };
+        TroopaWorld.prototype.onKilled = function () {
+            this.destroy();
+        };
+        TroopaWorld.prototype.onStepped = function () {
+        };
+        TroopaWorld.prototype.onGrabed = function (player) {
+            this._grabbedPlayer = player;
+        };
+        TroopaWorld.prototype.onKicked = function (kickDirection, kickPower) {
+            this._speed = 10;
+            this._direction = kickDirection;
+            return Charjs.HitStatus.attack;
+        };
+        TroopaWorld.prototype.onEnemyAttack = function (attackDirection, kickPower) {
+            var _this = this;
+            this._isKilled = true;
+            this.stop();
+            var yVector = 10 * this.pixSize;
+            var direction = (attackDirection == Charjs.Direction.Right ? 1 : -1);
+            var killTimer = this.getTimer(function () {
+                yVector -= _this._gravity * _this.pixSize;
+                _this.position.y = _this.position.y + yVector;
+                _this.position.x += kickPower * direction;
+                if (_this.position.y < _this.size.height * 5 * -1) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                    return;
+                }
+                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
+            }, this.frameInterval);
+        };
+        TroopaWorld.prototype.registerActionCommand = function () {
         };
         return TroopaWorld;
-    }(Charjs.KoopatroopaWorld));
+    }(Charjs.AbstractEnemy));
     TroopaWorld.animation = [
         { index: 4, direction: Charjs.Direction.Right },
         { index: 3, direction: Charjs.Direction.Left },

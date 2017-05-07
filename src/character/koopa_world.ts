@@ -1,5 +1,5 @@
 namespace Charjs {
-    export class KoopaWorld extends KoopatroopaWorld {
+    export class KoopaWorld {
         cchars = null;
         chars = [[
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
