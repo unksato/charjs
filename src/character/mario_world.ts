@@ -119,7 +119,7 @@ namespace Charjs {
                                 if (this._isSpecial) {
                                     this._special_effect.drawEffect(enemys[name].getPosition());
                                     enemys[name].onKilled();
-                                    this._yVector = 12 * this.pixSize;                            
+                                    this._yVector = 2 * this.pixSize;
                                     return HitStatus.none;
                                 } else {
                                     let playerCenter = this.position.x + this.size.width / 2;
@@ -137,12 +137,13 @@ namespace Charjs {
                             if (this._isSpecial) {
                                 this._special_effect.drawEffect(enemys[name].getPosition());
                                 enemys[name].onKilled();
+                                this._yVector = 2 * this.pixSize;
                             } else {
                                 enemys[name].onStepped();
                                 let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                                 this._star_effect.drawEffect(effectPos);
+                                this._yVector = 12 * this.pixSize;
                             }
-                            this._yVector = 12 * this.pixSize;
                             continue;
                         }
                         return HitStatus.dammage;

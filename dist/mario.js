@@ -939,7 +939,7 @@ var Charjs;
                                 if (this._isSpecial) {
                                     this._special_effect.drawEffect(enemys[name_2].getPosition());
                                     enemys[name_2].onKilled();
-                                    this._yVector = 12 * this.pixSize;
+                                    this._yVector = 2 * this.pixSize;
                                     return Charjs.HitStatus.none;
                                 }
                                 else {
@@ -958,13 +958,14 @@ var Charjs;
                             if (this._isSpecial) {
                                 this._special_effect.drawEffect(enemys[name_2].getPosition());
                                 enemys[name_2].onKilled();
+                                this._yVector = 2 * this.pixSize;
                             }
                             else {
                                 enemys[name_2].onStepped();
                                 var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                                 this._star_effect.drawEffect(effectPos);
+                                this._yVector = 12 * this.pixSize;
                             }
-                            this._yVector = 12 * this.pixSize;
                             continue;
                         }
                         return Charjs.HitStatus.dammage;
