@@ -1,7 +1,4 @@
 namespace Charjs {
-
-
-
     export class MarioWorld extends AbstractPlayer {
         private static STEP = 2;
         private static DEFAULT_SPEED = 2;

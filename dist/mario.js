@@ -456,28 +456,9 @@ var Charjs;
         __extends(SlipEffect, _super);
         function SlipEffect() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.cchars = null;
+            _this.cchars = [[[0, 1, 1, 2, 0, 1], [1, 4], [1, 4], [0, 1, 1, 2, 0, 1]], [[0, 1, 1, 2, 0, 1], [1, 4], [0, 1, 1, 2, 0, 1], [0, 4]], [[0, 4], [0, 1, 1, 1, 0, 2], [0, 4], [0, 4]]];
             _this.colors = ['', '#fff'];
-            _this.chars = [
-                [
-                    [0, 1, 1, 0],
-                    [1, 1, 1, 1],
-                    [1, 1, 1, 1],
-                    [0, 1, 1, 0]
-                ],
-                [
-                    [0, 1, 1, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 1, 0],
-                    [0, 0, 0, 0]
-                ],
-                [
-                    [0, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0]
-                ]
-            ];
+            _this.chars = null;
             return _this;
         }
         SlipEffect.prototype.init = function () {

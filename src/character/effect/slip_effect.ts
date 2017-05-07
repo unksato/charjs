@@ -1,28 +1,29 @@
 
 namespace Charjs {
     export class SlipEffect extends AbstractObject {
-        cchars = null;
+        cchars = [[[0, 1, 1, 2, 0, 1], [1, 4], [1, 4], [0, 1, 1, 2, 0, 1]], [[0, 1, 1, 2, 0, 1], [1, 4], [0, 1, 1, 2, 0, 1], [0, 4]], [[0, 4], [0, 1, 1, 1, 0, 2], [0, 4], [0, 4]]];
         colors = ['', '#fff'];
-        chars = [
-            [
-                [0, 1, 1, 0],
-                [1, 1, 1, 1],
-                [1, 1, 1, 1],
-                [0, 1, 1, 0]
-            ],
-            [
-                [0, 1, 1, 0],
-                [1, 1, 1, 1],
-                [0, 1, 1, 0],
-                [0, 0, 0, 0]
-            ],
-            [
-                [0, 0, 0, 0],
-                [0, 1, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0]
-            ]
-        ];
+        chars = null;
+        // chars = [
+        //     [
+        //         [0, 1, 1, 0],
+        //         [1, 1, 1, 1],
+        //         [1, 1, 1, 1],
+        //         [0, 1, 1, 0]
+        //     ],
+        //     [
+        //         [0, 1, 1, 0],
+        //         [1, 1, 1, 1],
+        //         [0, 1, 1, 0],
+        //         [0, 0, 0, 0]
+        //     ],
+        //     [
+        //         [0, 0, 0, 0],
+        //         [0, 1, 0, 0],
+        //         [0, 0, 0, 0],
+        //         [0, 0, 0, 0]
+        //     ]
+        // ];
 
         init(): StarEffect {
             super.init();
@@ -30,7 +31,7 @@ namespace Charjs {
         }
         drawEffect(pos: IPosition) {
             let count = 0;
-            let current = this.draw(count, pos, undefined, undefined, true, undefined,true);
+            let current = this.draw(count, pos, undefined, undefined, true, undefined, true);
             count++;
             let tEffect = this.getTimer(() => {
                 this.removeCharacter(current);
@@ -38,7 +39,7 @@ namespace Charjs {
                     this.destroy();
                     this.removeTimer(tEffect);
                 } else {
-                    current = this.draw(count, pos, undefined, undefined, true, undefined,true);
+                    current = this.draw(count, pos, undefined, undefined, true, undefined, true);
                     count++;
                 }
             }, this.frameInterval * 2);
