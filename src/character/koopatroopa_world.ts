@@ -141,7 +141,12 @@ namespace Charjs {
         }
 
         onStepped(): void {
-
+            if(this._gameMaster){
+                this._isKilled = true;
+                let troopa = this._gameMaster.CreateEnemyInstance(TroopaWorld, this.position, this._direction);
+                troopa.init().start();
+                this.destroy();
+            }
         }
 
         onGrabed(player: IPlayer): void {

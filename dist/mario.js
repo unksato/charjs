@@ -1011,6 +1011,12 @@ var Charjs;
             this.destroy();
         };
         KoopatroopaWorld.prototype.onStepped = function () {
+            if (this._gameMaster) {
+                this._isKilled = true;
+                var troopa = this._gameMaster.CreateEnemyInstance(Charjs.TroopaWorld, this.position, this._direction);
+                troopa.init().start();
+                this.destroy();
+            }
         };
         KoopatroopaWorld.prototype.onGrabed = function (player) {
         };
@@ -2267,10 +2273,10 @@ var Charjs;
         return TroopaWorld;
     }(Charjs.AbstractEnemy));
     TroopaWorld.animation = [
-        { index: 4, direction: Charjs.Direction.Right },
-        { index: 3, direction: Charjs.Direction.Left },
         { index: 2, direction: Charjs.Direction.Right },
-        { index: 3, direction: Charjs.Direction.Right }
+        { index: 1, direction: Charjs.Direction.Left },
+        { index: 0, direction: Charjs.Direction.Right },
+        { index: 1, direction: Charjs.Direction.Right }
     ];
     Charjs.TroopaWorld = TroopaWorld;
 })(Charjs || (Charjs = {}));
