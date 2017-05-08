@@ -134,12 +134,12 @@ namespace Charjs {
                     this.chars.push(Util.Compression.RLD(cchar));
                 }
             } else {
-                //// for debbuging code
+                // // for debbuging code
                 // this.cchars = [];
                 // for (let char of this.chars) {
                 //     this.cchars.push(Util.Compression.RLE(char));
                 // }
-                // console.log(JSON.stringify(this.cchars));
+                // console.log(this._name + ":" + JSON.stringify(this.cchars));
             }
         }
 
