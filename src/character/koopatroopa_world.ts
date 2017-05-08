@@ -140,11 +140,14 @@ namespace Charjs {
             this.destroy();
         }
 
-        onStepped(): void {
-            if(this._gameMaster){
+        onStepped(attackDirection: Direction): void {
+            if (this._gameMaster) {
                 this._isKilled = true;
                 let troopa = this._gameMaster.CreateEnemyInstance(TroopaWorld, this.position, this._direction);
+                let koopa = this._gameMaster.CreateEnemyInstance(KoopaWorld, { x: this.position.x + 20, y: this.position.y }, attackDirection);
                 troopa.init().start();
+                koopa.init().onPushOut().start();
+
                 this.destroy();
             }
         }

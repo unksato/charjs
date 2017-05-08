@@ -58,9 +58,9 @@ namespace Charjs {
     }
 
     export interface IEnemy extends ICharacter {
-        onStepped(): void;
+        onStepped(direction?: Direction): void;
         onGrabed(player: IPlayer): void;
-        onKicked(direction: number, kickPower: number): HitStatus;
+        onKicked(direction: Direction, kickPower: number): HitStatus;
         onKilled(): void;
         onEnemyAttack(attackDirection: Direction, kickPower: number): void;
         isKilled(): boolean;
@@ -416,7 +416,7 @@ namespace Charjs {
     }
 
     export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
-        abstract onStepped(): void;
+        abstract onStepped(direction?: Direction): void;
         abstract onGrabed(player: IPlayer): void;
         abstract onKicked(direction: number, kickPower: number): HitStatus;
         abstract isKilled(): boolean;

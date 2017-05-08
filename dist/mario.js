@@ -803,10 +803,50 @@ var Charjs;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
-    var KoopaWorld = (function () {
-        function KoopaWorld() {
-            this.cchars = null;
-            this.chars = [[
+    var KoopaWorld = (function (_super) {
+        __extends(KoopaWorld, _super);
+        function KoopaWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
+            if (zIndex === void 0) { zIndex = 100; }
+            if (frameInterval === void 0) { frameInterval = 45; }
+            var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
+            _this.colors = ['', '#000000', '#f8f8f8', '#b52b0f', '#f58820', '#17770f', '#28b61d', '#3af52a'];
+            _this.cchars = null;
+            _this.chars = [[
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 2, 2, 2, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3, 2, 2, 2, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 2, 0],
+                    [0, 0, 0, 0, 3, 3, 3, 3, 3, 4, 4, 4, 2, 2, 4, 3],
+                    [0, 0, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 1, 3],
+                    [0, 3, 2, 2, 2, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 3],
+                    [0, 3, 2, 2, 4, 4, 2, 4, 3, 4, 4, 3, 4, 4, 4, 3],
+                    [3, 2, 2, 2, 4, 4, 4, 3, 3, 3, 4, 4, 3, 4, 3, 0],
+                    [3, 2, 2, 2, 4, 4, 4, 3, 0, 0, 3, 4, 3, 3, 0, 0],
+                    [0, 3, 1, 1, 1, 1, 1, 3, 0, 0, 0, 3, 3, 0, 0, 0],
+                    [0, 0, 1, 7, 7, 7, 7, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 7, 7, 7, 7, 2, 1, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+                ], [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 2, 2, 2, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3, 2, 2, 2, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 2, 3],
+                    [0, 0, 0, 0, 3, 3, 3, 3, 3, 4, 4, 4, 2, 2, 4, 3],
+                    [0, 0, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 1, 3],
+                    [0, 3, 2, 2, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 3],
+                    [0, 3, 2, 4, 4, 2, 2, 4, 3, 4, 4, 3, 4, 4, 4, 3],
+                    [1, 2, 2, 4, 4, 4, 2, 3, 3, 3, 4, 4, 3, 4, 3, 0],
+                    [1, 3, 2, 4, 4, 4, 1, 1, 1, 2, 3, 4, 3, 3, 0, 0],
+                    [1, 6, 3, 3, 1, 7, 7, 7, 7, 1, 1, 3, 3, 0, 0, 0],
+                    [0, 1, 6, 6, 1, 7, 7, 7, 7, 2, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
+                ], [
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [1, 2, 7, 7, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -841,43 +881,155 @@ var Charjs;
                     [0, 0, 3, 3, 2, 2, 3, 4, 4, 4, 3, 4, 3, 0, 0, 0],
                     [0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0]
                 ], [
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 2, 2, 2, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3, 2, 2, 2, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 2, 0],
-                    [0, 0, 0, 0, 3, 3, 3, 3, 3, 4, 4, 4, 2, 2, 4, 3],
-                    [0, 0, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 1, 3],
-                    [0, 3, 2, 2, 2, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 3],
-                    [0, 3, 2, 2, 4, 4, 2, 4, 3, 4, 4, 3, 4, 4, 4, 3],
-                    [3, 2, 2, 2, 4, 4, 4, 3, 3, 3, 4, 4, 3, 4, 3, 0],
-                    [3, 2, 2, 2, 4, 4, 4, 3, 0, 0, 3, 4, 3, 3, 0, 0],
-                    [0, 3, 1, 1, 1, 1, 1, 3, 0, 0, 0, 3, 3, 0, 0, 0],
-                    [0, 0, 1, 7, 7, 7, 7, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 7, 7, 7, 7, 2, 1, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
-                ], [
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 2, 2, 2, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 2, 2, 2, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3, 2, 2, 2, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 4, 2, 2, 2, 2, 3],
-                    [0, 0, 0, 0, 3, 3, 3, 3, 3, 4, 4, 4, 2, 2, 4, 3],
-                    [0, 0, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 1, 3],
-                    [0, 3, 2, 2, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 3],
-                    [0, 3, 2, 4, 4, 2, 2, 4, 3, 4, 4, 3, 4, 4, 4, 3],
-                    [1, 2, 2, 4, 4, 4, 2, 3, 3, 3, 4, 4, 3, 4, 3, 0],
-                    [1, 3, 2, 4, 4, 4, 1, 1, 1, 2, 3, 4, 3, 3, 0, 0],
-                    [1, 6, 3, 3, 1, 7, 7, 7, 7, 1, 1, 3, 3, 0, 0, 0],
-                    [0, 1, 6, 6, 1, 7, 7, 7, 7, 2, 1, 0, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0]
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 3, 3, 0, 0, 3, 3, 3, 3, 3, 3, 0, 0, 3, 3, 0],
+                    [3, 4, 4, 3, 2, 2, 2, 3, 3, 2, 2, 2, 3, 4, 4, 3],
+                    [3, 3, 3, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 3, 3, 3],
+                    [0, 0, 3, 4, 2, 2, 2, 4, 4, 2, 2, 2, 4, 3, 0, 0],
+                    [0, 0, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 0, 0],
+                    [0, 0, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 0, 0],
+                    [0, 1, 2, 7, 7, 7, 1, 2, 2, 1, 7, 7, 7, 2, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 0]
                 ]];
+            _this._yVector = 0;
+            _this._isKilled = false;
+            _this._step = KoopaWorld.STEP;
+            _this._currentStep = 0;
+            _this._actionIndex = 0;
+            _this._xVector = 0;
+            _this._speed = KoopaWorld.DEFAULT_SPEED;
+            _this._star_effect = null;
+            _this._vertical = Charjs.Vertical.Up;
+            _this.pikupikuCount = 0;
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
+            return _this;
         }
+        KoopaWorld.prototype.executeJump = function () {
+            var ground = this.entity.ground || 0;
+            if (this.position.y > ground) {
+                this._yVector -= this._gravity * this.pixSize;
+                this.position.y += this._yVector;
+                if (this.position.y < ground) {
+                    this.position.y = ground;
+                }
+            }
+            else {
+                this._yVector = 0;
+            }
+        };
+        KoopaWorld.prototype.onPushOut = function () {
+            this._xVector = 12;
+            return this;
+        };
+        KoopaWorld.prototype.onAction = function () {
+            var directionUpdated = this.updateDirection();
+            var targetEnemy = this.doHitTestWithOtherEnemy();
+            this.updateEntity();
+            this.executeJump();
+            if (this._xVector > 0) {
+                this._xVector--;
+                this._speed = KoopaWorld.DEFAULT_SPEED * this._xVector;
+            }
+            else {
+                this._speed = KoopaWorld.DEFAULT_SPEED;
+            }
+            if (this._xVector == 0 && this.pikupikuCount < 100) {
+                this.pikupikuCount++;
+                this._speed = 0;
+            }
+            if (this._direction == Charjs.Direction.Right) {
+                this.position.x += this.pixSize * this._speed;
+            }
+            else {
+                this.position.x -= this.pixSize * this._speed;
+            }
+            this.drawAction();
+        };
+        KoopaWorld.prototype.drawAction = function () {
+            var action = this._actionIndex;
+            if (this._xVector > 0) {
+                action = 2;
+            }
+            else {
+                if (this._currentStep < this._step) {
+                    this._currentStep++;
+                }
+                else {
+                    this._currentStep = 0;
+                    if (this._actionIndex == 0 || this._actionIndex == 1) {
+                        this._actionIndex = this._actionIndex ^ 1;
+                    }
+                    else {
+                        this._actionIndex = 0;
+                    }
+                }
+                if (this._speed == 0) {
+                    action = this._actionIndex + 2;
+                }
+            }
+            this.draw(action, null, this._direction, this._vertical, true);
+        };
+        KoopaWorld.prototype.isKilled = function () {
+            return this._isKilled;
+        };
+        KoopaWorld.prototype.onKilled = function () {
+            this.destroy();
+        };
+        KoopaWorld.prototype.isStepped = function () {
+            return false;
+        };
+        KoopaWorld.prototype.onStepped = function () {
+            var _this = this;
+            this._isKilled = true;
+            this.stop();
+            this.draw(4, null, this._direction, Charjs.Vertical.Up, true);
+            var timercount = 0;
+            var killTimer = this.getTimer(function () {
+                timercount++;
+                if (timercount > 4) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                }
+            }, this.frameInterval);
+        };
+        KoopaWorld.prototype.onGrabed = function (player) {
+        };
+        KoopaWorld.prototype.onKicked = function (kickDirection, kickPower) {
+            return Charjs.HitStatus.none;
+        };
+        KoopaWorld.prototype.onEnemyAttack = function (attackDirection, kickPower) {
+            var _this = this;
+            if (this._xVector > 0)
+                return;
+            this._isKilled = true;
+            this.stop();
+            var yVector = 10 * this.pixSize;
+            var direction = (attackDirection == Charjs.Direction.Right ? 1 : -1);
+            var killTimer = this.getTimer(function () {
+                yVector -= _this._gravity * _this.pixSize;
+                _this.position.y = _this.position.y + yVector;
+                _this.position.x += kickPower * direction;
+                if (_this.position.y < _this.size.height * 5 * -1) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                    return;
+                }
+                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
+            }, this.frameInterval);
+        };
+        KoopaWorld.prototype.registerActionCommand = function () {
+        };
         return KoopaWorld;
-    }());
+    }(Charjs.AbstractEnemy));
+    KoopaWorld.STEP = 2;
+    KoopaWorld.DEFAULT_SPEED = 1;
     Charjs.KoopaWorld = KoopaWorld;
 })(Charjs || (Charjs = {}));
 var Charjs;
@@ -1010,11 +1162,13 @@ var Charjs;
             this._isKilled = true;
             this.destroy();
         };
-        KoopatroopaWorld.prototype.onStepped = function () {
+        KoopatroopaWorld.prototype.onStepped = function (attackDirection) {
             if (this._gameMaster) {
                 this._isKilled = true;
                 var troopa = this._gameMaster.CreateEnemyInstance(Charjs.TroopaWorld, this.position, this._direction);
+                var koopa = this._gameMaster.CreateEnemyInstance(Charjs.KoopaWorld, { x: this.position.x + 20, y: this.position.y }, attackDirection);
                 troopa.init().start();
+                koopa.init().onPushOut().start();
                 this.destroy();
             }
         };
@@ -1197,7 +1351,10 @@ var Charjs;
                                 this._yVector = 2 * this.pixSize;
                             }
                             else {
-                                enemys[name_2].onStepped();
+                                var playerCenter = this.position.x + this.size.width / 2;
+                                var enemyCenter = ePos.x + eSize.width / 2;
+                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left;
+                                enemys[name_2].onStepped(this._attackDirection);
                                 var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                                 this._star_effect.drawEffect(effectPos);
                                 this._yVector = 12 * this.pixSize;

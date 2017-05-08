@@ -30,7 +30,7 @@ namespace Charjs {
             super(targetDom, pixSize, position, direction, true, false, zIndex, frameInterval);
             this._star_effect = new StarEffect(targetDom, pixSize).init();
             this._special_effect = new SpecialEffect(targetDom, pixSize).init();
-            this._slip_effect = new SlipEffect(targetDom,this.pixSize).init();
+            this._slip_effect = new SlipEffect(targetDom, this.pixSize).init();
         }
 
         onAction(): void {
@@ -136,7 +136,11 @@ namespace Charjs {
                                 enemys[name].onKilled();
                                 this._yVector = 2 * this.pixSize;
                             } else {
-                                enemys[name].onStepped();
+                                let playerCenter = this.position.x + this.size.width / 2;
+                                let enemyCenter = ePos.x + eSize.width / 2;
+                                this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
+
+                                enemys[name].onStepped(this._attackDirection);
                                 let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                                 this._star_effect.drawEffect(effectPos);
                                 this._yVector = 12 * this.pixSize;
