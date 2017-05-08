@@ -99,7 +99,7 @@ namespace Charjs {
             let directionUpdated = this.updateDirection();
 
             let targetEnemy = this.doHitTestWithOtherEnemy();
-            if (targetEnemy) {
+            if (targetEnemy && this._speed > 0) {
                 let ePos = targetEnemy.getPosition();
                 let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                 let enemyCenter = this.position.x + this.size.width / 2;

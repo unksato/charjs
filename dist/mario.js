@@ -390,7 +390,7 @@ var Charjs;
             if (this._gameMaster) {
                 var enemys = this._gameMaster.getEnemys();
                 for (var name_1 in enemys) {
-                    if (enemys[name_1] != this) {
+                    if (enemys[name_1] != this && !enemys[name_1].isKilled()) {
                         var ePos = enemys[name_1].getPosition();
                         var eSize = enemys[name_1].getCharSize();
                         if (this.position.y > ePos.y + eSize.height)
@@ -907,21 +907,16 @@ var Charjs;
             _this._speed = KoopaWorld.DEFAULT_SPEED;
             _this._star_effect = null;
             _this._vertical = Charjs.Vertical.Up;
-            _this.pikupikuCount = 0;
+            _this.waitCount = 0;
             _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
             return _this;
         }
         KoopaWorld.prototype.executeJump = function () {
             var ground = this.entity.ground || 0;
-            if (this.position.y > ground) {
-                this._yVector -= this._gravity * this.pixSize;
-                this.position.y += this._yVector;
-                if (this.position.y < ground) {
-                    this.position.y = ground;
-                }
-            }
-            else {
-                this._yVector = 0;
+            this._yVector -= this._gravity * this.pixSize;
+            this.position.y += this._yVector;
+            if (this.position.y < ground) {
+                this.position.y = ground;
             }
         };
         KoopaWorld.prototype.onPushOut = function () {
@@ -931,6 +926,9 @@ var Charjs;
         KoopaWorld.prototype.onAction = function () {
             var directionUpdated = this.updateDirection();
             var targetEnemy = this.doHitTestWithOtherEnemy();
+            if (targetEnemy && this._xVector == 0) {
+                this._direction = this._direction == Charjs.Direction.Right ? Charjs.Direction.Left : Charjs.Direction.Right;
+            }
             this.updateEntity();
             this.executeJump();
             if (this._xVector > 0) {
@@ -940,9 +938,11 @@ var Charjs;
             else {
                 this._speed = KoopaWorld.DEFAULT_SPEED;
             }
-            if (this._xVector == 0 && this.pikupikuCount < 100) {
-                this.pikupikuCount++;
+            if (this._xVector == 0 && this.waitCount < 100) {
+                this.waitCount++;
                 this._speed = 0;
+                if (this.waitCount == 100)
+                    this._yVector = 8 * this.pixSize;
             }
             if (this._direction == Charjs.Direction.Right) {
                 this.position.x += this.pixSize * this._speed;
@@ -2362,7 +2362,7 @@ var Charjs;
         TroopaWorld.prototype.onAction = function () {
             var directionUpdated = this.updateDirection();
             var targetEnemy = this.doHitTestWithOtherEnemy();
-            if (targetEnemy) {
+            if (targetEnemy && this._speed > 0) {
                 var ePos = targetEnemy.getPosition();
                 var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                 var enemyCenter = this.position.x + this.size.width / 2;

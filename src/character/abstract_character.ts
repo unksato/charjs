@@ -429,7 +429,7 @@ namespace Charjs {
             if (this._gameMaster) {
                 let enemys = this._gameMaster.getEnemys();
                 for (let name in enemys) {
-                    if (enemys[name] != this) {
+                    if (enemys[name] != this && !enemys[name].isKilled()) {
                         let ePos = enemys[name].getPosition();
                         let eSize = enemys[name].getCharSize()
                         if (this.position.y > ePos.y + eSize.height)

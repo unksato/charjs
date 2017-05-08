@@ -109,14 +109,10 @@ namespace Charjs {
         private executeJump(): void {
             let ground = this.entity.ground || 0;
 
-            if (this.position.y > ground) {
-                this._yVector -= this._gravity * this.pixSize;
-                this.position.y += this._yVector;
-                if (this.position.y < ground) {
-                    this.position.y = ground;
-                }
-            } else {
-                this._yVector = 0;
+            this._yVector -= this._gravity * this.pixSize;
+            this.position.y += this._yVector;
+            if (this.position.y < ground) {
+                this.position.y = ground;
             }
         }
 
@@ -125,11 +121,15 @@ namespace Charjs {
             return this;
         }
 
-        private pikupikuCount = 0;
+        private waitCount = 0;
 
         onAction(): void {
             let directionUpdated = this.updateDirection();
             let targetEnemy = this.doHitTestWithOtherEnemy();
+
+            if (targetEnemy && this._xVector == 0) {
+                this._direction = this._direction == Direction.Right ? Direction.Left : Direction.Right;
+            }
 
             this.updateEntity();
             this.executeJump();
@@ -141,9 +141,11 @@ namespace Charjs {
                 this._speed = KoopaWorld.DEFAULT_SPEED;
             }
 
-            if (this._xVector == 0 && this.pikupikuCount < 100) {
-                this.pikupikuCount++;
+            if (this._xVector == 0 && this.waitCount < 100) {
+                this.waitCount++;
                 this._speed = 0;
+                if (this.waitCount == 100)
+                    this._yVector = 8 * this.pixSize;
             }
 
             if (this._direction == Direction.Right) {
