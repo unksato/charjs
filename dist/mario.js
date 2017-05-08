@@ -2182,6 +2182,7 @@ var Charjs;
             _this._yVector = 0;
             _this._grabbedPlayer = null;
             _this._isKilled = false;
+            _this._isStepped = true;
             _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
             return _this;
         }
@@ -2235,17 +2236,20 @@ var Charjs;
             this.draw(this._actionIndex, null, direction, Charjs.Vertical.Up, true);
         };
         TroopaWorld.prototype.isStepped = function () {
-            return true;
+            return this._isStepped;
         };
         TroopaWorld.prototype.onKilled = function () {
             this.destroy();
         };
         TroopaWorld.prototype.onStepped = function () {
+            this._isStepped = true;
+            this._speed = 0;
         };
         TroopaWorld.prototype.onGrabed = function (player) {
             this._grabbedPlayer = player;
         };
         TroopaWorld.prototype.onKicked = function (kickDirection, kickPower) {
+            this._isStepped = false;
             this._speed = 10;
             this._direction = kickDirection;
             return Charjs.HitStatus.attack;

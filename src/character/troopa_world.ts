@@ -70,6 +70,7 @@ namespace Charjs {
         private _yVector = 0;
         private _grabbedPlayer: IPlayer = null;
         private _isKilled = false;
+        private _isStepped = true;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
@@ -134,7 +135,7 @@ namespace Charjs {
         }
 
         isStepped(): boolean {
-            return true;
+            return this._isStepped;
         }
 
         onKilled(): void {
@@ -142,6 +143,8 @@ namespace Charjs {
         }
 
         onStepped(): void {
+            this._isStepped = true;
+            this._speed = 0;
         }
 
         onGrabed(player: IPlayer): void {
@@ -149,6 +152,7 @@ namespace Charjs {
         }
 
         onKicked(kickDirection: Direction, kickPower: number): HitStatus {
+            this._isStepped = false;
             this._speed = 10;
             this._direction = kickDirection;
             return HitStatus.attack;
