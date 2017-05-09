@@ -1029,8 +1029,8 @@ var Charjs;
                 this._isKilled = true;
                 var troopa = this._gameMaster.CreateEnemyInstance(Charjs.TroopaWorld, this.position, this._direction);
                 var koopa = this._gameMaster.CreateEnemyInstance(Charjs.KoopaWorld, { x: this.position.x + 20, y: this.position.y }, attackDirection);
-                troopa.init().start();
-                koopa.init().onPushOut().start();
+                troopa.init(true).start();
+                koopa.init(true).onPushOut().start();
                 this.destroy();
             }
         };
@@ -1045,13 +1045,16 @@ var Charjs;
             this._isKilled = true;
             var yVector = 10 * this.pixSize;
             var direction = attackDirection == Charjs.Direction.Right ? 1 : -1;
+            this.destroy();
+            var troopa = new Charjs.TroopaWorld(this.targetDom, this.pixSize, this.position, this._direction);
+            troopa.init(true);
             var killTimer = this.getTimer(function () {
                 yVector -= _this._gravity * _this.pixSize;
                 _this.position.y = _this.position.y + yVector;
                 _this.position.x += kickPower * direction;
                 if (_this.position.y < _this.size.height * 5 * -1) {
                     _this.removeTimer(killTimer);
-                    _this.destroy();
+                    troopa.destroy();
                     return;
                 }
                 if (_this._currentStep < KoopatroopaWorld.STEP) {
@@ -1061,7 +1064,7 @@ var Charjs;
                     _this._currentStep = 0;
                     _this._actionIndex = _this._actionIndex ^ 1;
                 }
-                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
+                troopa.draw(0, null, _this._direction, Charjs.Vertical.Down, true);
             }, this.frameInterval);
         };
         KoopatroopaWorld.prototype.registerActionCommand = function () {
