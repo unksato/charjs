@@ -386,6 +386,27 @@ var Charjs;
         function AbstractEnemy() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
+        AbstractEnemy.prototype.doHitTestWithOtherEnemy = function () {
+            if (this._gameMaster) {
+                var enemys = this._gameMaster.getEnemys();
+                for (var name_1 in enemys) {
+                    if (enemys[name_1] != this && !enemys[name_1].isKilled()) {
+                        var ePos = enemys[name_1].getPosition();
+                        var eSize = enemys[name_1].getCharSize();
+                        if (this.position.y > ePos.y + eSize.height)
+                            continue;
+                        if (ePos.y > this.position.y + this.size.height)
+                            continue;
+                        if (this.position.x > ePos.x + eSize.width)
+                            continue;
+                        if (ePos.x > this.position.x + this.size.width)
+                            continue;
+                        return enemys[name_1];
+                    }
+                }
+            }
+            return null;
+        };
         return AbstractEnemy;
     }(AbstractCharacter));
     Charjs.AbstractEnemy = AbstractEnemy;
@@ -472,7 +493,7 @@ var Charjs;
             count++;
             var tEffect = this.getTimer(function () {
                 _this.removeCharacter(current);
-                if (count > _this.chars.length) {
+                if (count >= _this.chars.length) {
                     _this.destroy();
                     _this.removeTimer(tEffect);
                 }
@@ -691,8 +712,8 @@ var Charjs;
                         var ePos = targetEnemy.getPosition();
                         var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                         var enemyCenter = this.position.x + this.size.width / 2;
-                        targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left, 10);
-                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                        targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left, 10);
                         var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                         this._star_effect.drawEffect(effectPos);
                         return;
@@ -752,7 +773,7 @@ var Charjs;
             this.stop();
             this._isKilled = true;
             var yVector = 10 * this.pixSize;
-            var direction = attackDirection == Charjs.Direction.Right ? 1 : -1;
+            var direction = (attackDirection == Charjs.Direction.Right ? 1 : -1);
             var killTimer = this.getTimer(function () {
                 yVector -= _this._gravity * _this.pixSize;
                 _this.position.y = _this.position.y + yVector;
@@ -772,27 +793,6 @@ var Charjs;
                 _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
             }, this.frameInterval);
         };
-        GoombaWorld.prototype.doHitTestWithOtherEnemy = function () {
-            if (this._gameMaster) {
-                var enemys = this._gameMaster.getEnemys();
-                for (var name_1 in enemys) {
-                    if (enemys[name_1] != this) {
-                        var ePos = enemys[name_1].getPosition();
-                        var eSize = enemys[name_1].getCharSize();
-                        if (this.position.y > ePos.y + eSize.height)
-                            continue;
-                        if (ePos.y > this.position.y + this.size.height)
-                            continue;
-                        if (this.position.x > ePos.x + eSize.width)
-                            continue;
-                        if (ePos.x > this.position.x + this.size.width)
-                            continue;
-                        return enemys[name_1];
-                    }
-                }
-            }
-            return null;
-        };
         GoombaWorld.prototype.registerActionCommand = function () {
         };
         return GoombaWorld;
@@ -800,6 +800,277 @@ var Charjs;
     GoombaWorld.DEFAULT_SPEED = 1;
     GoombaWorld.STEP = 2;
     Charjs.GoombaWorld = GoombaWorld;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
+    var KoopaWorld = (function (_super) {
+        __extends(KoopaWorld, _super);
+        function KoopaWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
+            if (zIndex === void 0) { zIndex = 100; }
+            if (frameInterval === void 0) { frameInterval = 45; }
+            var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
+            _this.colors = ['', '#000000', '#f8f8f8', '#b52b0f', '#f58820', '#17770f', '#28b61d', '#3af52a'];
+            _this.cchars = [[[0, 11, 3, 1, 2, 2, 0, 2], [0, 10, 3, 1, 2, 4, 0, 1], [0, 9, 3, 2, 2, 3, 1, 1, 0, 1], [0, 8, 3, 1, 4, 1, 3, 1, 2, 3, 1, 1, 0, 1], [0, 8, 3, 1, 4, 2, 2, 3, 1, 1, 0, 1], [0, 8, 3, 1, 4, 2, 2, 4, 0, 1], [0, 4, 3, 5, 4, 3, 2, 2, 4, 1, 3, 1], [0, 2, 3, 2, 2, 4, 4, 6, 1, 1, 3, 1], [0, 1, 3, 1, 2, 3, 4, 1, 2, 1, 4, 8, 3, 1], [0, 1, 3, 1, 2, 2, 4, 2, 2, 1, 4, 1, 3, 1, 4, 2, 3, 1, 4, 3, 3, 1], [3, 1, 2, 3, 4, 3, 3, 3, 4, 2, 3, 1, 4, 1, 3, 1, 0, 1], [3, 1, 2, 3, 4, 3, 3, 1, 0, 2, 3, 1, 4, 1, 3, 2, 0, 2], [0, 1, 3, 1, 1, 5, 3, 1, 0, 3, 3, 2, 0, 3], [0, 2, 1, 1, 7, 4, 1, 2, 0, 7], [0, 2, 1, 1, 7, 4, 2, 1, 1, 1, 0, 7], [0, 2, 1, 7, 0, 7]], [[0, 16], [0, 11, 3, 1, 2, 2, 0, 2], [0, 10, 3, 1, 2, 4, 0, 1], [0, 9, 3, 2, 2, 3, 1, 1, 0, 1], [0, 8, 3, 1, 4, 1, 3, 1, 2, 3, 1, 1, 0, 1], [0, 8, 3, 1, 4, 2, 2, 3, 1, 1, 0, 1], [0, 8, 3, 1, 4, 2, 2, 4, 3, 1], [0, 4, 3, 5, 4, 3, 2, 2, 4, 1, 3, 1], [0, 2, 3, 2, 2, 4, 4, 6, 1, 1, 3, 1], [0, 1, 3, 1, 2, 2, 4, 2, 2, 1, 4, 8, 3, 1], [0, 1, 3, 1, 2, 1, 4, 2, 2, 2, 4, 1, 3, 1, 4, 2, 3, 1, 4, 3, 3, 1], [1, 1, 2, 2, 4, 3, 2, 1, 3, 3, 4, 2, 3, 1, 4, 1, 3, 1, 0, 1], [1, 1, 3, 1, 2, 1, 4, 3, 1, 3, 2, 1, 3, 1, 4, 1, 3, 2, 0, 2], [1, 1, 6, 1, 3, 2, 1, 1, 7, 4, 1, 2, 3, 2, 0, 3], [0, 1, 1, 1, 6, 2, 1, 1, 7, 4, 2, 1, 1, 1, 0, 5], [0, 2, 1, 9, 0, 5]], [[0, 16], [1, 4, 0, 12], [1, 1, 2, 1, 7, 2, 1, 3, 0, 9], [0, 1, 1, 1, 7, 5, 1, 1, 0, 4, 2, 2, 0, 2], [0, 2, 1, 1, 7, 4, 1, 1, 0, 2, 3, 1, 2, 4, 0, 1], [0, 2, 1, 3, 7, 1, 1, 1, 0, 2, 3, 1, 4, 1, 2, 2, 1, 1, 0, 2], [0, 1, 3, 1, 4, 3, 1, 2, 0, 1, 3, 1, 4, 2, 2, 3, 1, 1, 0, 1], [3, 1, 2, 1, 3, 1, 4, 3, 3, 1, 0, 1, 3, 1, 4, 2, 2, 3, 1, 1, 0, 1], [3, 1, 2, 2, 3, 3, 2, 1, 3, 2, 4, 2, 2, 4, 3, 1], [3, 1, 2, 6, 3, 1, 4, 4, 2, 2, 4, 1, 3, 1], [3, 1, 2, 5, 3, 2, 4, 6, 1, 1, 3, 1], [0, 1, 3, 1, 2, 3, 3, 1, 4, 2, 3, 1, 4, 6, 3, 1], [0, 1, 3, 1, 2, 3, 3, 1, 4, 3, 3, 3, 4, 3, 3, 1], [0, 2, 3, 1, 2, 2, 3, 1, 4, 4, 3, 1, 4, 1, 3, 1, 4, 1, 3, 1, 0, 1], [0, 3, 3, 2, 2, 1, 3, 2, 4, 3, 3, 1, 4, 1, 3, 1, 0, 2], [0, 5, 3, 8, 0, 3]], [[0, 2, 1, 2, 0, 12], [0, 2, 1, 1, 7, 1, 1, 1, 0, 5, 2, 1, 0, 2, 2, 1, 0, 2], [0, 2, 1, 1, 7, 2, 1, 1, 0, 10], [0, 3, 1, 1, 7, 2, 1, 1, 0, 4, 2, 2, 0, 3], [0, 2, 1, 1, 7, 4, 1, 1, 0, 1, 3, 1, 2, 4, 0, 2], [0, 2, 1, 2, 7, 2, 1, 1, 0, 1, 3, 1, 4, 1, 2, 2, 1, 1, 2, 1, 0, 2], [0, 1, 3, 1, 4, 2, 1, 2, 0, 1, 3, 1, 4, 2, 2, 3, 1, 1, 0, 2], [0, 1, 3, 2, 4, 3, 3, 2, 4, 2, 2, 3, 1, 1, 0, 2], [3, 1, 2, 2, 3, 5, 4, 2, 2, 4, 3, 1, 0, 1], [3, 1, 2, 5, 3, 1, 4, 4, 2, 2, 4, 1, 3, 1, 0, 1], [3, 1, 2, 5, 3, 1, 4, 6, 1, 1, 3, 1, 0, 1], [3, 1, 2, 4, 3, 3, 4, 1, 3, 2, 4, 3, 3, 1, 0, 1], [3, 2, 2, 3, 3, 1, 4, 2, 3, 1, 4, 2, 3, 1, 4, 2, 3, 1, 0, 1], [0, 1, 3, 2, 2, 2, 3, 1, 4, 3, 3, 1, 4, 1, 3, 1, 4, 1, 3, 1, 0, 2], [0, 2, 3, 2, 2, 2, 3, 1, 4, 3, 3, 1, 4, 1, 3, 1, 0, 3], [0, 4, 3, 8, 0, 4]], [[0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 16], [0, 1, 3, 2, 0, 2, 3, 6, 0, 2, 3, 2, 0, 1], [3, 1, 4, 2, 3, 1, 2, 3, 3, 2, 2, 3, 3, 1, 4, 2, 3, 1], [3, 3, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 3, 3], [0, 2, 3, 1, 4, 1, 2, 3, 4, 2, 2, 3, 4, 1, 3, 1, 0, 2], [0, 2, 3, 2, 4, 8, 3, 2, 0, 2], [0, 2, 1, 2, 3, 8, 1, 2, 0, 2], [0, 1, 1, 1, 2, 1, 7, 3, 1, 1, 2, 2, 1, 1, 7, 3, 2, 1, 1, 1, 0, 1], [0, 1, 1, 6, 3, 2, 1, 6, 0, 1]]];
+            _this.chars = null;
+            _this._yVector = 0;
+            _this._isKilled = false;
+            _this._step = KoopaWorld.STEP;
+            _this._currentStep = 0;
+            _this._actionIndex = 0;
+            _this._xVector = 0;
+            _this._speed = KoopaWorld.DEFAULT_SPEED;
+            _this._star_effect = null;
+            _this._slip_effect = null;
+            _this._vertical = Charjs.Vertical.Up;
+            _this.waitCount = 0;
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
+            _this._slip_effect = new Charjs.SlipEffect(targetDom, _this.pixSize).init();
+            return _this;
+        }
+        KoopaWorld.prototype.executeJump = function () {
+            var ground = this.entity.ground || 0;
+            this._yVector -= this._gravity * this.pixSize;
+            this.position.y += this._yVector;
+            if (this.position.y < ground) {
+                this.position.y = ground;
+            }
+        };
+        KoopaWorld.prototype.onPushOut = function () {
+            this._xVector = 12;
+            return this;
+        };
+        KoopaWorld.prototype.onAction = function () {
+            var directionUpdated = this.updateDirection();
+            var targetEnemy = this.doHitTestWithOtherEnemy();
+            if (targetEnemy && this._xVector == 0) {
+                this._direction = this._direction == Charjs.Direction.Right ? Charjs.Direction.Left : Charjs.Direction.Right;
+            }
+            this.updateEntity();
+            this.executeJump();
+            if (this._xVector > 0) {
+                this._xVector--;
+                this._speed = KoopaWorld.DEFAULT_SPEED * this._xVector;
+            }
+            else {
+                this._speed = KoopaWorld.DEFAULT_SPEED;
+            }
+            if (this._xVector == 0 && this.waitCount < 100) {
+                this.waitCount++;
+                this._speed = 0;
+                if (this.waitCount == 100)
+                    this._yVector = 8 * this.pixSize;
+            }
+            if (this._direction == Charjs.Direction.Right) {
+                this.position.x += this.pixSize * this._speed;
+            }
+            else {
+                this.position.x -= this.pixSize * this._speed;
+            }
+            this.drawAction();
+        };
+        KoopaWorld.prototype.drawAction = function () {
+            var action = this._actionIndex;
+            if (this._xVector > 0) {
+                this._slip_effect.drawEffect(this.position);
+                action = 2;
+            }
+            else {
+                if (this._currentStep < this._step) {
+                    this._currentStep++;
+                }
+                else {
+                    this._currentStep = 0;
+                    if (this._actionIndex == 0 || this._actionIndex == 1) {
+                        this._actionIndex = this._actionIndex ^ 1;
+                    }
+                    else {
+                        this._actionIndex = 0;
+                    }
+                }
+                if (this._speed == 0) {
+                    action = this._actionIndex + 2;
+                }
+            }
+            this.draw(action, null, this._direction, this._vertical, true);
+        };
+        KoopaWorld.prototype.isKilled = function () {
+            return this._isKilled;
+        };
+        KoopaWorld.prototype.onKilled = function () {
+            this.destroy();
+        };
+        KoopaWorld.prototype.isStepped = function () {
+            return false;
+        };
+        KoopaWorld.prototype.onStepped = function () {
+            var _this = this;
+            this._isKilled = true;
+            this.stop();
+            this.draw(4, null, this._direction, Charjs.Vertical.Up, true);
+            var timercount = 0;
+            var killTimer = this.getTimer(function () {
+                timercount++;
+                if (timercount > 4) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                }
+            }, this.frameInterval);
+        };
+        KoopaWorld.prototype.onGrabed = function (player) {
+        };
+        KoopaWorld.prototype.onKicked = function (kickDirection, kickPower) {
+            return Charjs.HitStatus.none;
+        };
+        KoopaWorld.prototype.onEnemyAttack = function (attackDirection, kickPower) {
+            var _this = this;
+            if (this._xVector > 0)
+                return;
+            this._isKilled = true;
+            this.stop();
+            var yVector = 10 * this.pixSize;
+            var direction = (attackDirection == Charjs.Direction.Right ? 1 : -1);
+            var killTimer = this.getTimer(function () {
+                yVector -= _this._gravity * _this.pixSize;
+                _this.position.y = _this.position.y + yVector;
+                _this.position.x += kickPower * direction;
+                if (_this.position.y < _this.size.height * 5 * -1) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                    return;
+                }
+                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
+            }, this.frameInterval);
+        };
+        KoopaWorld.prototype.registerActionCommand = function () {
+        };
+        return KoopaWorld;
+    }(Charjs.AbstractEnemy));
+    KoopaWorld.STEP = 2;
+    KoopaWorld.DEFAULT_SPEED = 1;
+    Charjs.KoopaWorld = KoopaWorld;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
+    var KoopatroopaWorld = (function (_super) {
+        __extends(KoopatroopaWorld, _super);
+        function KoopatroopaWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
+            if (zIndex === void 0) { zIndex = 100; }
+            if (frameInterval === void 0) { frameInterval = 45; }
+            var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
+            _this.colors = ['', '#000000', '#f8f8f8', '#b52b0f', '#f58820', '#17770f', '#28b61d', '#3af52a'];
+            _this.cchars = [[[0, 10, 2, 2, 0, 4], [0, 9, 2, 4, 0, 3], [0, 9, 2, 3, 1, 1, 0, 3], [0, 8, 3, 1, 2, 3, 1, 1, 0, 3], [0, 7, 3, 1, 4, 1, 2, 3, 1, 1, 3, 1, 0, 2], [0, 6, 3, 1, 4, 2, 2, 4, 4, 1, 3, 1, 0, 1], [0, 6, 3, 1, 4, 3, 2, 2, 4, 2, 3, 1, 0, 1], [0, 6, 3, 1, 4, 8, 3, 1], [0, 6, 3, 1, 4, 8, 3, 1], [0, 7, 3, 1, 4, 3, 3, 2, 4, 2, 3, 1], [0, 8, 3, 1, 4, 4, 3, 1, 4, 1, 3, 1], [0, 4, 1, 1, 5, 2, 1, 1, 0, 1, 3, 1, 4, 4, 3, 2], [0, 2, 5, 2, 1, 1, 2, 2, 5, 1, 1, 2, 4, 2, 3, 3, 0, 1], [0, 1, 5, 1, 7, 1, 1, 1, 7, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 4, 1, 3, 1, 0, 3], [0, 1, 1, 2, 7, 2, 6, 1, 1, 3, 2, 1, 1, 1, 3, 1, 0, 4], [5, 1, 6, 1, 1, 1, 6, 2, 1, 1, 6, 1, 1, 1, 3, 2, 1, 3, 0, 3], [5, 1, 6, 1, 1, 3, 6, 1, 5, 1, 3, 1, 4, 2, 3, 1, 2, 2, 1, 1, 0, 2], [5, 1, 1, 1, 6, 2, 1, 2, 2, 1, 3, 1, 4, 1, 3, 1, 6, 2, 1, 1, 0, 3], [1, 1, 6, 2, 5, 1, 1, 1, 2, 1, 1, 1, 3, 1, 4, 1, 3, 2, 1, 1, 0, 4], [5, 3, 1, 2, 3, 3, 4, 3, 3, 1, 0, 4], [2, 1, 1, 3, 2, 1, 3, 1, 4, 1, 3, 1, 4, 3, 3, 1, 0, 4], [1, 1, 2, 3, 1, 1, 3, 1, 4, 2, 3, 3, 0, 5], [0, 1, 1, 8, 0, 7], [0, 5, 1, 1, 7, 2, 1, 1, 0, 7], [0, 5, 1, 1, 7, 3, 1, 2, 0, 5], [0, 5, 1, 1, 7, 4, 2, 1, 1, 1, 0, 4], [0, 5, 1, 7, 0, 4]], [[0, 16], [0, 10, 2, 2, 0, 4], [0, 9, 2, 4, 0, 3], [0, 9, 2, 3, 1, 1, 0, 3], [0, 8, 3, 1, 2, 3, 1, 1, 0, 3], [0, 7, 3, 1, 4, 1, 2, 3, 1, 1, 3, 1, 0, 2], [0, 6, 3, 1, 4, 2, 2, 4, 4, 1, 3, 1, 0, 1], [0, 6, 3, 1, 4, 3, 2, 2, 4, 2, 3, 1, 0, 1], [0, 6, 3, 1, 4, 8, 3, 1], [0, 6, 3, 1, 4, 8, 3, 1], [0, 7, 3, 1, 4, 3, 3, 2, 4, 2, 3, 1], [0, 8, 3, 1, 4, 4, 3, 1, 4, 1, 3, 1], [0, 4, 1, 1, 5, 2, 1, 1, 0, 1, 3, 1, 4, 4, 3, 2], [0, 2, 5, 2, 1, 1, 2, 2, 5, 1, 1, 2, 4, 2, 3, 3, 0, 1], [0, 1, 5, 1, 7, 1, 3, 5, 1, 1, 2, 1, 1, 1, 4, 1, 3, 1, 0, 3], [5, 1, 6, 1, 3, 1, 4, 5, 3, 1, 2, 1, 1, 1, 3, 1, 0, 1, 3, 2, 0, 1], [5, 1, 6, 1, 3, 1, 4, 2, 3, 2, 4, 2, 3, 1, 1, 3, 4, 2, 3, 1], [5, 1, 6, 1, 3, 1, 4, 2, 3, 1, 1, 1, 3, 2, 5, 1, 2, 3, 1, 1, 4, 1, 3, 1], [5, 1, 1, 1, 6, 1, 3, 2, 1, 1, 2, 1, 1, 1, 2, 2, 6, 2, 1, 1, 3, 2, 0, 1], [1, 1, 6, 2, 5, 1, 1, 1, 2, 1, 1, 1, 2, 1, 5, 1, 2, 2, 1, 1, 0, 4], [5, 2, 1, 1, 5, 1, 3, 3, 2, 2, 6, 2, 1, 3, 0, 2], [0, 1, 1, 1, 7, 1, 1, 1, 4, 2, 3, 1, 6, 1, 2, 2, 1, 2, 2, 1, 1, 1, 0, 2], [1, 1, 7, 3, 1, 1, 4, 1, 3, 1, 2, 1, 1, 3, 7, 2, 1, 1, 0, 2], [1, 1, 7, 4, 1, 4, 7, 4, 1, 1, 0, 2], [0, 1, 1, 1, 7, 2, 1, 2, 0, 2, 1, 1, 7, 3, 1, 1, 0, 3], [0, 2, 1, 1, 7, 2, 2, 1, 1, 1, 0, 2, 1, 1, 7, 2, 1, 1, 0, 3], [0, 3, 1, 4, 0, 3, 1, 2, 0, 4]]];
+            _this.chars = null;
+            _this._speed = KoopatroopaWorld.DEFAULT_SPEED;
+            _this._step = KoopatroopaWorld.STEP;
+            _this._currentStep = 0;
+            _this._actionIndex = 0;
+            _this._isKilled = false;
+            _this._yVector = 0;
+            _this._isRevivalJumping = false;
+            _this._star_effect = null;
+            _this._vertical = Charjs.Vertical.Up;
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
+            return _this;
+        }
+        KoopatroopaWorld.prototype.isKilled = function () {
+            return this._isKilled;
+        };
+        KoopatroopaWorld.prototype.executeJump = function () {
+            var ground = this.entity.ground || 0;
+            if (this.position.y > ground) {
+                this._yVector -= this._gravity * this.pixSize;
+                this.position.y += this._yVector;
+                if (this.position.y < ground) {
+                    this.position.y = ground;
+                }
+            }
+            else {
+                this._yVector = 0;
+            }
+        };
+        KoopatroopaWorld.prototype.onAction = function () {
+            var directionUpdated = this.updateDirection();
+            var targetEnemy = this.doHitTestWithOtherEnemy();
+            if (targetEnemy) {
+                this._direction = this._direction == Charjs.Direction.Right ? Charjs.Direction.Left : Charjs.Direction.Right;
+            }
+            this.updateEntity();
+            this.executeJump();
+            if (this._direction == Charjs.Direction.Right) {
+                this.position.x += this.pixSize * this._speed;
+            }
+            else {
+                this.position.x -= this.pixSize * this._speed;
+            }
+            this.drawAction();
+        };
+        KoopatroopaWorld.prototype.drawAction = function () {
+            var direction = this._direction;
+            if (this._currentStep < this._step) {
+                this._currentStep++;
+            }
+            else {
+                this._currentStep = 0;
+                this._actionIndex = this._actionIndex ^ 1;
+            }
+            this.draw(this._actionIndex, null, direction, this._vertical, true);
+        };
+        KoopatroopaWorld.prototype.isStepped = function () {
+            return false;
+        };
+        KoopatroopaWorld.prototype.onKilled = function () {
+            this._isKilled = true;
+            this.destroy();
+        };
+        KoopatroopaWorld.prototype.onStepped = function (attackDirection) {
+            if (this._gameMaster) {
+                this._isKilled = true;
+                var troopa = this._gameMaster.CreateEnemyInstance(Charjs.TroopaWorld, this.position, this._direction);
+                var koopa = this._gameMaster.CreateEnemyInstance(Charjs.KoopaWorld, { x: this.position.x + 20, y: this.position.y }, attackDirection);
+                troopa.init().start();
+                koopa.init().onPushOut().start();
+                this.destroy();
+            }
+        };
+        KoopatroopaWorld.prototype.onGrabed = function (player) {
+        };
+        KoopatroopaWorld.prototype.onKicked = function (kickDirection, kickPower) {
+            return Charjs.HitStatus.none;
+        };
+        KoopatroopaWorld.prototype.onEnemyAttack = function (attackDirection, kickPower) {
+            var _this = this;
+            this.stop();
+            this._isKilled = true;
+            var yVector = 10 * this.pixSize;
+            var direction = attackDirection == Charjs.Direction.Right ? 1 : -1;
+            var killTimer = this.getTimer(function () {
+                yVector -= _this._gravity * _this.pixSize;
+                _this.position.y = _this.position.y + yVector;
+                _this.position.x += kickPower * direction;
+                if (_this.position.y < _this.size.height * 5 * -1) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                    return;
+                }
+                if (_this._currentStep < KoopatroopaWorld.STEP) {
+                    _this._currentStep++;
+                }
+                else {
+                    _this._currentStep = 0;
+                    _this._actionIndex = _this._actionIndex ^ 1;
+                }
+                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
+            }, this.frameInterval);
+        };
+        KoopatroopaWorld.prototype.registerActionCommand = function () {
+        };
+        return KoopatroopaWorld;
+    }(Charjs.AbstractEnemy));
+    KoopatroopaWorld.DEFAULT_SPEED = 1;
+    KoopatroopaWorld.STEP = 2;
+    Charjs.KoopatroopaWorld = KoopatroopaWorld;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {
@@ -942,7 +1213,10 @@ var Charjs;
                                 this._yVector = 2 * this.pixSize;
                             }
                             else {
-                                enemys[name_2].onStepped();
+                                var playerCenter = this.position.x + this.size.width / 2;
+                                var enemyCenter = ePos.x + eSize.width / 2;
+                                this._attackDirection = playerCenter <= enemyCenter ? Charjs.Direction.Right : Charjs.Direction.Left;
+                                enemys[name_2].onStepped(this._attackDirection);
                                 var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                                 this._star_effect.drawEffect(effectPos);
                                 this._yVector = 12 * this.pixSize;
@@ -1856,6 +2130,127 @@ var Charjs;
         return NormalGroundWorld;
     }(Charjs.AbstractGround));
     Charjs.NormalGroundWorld = NormalGroundWorld;
+})(Charjs || (Charjs = {}));
+var Charjs;
+(function (Charjs) {
+    var TroopaWorld = (function (_super) {
+        __extends(TroopaWorld, _super);
+        function TroopaWorld(targetDom, pixSize, position, direction, zIndex, frameInterval) {
+            if (direction === void 0) { direction = Charjs.Direction.Right; }
+            if (zIndex === void 0) { zIndex = 100; }
+            if (frameInterval === void 0) { frameInterval = 45; }
+            var _this = _super.call(this, targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval) || this;
+            _this.colors = ['', '#000000', '#f8f8f8', '#b52b0f', '#f58820', '#17770f', '#28b61d', '#3af52a'];
+            _this.cchars = [[[0, 5, 5, 6, 0, 5], [0, 4, 5, 1, 1, 1, 6, 2, 2, 2, 1, 1, 5, 1, 0, 4], [0, 3, 5, 1, 6, 2, 1, 3, 2, 2, 6, 1, 5, 1, 0, 3], [0, 2, 5, 1, 6, 2, 1, 1, 7, 4, 1, 1, 6, 2, 5, 1, 0, 2], [0, 2, 1, 1, 6, 1, 1, 1, 7, 6, 1, 1, 6, 1, 1, 1, 0, 2], [0, 1, 5, 1, 6, 1, 1, 1, 7, 8, 1, 1, 6, 1, 5, 1, 0, 1], [0, 1, 5, 1, 1, 1, 6, 1, 1, 1, 7, 6, 1, 1, 6, 1, 1, 1, 5, 1, 0, 1], [5, 1, 1, 1, 5, 1, 6, 2, 1, 1, 7, 4, 1, 1, 6, 2, 5, 1, 1, 1, 5, 1], [1, 1, 5, 3, 6, 2, 1, 4, 6, 2, 5, 3, 1, 1], [2, 3, 5, 2, 1, 1, 0, 4, 1, 1, 5, 2, 2, 3], [2, 4, 1, 1, 5, 6, 1, 1, 2, 4], [1, 2, 2, 12, 1, 2], [0, 1, 1, 3, 2, 8, 1, 3, 0, 1], [0, 2, 1, 1, 2, 1, 1, 8, 2, 1, 1, 1, 0, 2], [0, 3, 1, 1, 2, 8, 1, 1, 0, 3], [0, 4, 1, 8, 0, 4]], [[0, 5, 5, 2, 1, 1, 5, 3, 0, 5], [0, 4, 5, 2, 2, 2, 1, 1, 6, 1, 5, 2, 0, 4], [0, 3, 5, 1, 6, 1, 2, 2, 7, 2, 1, 3, 5, 1, 0, 3], [0, 2, 1, 1, 5, 1, 6, 1, 7, 3, 1, 1, 7, 1, 6, 2, 1, 1, 5, 1, 0, 2], [0, 2, 5, 1, 1, 1, 7, 3, 1, 1, 7, 3, 6, 2, 1, 1, 0, 2], [0, 1, 5, 1, 6, 2, 1, 3, 7, 4, 6, 3, 1, 1, 0, 1], [0, 1, 5, 1, 6, 1, 1, 1, 6, 3, 1, 1, 7, 2, 6, 3, 1, 1, 5, 1, 0, 1], [5, 2, 1, 1, 2, 5, 1, 1, 6, 3, 1, 1, 6, 1, 5, 2], [1, 2, 2, 7, 1, 3, 6, 1, 5, 3], [5, 1, 2, 10, 5, 1, 1, 1, 5, 2, 0, 1], [2, 2, 1, 6, 2, 8], [2, 1, 1, 9, 2, 6], [0, 1, 2, 1, 1, 14], [0, 1, 1, 1, 2, 1, 1, 6, 2, 6, 0, 1], [0, 2, 1, 1, 2, 8, 1, 3, 0, 2], [0, 3, 1, 8, 0, 5]], [[0, 5, 5, 1, 1, 1, 5, 2, 1, 1, 5, 1, 0, 5], [0, 4, 5, 1, 1, 1, 2, 2, 6, 2, 1, 1, 5, 1, 0, 4], [0, 3, 1, 2, 2, 2, 7, 4, 1, 2, 0, 3], [0, 2, 5, 2, 6, 1, 1, 1, 7, 4, 1, 1, 6, 1, 5, 2, 0, 2], [0, 2, 5, 1, 6, 1, 7, 2, 1, 1, 7, 2, 1, 1, 7, 2, 6, 1, 5, 1, 0, 2], [0, 1, 5, 2, 6, 1, 7, 3, 1, 2, 7, 3, 6, 1, 5, 2, 0, 1], [0, 1, 5, 2, 6, 2, 7, 1, 1, 1, 7, 2, 1, 1, 7, 1, 6, 2, 5, 2, 0, 1], [0, 1, 1, 1, 5, 2, 6, 1, 1, 1, 2, 4, 1, 1, 6, 1, 5, 2, 1, 1, 0, 1], [0, 1, 5, 1, 1, 3, 2, 6, 1, 3, 5, 2], [5, 1, 1, 1, 5, 1, 2, 10, 5, 1, 1, 1, 5, 1], [1, 1, 2, 4, 1, 6, 2, 4, 1, 1], [2, 4, 1, 8, 2, 4], [2, 1, 1, 14, 2, 1], [0, 1, 1, 1, 2, 2, 1, 8, 2, 2, 1, 1, 0, 1], [0, 2, 1, 2, 2, 8, 1, 2, 0, 2], [0, 4, 1, 8, 0, 4]]];
+            _this.chars = null;
+            _this.animationIndex = 4;
+            _this._speed = 0;
+            _this._actionIndex = 0;
+            _this._star_effect = null;
+            _this._yVector = 0;
+            _this._grabbedPlayer = null;
+            _this._isKilled = false;
+            _this._isStepped = true;
+            _this._star_effect = new Charjs.StarEffect(targetDom, pixSize).init();
+            return _this;
+        }
+        TroopaWorld.prototype.executeJump = function () {
+            var ground = this.entity.ground || 0;
+            if (this.position.y > ground) {
+                this._yVector -= this._gravity * this.pixSize;
+                this.position.y += this._yVector;
+                if (this.position.y < ground) {
+                    this.position.y = ground;
+                }
+            }
+            else {
+                this._yVector = 0;
+            }
+        };
+        TroopaWorld.prototype.isKilled = function () {
+            return this._isKilled;
+        };
+        TroopaWorld.prototype.onAction = function () {
+            var directionUpdated = this.updateDirection();
+            var targetEnemy = this.doHitTestWithOtherEnemy();
+            if (targetEnemy && this._speed > 0) {
+                var ePos = targetEnemy.getPosition();
+                var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
+                var enemyCenter = this.position.x + this.size.width / 2;
+                targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                this._star_effect.drawEffect(effectPos);
+            }
+            this.updateEntity();
+            this.executeJump();
+            if (this._direction == Charjs.Direction.Right) {
+                this.position.x += this.pixSize * this._speed;
+            }
+            else {
+                this.position.x -= this.pixSize * this._speed;
+            }
+            this.drawAction();
+        };
+        TroopaWorld.prototype.drawAction = function () {
+            var direction = this._direction;
+            if (this._speed > 0) {
+                if (this.animationIndex >= TroopaWorld.animation.length) {
+                    this.animationIndex = 0;
+                }
+                this._actionIndex = TroopaWorld.animation[this.animationIndex].index;
+                direction = TroopaWorld.animation[this.animationIndex].direction;
+                this.animationIndex++;
+            }
+            this.draw(this._actionIndex, null, direction, Charjs.Vertical.Up, true);
+        };
+        TroopaWorld.prototype.isStepped = function () {
+            return this._isStepped;
+        };
+        TroopaWorld.prototype.onKilled = function () {
+            this.destroy();
+        };
+        TroopaWorld.prototype.onStepped = function () {
+            this._isStepped = true;
+            this._speed = 0;
+        };
+        TroopaWorld.prototype.onGrabed = function (player) {
+            this._grabbedPlayer = player;
+        };
+        TroopaWorld.prototype.onKicked = function (kickDirection, kickPower) {
+            this._isStepped = false;
+            this._speed = 10;
+            this._direction = kickDirection;
+            return Charjs.HitStatus.attack;
+        };
+        TroopaWorld.prototype.onEnemyAttack = function (attackDirection, kickPower) {
+            var _this = this;
+            this._isKilled = true;
+            this.stop();
+            var yVector = 10 * this.pixSize;
+            var direction = (attackDirection == Charjs.Direction.Right ? 1 : -1);
+            var killTimer = this.getTimer(function () {
+                yVector -= _this._gravity * _this.pixSize;
+                _this.position.y = _this.position.y + yVector;
+                _this.position.x += kickPower * direction;
+                if (_this.position.y < _this.size.height * 5 * -1) {
+                    _this.removeTimer(killTimer);
+                    _this.destroy();
+                    return;
+                }
+                _this.draw(_this._actionIndex, null, _this._direction, Charjs.Vertical.Down, true);
+            }, this.frameInterval);
+        };
+        TroopaWorld.prototype.registerActionCommand = function () {
+        };
+        return TroopaWorld;
+    }(Charjs.AbstractEnemy));
+    TroopaWorld.animation = [
+        { index: 2, direction: Charjs.Direction.Right },
+        { index: 1, direction: Charjs.Direction.Left },
+        { index: 0, direction: Charjs.Direction.Right },
+        { index: 1, direction: Charjs.Direction.Right }
+    ];
+    Charjs.TroopaWorld = TroopaWorld;
 })(Charjs || (Charjs = {}));
 var Charjs;
 (function (Charjs) {

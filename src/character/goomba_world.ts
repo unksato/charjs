@@ -160,8 +160,8 @@ namespace Charjs {
                         let ePos = targetEnemy.getPosition();
                         let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                         let enemyCenter = this.position.x + this.size.width / 2;
-                        targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, 10);
-                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
+                        targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
+                        this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, 10);
 
                         let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                         this._star_effect.drawEffect(effectPos);
@@ -229,7 +229,7 @@ namespace Charjs {
             this.stop();
             this._isKilled = true;
             let yVector = 10 * this.pixSize;
-            let direction = attackDirection == Direction.Right ? 1 : -1;
+            let direction = (attackDirection == Direction.Right ? 1 : -1);
 
             let killTimer = this.getTimer(() => {
 
@@ -253,29 +253,6 @@ namespace Charjs {
                 this.draw(this._actionIndex, null, this._direction, Vertical.Down, true);
 
             }, this.frameInterval);
-        }
-
-
-        private doHitTestWithOtherEnemy(): IEnemy {
-            if (this._gameMaster) {
-                let enemys = this._gameMaster.getEnemys();
-                for (let name in enemys) {
-                    if (enemys[name] != this) {
-                        let ePos = enemys[name].getPosition();
-                        let eSize = enemys[name].getCharSize()
-                        if (this.position.y > ePos.y + eSize.height)
-                            continue;
-                        if (ePos.y > this.position.y + this.size.height)
-                            continue;
-                        if (this.position.x > ePos.x + eSize.width)
-                            continue;
-                        if (ePos.x > this.position.x + this.size.width)
-                            continue;
-                        return enemys[name];
-                    }
-                }
-            }
-            return null;
         }
 
         registerActionCommand(): void {

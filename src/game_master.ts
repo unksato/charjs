@@ -58,7 +58,7 @@ namespace Charjs {
 
         private _isStarting = false;
 
-        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: Position, direction = Direction.Right): C {
+        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition, direction = Direction.Right): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
             char._name = 'player';
             this._player = <any>char;
@@ -66,7 +66,7 @@ namespace Charjs {
             return char;
         }
 
-        public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: Position, direction = Direction.Right): C {
+        public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition, direction = Direction.Right): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
             char._name = 'enemy_' + this._enemyCount;
             this._enemyCount++;
@@ -75,7 +75,7 @@ namespace Charjs {
             return char;
         }
 
-        public CreateObjectInstance<C extends AbstractOtherObject>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: Position): C {
+        public CreateObjectInstance<C extends AbstractOtherObject>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition): C {
             let char = new clz(this.targetDom, this.charSize, position, Direction.Right, 90, this.frameInterval);
             char._name = 'obj_' + this._objectCount;
             this._objectCount++;

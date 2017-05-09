@@ -58,9 +58,9 @@ namespace Charjs {
     }
 
     export interface IEnemy extends ICharacter {
-        onStepped(): void;
+        onStepped(direction?: Direction): void;
         onGrabed(player: IPlayer): void;
-        onKicked(direction: number, kickPower: number): HitStatus;
+        onKicked(direction: Direction, kickPower: number): HitStatus;
         onKilled(): void;
         onEnemyAttack(attackDirection: Direction, kickPower: number): void;
         isKilled(): boolean;
@@ -134,12 +134,12 @@ namespace Charjs {
                     this.chars.push(Util.Compression.RLD(cchar));
                 }
             } else {
-                //// for debbuging code
+                // // for debbuging code
                 // this.cchars = [];
                 // for (let char of this.chars) {
                 //     this.cchars.push(Util.Compression.RLE(char));
                 // }
-                // console.log(JSON.stringify(this.cchars));
+                // console.log(this._name + ":" + JSON.stringify(this.cchars));
             }
         }
 
@@ -416,7 +416,7 @@ namespace Charjs {
     }
 
     export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
-        abstract onStepped(): void;
+        abstract onStepped(direction?: Direction): void;
         abstract onGrabed(player: IPlayer): void;
         abstract onKicked(direction: number, kickPower: number): HitStatus;
         abstract isKilled(): boolean;
@@ -424,6 +424,29 @@ namespace Charjs {
         abstract drawAction(): void;
         abstract onKilled(): void;
         abstract onEnemyAttack(attackDirection: Direction, kickPower: number): void;
+
+        protected doHitTestWithOtherEnemy(): IEnemy {
+            if (this._gameMaster) {
+                let enemys = this._gameMaster.getEnemys();
+                for (let name in enemys) {
+                    if (enemys[name] != this && !enemys[name].isKilled()) {
+                        let ePos = enemys[name].getPosition();
+                        let eSize = enemys[name].getCharSize()
+                        if (this.position.y > ePos.y + eSize.height)
+                            continue;
+                        if (ePos.y > this.position.y + this.size.height)
+                            continue;
+                        if (this.position.x > ePos.x + eSize.width)
+                            continue;
+                        if (ePos.x > this.position.x + this.size.width)
+                            continue;
+                        return enemys[name];
+                    }
+                }
+            }
+            return null;
+        }
+
     }
 
     export interface IOtherObject extends IObject {
