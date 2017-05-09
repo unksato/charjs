@@ -222,7 +222,7 @@ var Charjs;
             return action;
         };
         AbstractObject.prototype.cloneCanvas = function (oldCanvas) {
-            var canvas = AbstractPixel.createCanvasElement(Number(oldCanvas.getAttribute("width")), Number(oldCanvas.getAttribute("height")), this.zIndex + 1);
+            var canvas = AbstractPixel.createCanvasElement(oldCanvas.width, oldCanvas.height, this.zIndex + 1);
             var ctx = canvas.getContext("2d");
             ctx.drawImage(oldCanvas, 0, 0);
             return canvas;
@@ -493,7 +493,7 @@ var Charjs;
             count++;
             var tEffect = this.getTimer(function () {
                 _this.removeCharacter(current);
-                if (count > _this.chars.length) {
+                if (count >= _this.chars.length) {
                     _this.destroy();
                     _this.removeTimer(tEffect);
                 }

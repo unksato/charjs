@@ -35,7 +35,7 @@ namespace Charjs {
             count++;
             let tEffect = this.getTimer(() => {
                 this.removeCharacter(current);
-                if (count > this.chars.length) {
+                if (count >= this.chars.length) {
                     this.destroy();
                     this.removeTimer(tEffect);
                 } else {
