@@ -145,8 +145,8 @@ namespace Charjs {
                 this._isKilled = true;
                 let troopa = this._gameMaster.CreateEnemyInstance(TroopaWorld, this.position, this._direction);
                 let koopa = this._gameMaster.CreateEnemyInstance(KoopaWorld, { x: this.position.x + 20, y: this.position.y }, attackDirection);
-                troopa.init().start();
-                koopa.init().onPushOut().start();
+                troopa.init(true).start();
+                koopa.init(true).onPushOut().start();
 
                 this.destroy();
             }
@@ -165,6 +165,10 @@ namespace Charjs {
             let yVector = 10 * this.pixSize;
             let direction = attackDirection == Direction.Right ? 1 : -1;
 
+            this.destroy();
+            let troopa = new TroopaWorld(this.targetDom, this.pixSize, this.position, this._direction);
+            troopa.init(true);
+
             let killTimer = this.getTimer(() => {
 
                 yVector -= this._gravity * this.pixSize;
@@ -173,7 +177,7 @@ namespace Charjs {
 
                 if (this.position.y < this.size.height * 5 * -1) {
                     this.removeTimer(killTimer);
-                    this.destroy();
+                    troopa.destroy();
                     return;
                 }
 
@@ -183,8 +187,8 @@ namespace Charjs {
                     this._currentStep = 0;
                     this._actionIndex = this._actionIndex ^ 1;
                 }
-
-                this.draw(this._actionIndex, null, this._direction, Vertical.Down, true);
+                troopa.draw(0, null, this._direction, Vertical.Down, true);
+                //                this.draw(this._actionIndex, null, this._direction, Vertical.Down, true);
 
             }, this.frameInterval);
         }
