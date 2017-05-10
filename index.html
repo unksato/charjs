@@ -15,7 +15,11 @@
     <script type="text/javascript" src="./dist/mario.js"></script>
     <script>
         window.onload = function () {
-            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2);
+            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function(point){
+                ga('send', 'event', 'Game', 'gool', 'Sample Game');
+            }, function(point){
+
+            });
             controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });

@@ -1,20 +1,25 @@
 namespace Charjs {
+
     export class GameMaster {
 
         static GAME_MASTERS = {};
 
-        constructor(private targetDom, private charSize, private frameInterval = 45) {
+        constructor(private targetDom : HTMLElement, private charSize : number = 2, private frameInterval = 45, private _goolCallback?: {(point : number)}, private _gameoverCallback?: {(point : number)}) {
         }
 
-        public static GetController(gameName: string, targetDom, charSize: any): GameMaster {
+        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback? : {(point : number)}, clearCallback?: {(point : number)} ): GameMaster {
             let master = GameMaster.GAME_MASTERS[gameName];
             if (master) {
                 return master;
             }
 
-            master = new GameMaster(targetDom, charSize);
-            GameMaster.GAME_MASTERS[gameName] = master;
-            return master;
+            if(targetDom){
+                master = new GameMaster(targetDom, charSize, frameInterval, goolCallback, clearCallback);
+                GameMaster.GAME_MASTERS[gameName] = master;
+                return master;
+            }else{
+                return null;
+            }
         }
 
         private _events: { [id: number]: Function } = {};
@@ -215,8 +220,11 @@ namespace Charjs {
                                     this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
                                     circleAnimationCount++;
                                     if (circleSize <= 0) {
-                                        clearInterval(circleTimer);
+                                        this.removeEvent(circleTimer);
                                         this._player.destroy();
+                                        if(this._goolCallback){
+                                            this._goolCallback(0);
+                                        }
                                     }
                                 });
                             }

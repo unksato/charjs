@@ -2258,12 +2258,15 @@ var Charjs;
 var Charjs;
 (function (Charjs) {
     var GameMaster = (function () {
-        function GameMaster(targetDom, charSize, frameInterval) {
+        function GameMaster(targetDom, charSize, frameInterval, _goolCallback, _gameoverCallback) {
+            if (charSize === void 0) { charSize = 2; }
             if (frameInterval === void 0) { frameInterval = 45; }
             var _this = this;
             this.targetDom = targetDom;
             this.charSize = charSize;
             this.frameInterval = frameInterval;
+            this._goolCallback = _goolCallback;
+            this._gameoverCallback = _gameoverCallback;
             this._events = {};
             this._eventCount = 0;
             this._gameTimer = null;
@@ -2284,14 +2287,19 @@ var Charjs;
                 }
             };
         }
-        GameMaster.GetController = function (gameName, targetDom, charSize) {
+        GameMaster.GetController = function (gameName, targetDom, charSize, frameInterval, goolCallback, clearCallback) {
             var master = GameMaster.GAME_MASTERS[gameName];
             if (master) {
                 return master;
             }
-            master = new GameMaster(targetDom, charSize);
-            GameMaster.GAME_MASTERS[gameName] = master;
-            return master;
+            if (targetDom) {
+                master = new GameMaster(targetDom, charSize, frameInterval, goolCallback, clearCallback);
+                GameMaster.GAME_MASTERS[gameName] = master;
+                return master;
+            }
+            else {
+                return null;
+            }
         };
         GameMaster.prototype.addEvent = function (func) {
             this._eventCount++;
@@ -2448,8 +2456,11 @@ var Charjs;
                                     _this.drawBlackClipCircle(screen, rect, circleSize_1, circleAnimationCount_1);
                                     circleAnimationCount_1++;
                                     if (circleSize_1 <= 0) {
-                                        clearInterval(circleTimer_1);
+                                        _this.removeEvent(circleTimer_1);
                                         _this._player.destroy();
+                                        if (_this._goolCallback) {
+                                            _this._goolCallback(0);
+                                        }
                                     }
                                 });
                             }
