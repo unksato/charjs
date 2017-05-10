@@ -3,21 +3,22 @@ namespace Charjs {
     export class GameMaster {
 
         static GAME_MASTERS = {};
+        private _point = 0;
 
-        constructor(private targetDom : HTMLElement, private charSize : number = 2, private frameInterval = 45, private _goolCallback?: {(point : number)}, private _gameoverCallback?: {(point : number)}) {
+        constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (point: number) }, private _gameoverCallback?: { (point: number) }) {
         }
 
-        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback? : {(point : number)}, clearCallback?: {(point : number)} ): GameMaster {
+        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (point: number) }, clearCallback?: { (point: number) }): GameMaster {
             let master = GameMaster.GAME_MASTERS[gameName];
             if (master) {
                 return master;
             }
 
-            if(targetDom){
+            if (targetDom) {
                 master = new GameMaster(targetDom, charSize, frameInterval, goolCallback, clearCallback);
                 GameMaster.GAME_MASTERS[gameName] = master;
                 return master;
-            }else{
+            } else {
                 return null;
             }
         }
@@ -179,12 +180,20 @@ namespace Charjs {
         }
 
         public doGameOver(): void {
+            if (this._gameoverCallback) {
+                this._gameoverCallback(this._point);
+            }
+
             for (let name in this._enemys) {
                 this._enemys[name].stop();
             }
         }
 
         public doGool(): void {
+            if (this._goolCallback) {
+                this._goolCallback(this._point);
+            }
+
             for (let name in this._enemys) {
                 this._enemys[name].stop();
             }
@@ -222,9 +231,6 @@ namespace Charjs {
                                     if (circleSize <= 0) {
                                         this.removeEvent(circleTimer);
                                         this._player.destroy();
-                                        if(this._goolCallback){
-                                            this._goolCallback(0);
-                                        }
                                     }
                                 });
                             }

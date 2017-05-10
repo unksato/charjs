@@ -2267,6 +2267,7 @@ var Charjs;
             this.frameInterval = frameInterval;
             this._goolCallback = _goolCallback;
             this._gameoverCallback = _gameoverCallback;
+            this._point = 0;
             this._events = {};
             this._eventCount = 0;
             this._gameTimer = null;
@@ -2419,12 +2420,18 @@ var Charjs;
             this._isStarting = false;
         };
         GameMaster.prototype.doGameOver = function () {
+            if (this._gameoverCallback) {
+                this._gameoverCallback(this._point);
+            }
             for (var name_8 in this._enemys) {
                 this._enemys[name_8].stop();
             }
         };
         GameMaster.prototype.doGool = function () {
             var _this = this;
+            if (this._goolCallback) {
+                this._goolCallback(this._point);
+            }
             for (var name_9 in this._enemys) {
                 this._enemys[name_9].stop();
             }
@@ -2458,9 +2465,6 @@ var Charjs;
                                     if (circleSize_1 <= 0) {
                                         _this.removeEvent(circleTimer_1);
                                         _this._player.destroy();
-                                        if (_this._goolCallback) {
-                                            _this._goolCallback(0);
-                                        }
                                     }
                                 });
                             }
