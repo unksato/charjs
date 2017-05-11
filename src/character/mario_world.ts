@@ -6,6 +6,7 @@ namespace Charjs {
         private _currentStep = MarioWorld.STEP;
 
         private _yVector = 0;
+        private _xVector = 0;
         private _jumpPower = 18;
         private _speed = 0;
         private _gameOverWaitCount = 0;
@@ -22,9 +23,10 @@ namespace Charjs {
         private _isSquat = false;
         private _isRight = false;
         private _isLeft = false;
+        private _rightPushed = false;
+        private _leftPushed = false;
         private _isSpeedUp = false;
         private _attackDirection: Direction = Direction.Right;
-        private _directionUpdated = false;
 
         private _star_effect: StarEffect = null;
         private _special_effect: SpecialEffect = null;
@@ -222,15 +224,46 @@ namespace Charjs {
         }
 
         private executeRun(): { index: number, direction: Direction } {
-            // let directionUpdated = this.updateDirection();
 
-            if (this._direction == Direction.Right) {
+            this._isBraking = false;
+
+            if ((this._isLeft || this._isRight) && !this._isSquat) {
+                this._speed = MarioWorld.DEFAULT_SPEED * (this._isLeft ? -1 : 1);
+            } else {
+                this._speed = 0;
+            }
+
+            if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
+                if (this._isLeft && this._xVector > -10) {
+                    this._xVector--;
+                }
+                if (this._isRight && this._xVector < 10) {
+                    this._xVector++;
+                }
+            } else if (this._xVector != 0) {
+                if (this._xVector > 0) {
+                    this._xVector--;
+                } else {
+                    this._xVector++;
+                }
+                this._isBraking = true;
+            }
+
+            this._speed += this._xVector;
+
+            let currentX = this.position.x;
+
+            if (this._speed > 0) {
+                this._direction = Direction.Right;
                 let right = this.entity.right || this.targetDom.clientWidth;
                 this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
-            } else {
+            } else if (this._speed < 0) {
+                this._direction = Direction.Left;
                 let left = this.entity.left || 0;
-                this.position.x = Math.max(this.position.x - this.pixSize * this._speed, left);
+                this.position.x = Math.max(this.position.x + this.pixSize * this._speed, left);
             }
+
+            if (currentX == this.position.x) this._isBraking = false;
 
             let runIndex = this._runIndex;
 
@@ -242,7 +275,6 @@ namespace Charjs {
                 return { index: runIndex, direction: this._direction };
             }
 
-
             if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;
             } else {
@@ -252,7 +284,7 @@ namespace Charjs {
 
             // grabed action
             if (this._grabedEnemy) {
-                if (this._directionUpdated) {
+                if (this._speed == 0 && (this._isRight || this._isLeft)) {
                     runIndex = 12;
                     this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
                     this._grabedEnemy.zIndex = this.zIndex + 1;
@@ -263,7 +295,7 @@ namespace Charjs {
                 }
             } else {
                 // Speed up action
-                if (this._speed > 8) {
+                if (this._speed > 8 || this._speed < -8) {
                     runIndex = this._runIndex == 0 ? 4 : 5;
                 } else if (this._speed == 0) {
                     this._runIndex = 0;
@@ -273,20 +305,9 @@ namespace Charjs {
                 }
 
                 // Braking action
-                if (!this._isJumping) {
-                    if (this._speed > 5 || (!this._directionUpdated && this._isBraking)) {
-                        if ((this._direction == Direction.Left && this.position.x < this.size.width * 3) ||
-                            (this._direction == Direction.Right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)
-                        ) {
-                            runIndex = 6;
-                            if (this._speed > 2)
-                                this._speed--;
-                            this._isBraking = true;
-                            this._slip_effect.drawEffect(this.position);
-                        }
-                    } else {
-                        this._isBraking = false;
-                    }
+                if (!this._isJumping && this._isBraking) {
+                    runIndex = 6;
+                    this._slip_effect.drawEffect({ x: this.position.x + (this._direction == Direction.Left ? this.size.width : 0), y: this.position.y });
                 }
             }
             return { index: runIndex, direction: this._direction };;
@@ -349,126 +370,45 @@ namespace Charjs {
 
 
         private onSpeedUp(): void {
-            if (this._isLeft || this._isRight) {
-                this._isSpeedUp = true;
-                if (!this._speedUpTimer) {
-                    if (this._speedDownTimer) {
-                        this.removeTimer(this._speedDownTimer);
-                        this._speedDownTimer = null;
-                    }
-                    this._speedUpTimer = this.getTimer(() => {
-                        if (this._speed < 10) {
-                            if (!this._isBraking)
-                                this._speed++;
-                        } else {
-                            this.removeTimer(this._speedUpTimer);
-                            this._speedUpTimer = null;
-                        }
-                    }, this.frameInterval);
-                }
-            }
+            this._isSpeedUp = true;
         }
 
         private onAbortSpeedUp(): void {
             this._isSpeedUp = false;
-            if (!this._speedDownTimer) {
-                this._speedDownTimer = this.getTimer(() => {
-                    if (this._speedUpTimer) {
-                        this.removeTimer(this._speedUpTimer);
-                        this._speedUpTimer = null;
-                    }
-
-                    if (((this._isLeft || this._isRight) && this._speed >= MarioWorld.DEFAULT_SPEED) || this._speed != 0) {
-                        this._speed--;
-                    } else {
-                        this.removeTimer(this._speedDownTimer);
-                        this._speedDownTimer = null;
-                        this._isBraking = false;
-                    }
-                }, this.frameInterval);
-            }
         }
 
         private onSquat(): void {
-            this.onAbortSpeedUp();
             this._isSquat = true;
-            if (!this._squatTimer) {
-                this._squatTimer = this.getTimer(() => {
-                    if (this._speed != 0) {
-                        this._speed--;
-                    } else {
-                        this.removeTimer(this._squatTimer);
-                        this._squatTimer = null;
-                    }
-                }, this.frameInterval);
-            }
         }
 
         private onAbortSquat(): void {
-            if (this._squatTimer) {
-                this.removeTimer(this._squatTimer);
-                this._squatTimer = null;
-            }
-            this._speed = MarioWorld.DEFAULT_SPEED;
             this._isSquat = false;
         }
 
         private onRight(): void {
-            this._isRight = true;
-            if (this._direction == Direction.Left) {
-                this._directionUpdated = true;
-            } else {
-                this._directionUpdated = false;
-            }
-
-            this._direction = Direction.Right;
-            if (this._speed === 0) {
-                this._speed = MarioWorld.DEFAULT_SPEED;
-            }
+            this._rightPushed = true;
+            if (!this._isLeft)
+                this._isRight = true;
         }
 
         private onAbortRight(): void {
+            this._rightPushed = false;
             this._isRight = false;
-            if (this._isSpeedUp) {
-                this.onAbortSpeedUp();
-            } else {
-                let stopTimer = this.getTimer(() => {
-                    if (this._speed != 0) {
-                        this._speed--;
-                    } else {
-                        this.removeTimer(stopTimer);
-                    }
-                }, this.frameInterval)
-            }
+            if (this._leftPushed)
+                this._isLeft = true;
         }
 
         private onLeft(): void {
-            this._isLeft = true;
-            if (this._direction == Direction.Right) {
-                this._directionUpdated = true;
-            } else {
-                this._directionUpdated = false;
-            }
-
-            this._direction = Direction.Left;
-            if (this._speed === 0) {
-                this._speed = MarioWorld.DEFAULT_SPEED;
-            }
+            this._leftPushed = true;
+            if (!this._isRight)
+                this._isLeft = true;
         }
 
         private onAbortLeft(): void {
+            this._leftPushed = false;
             this._isLeft = false;
-            if (this._isSpeedUp) {
-                this.onAbortSpeedUp();
-            } else {
-                let stopTimer = this.getTimer(() => {
-                    if (this._speed != 0) {
-                        this._speed--;
-                    } else {
-                        this.removeTimer(stopTimer);
-                    }
-                }, this.frameInterval);
-            }
+            if (this._rightPushed)
+                this._isRight = true;
         }
 
         public gameOver(): void {

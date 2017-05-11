@@ -1087,6 +1087,7 @@ var Charjs;
             _this._runIndex = 0;
             _this._currentStep = MarioWorld.STEP;
             _this._yVector = 0;
+            _this._xVector = 0;
             _this._jumpPower = 18;
             _this._speed = 0;
             _this._gameOverWaitCount = 0;
@@ -1100,9 +1101,10 @@ var Charjs;
             _this._isSquat = false;
             _this._isRight = false;
             _this._isLeft = false;
+            _this._rightPushed = false;
+            _this._leftPushed = false;
             _this._isSpeedUp = false;
             _this._attackDirection = Charjs.Direction.Right;
-            _this._directionUpdated = false;
             _this._star_effect = null;
             _this._special_effect = null;
             _this._slip_effect = null;
@@ -1298,14 +1300,44 @@ var Charjs;
             }
         };
         MarioWorld.prototype.executeRun = function () {
-            if (this._direction == Charjs.Direction.Right) {
+            this._isBraking = false;
+            if ((this._isLeft || this._isRight) && !this._isSquat) {
+                this._speed = MarioWorld.DEFAULT_SPEED * (this._isLeft ? -1 : 1);
+            }
+            else {
+                this._speed = 0;
+            }
+            if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
+                if (this._isLeft && this._xVector > -10) {
+                    this._xVector--;
+                }
+                if (this._isRight && this._xVector < 10) {
+                    this._xVector++;
+                }
+            }
+            else if (this._xVector != 0) {
+                if (this._xVector > 0) {
+                    this._xVector--;
+                }
+                else {
+                    this._xVector++;
+                }
+                this._isBraking = true;
+            }
+            this._speed += this._xVector;
+            var currentX = this.position.x;
+            if (this._speed > 0) {
+                this._direction = Charjs.Direction.Right;
                 var right = this.entity.right || this.targetDom.clientWidth;
                 this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
             }
-            else {
+            else if (this._speed < 0) {
+                this._direction = Charjs.Direction.Left;
                 var left = this.entity.left || 0;
-                this.position.x = Math.max(this.position.x - this.pixSize * this._speed, left);
+                this.position.x = Math.max(this.position.x + this.pixSize * this._speed, left);
             }
+            if (currentX == this.position.x)
+                this._isBraking = false;
             var runIndex = this._runIndex;
             if (this._isSquat) {
                 if (this._grabedEnemy)
@@ -1322,7 +1354,7 @@ var Charjs;
                 this._runIndex = this._runIndex ^ 1;
             }
             if (this._grabedEnemy) {
-                if (this._directionUpdated) {
+                if (this._speed == 0 && (this._isRight || this._isLeft)) {
                     runIndex = 12;
                     this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
                     this._grabedEnemy.zIndex = this.zIndex + 1;
@@ -1334,7 +1366,7 @@ var Charjs;
                 }
             }
             else {
-                if (this._speed > 8) {
+                if (this._speed > 8 || this._speed < -8) {
                     runIndex = this._runIndex == 0 ? 4 : 5;
                 }
                 else if (this._speed == 0) {
@@ -1344,20 +1376,9 @@ var Charjs;
                 else {
                     runIndex = this._runIndex;
                 }
-                if (!this._isJumping) {
-                    if (this._speed > 5 || (!this._directionUpdated && this._isBraking)) {
-                        if ((this._direction == Charjs.Direction.Left && this.position.x < this.size.width * 3) ||
-                            (this._direction == Charjs.Direction.Right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)) {
-                            runIndex = 6;
-                            if (this._speed > 2)
-                                this._speed--;
-                            this._isBraking = true;
-                            this._slip_effect.drawEffect(this.position);
-                        }
-                    }
-                    else {
-                        this._isBraking = false;
-                    }
+                if (!this._isJumping && this._isBraking) {
+                    runIndex = 6;
+                    this._slip_effect.drawEffect({ x: this.position.x + (this._direction == Charjs.Direction.Left ? this.size.width : 0), y: this.position.y });
                 }
             }
             return { index: runIndex, direction: this._direction };
@@ -1408,130 +1429,38 @@ var Charjs;
             }
         };
         MarioWorld.prototype.onSpeedUp = function () {
-            var _this = this;
-            if (this._isLeft || this._isRight) {
-                this._isSpeedUp = true;
-                if (!this._speedUpTimer) {
-                    if (this._speedDownTimer) {
-                        this.removeTimer(this._speedDownTimer);
-                        this._speedDownTimer = null;
-                    }
-                    this._speedUpTimer = this.getTimer(function () {
-                        if (_this._speed < 10) {
-                            if (!_this._isBraking)
-                                _this._speed++;
-                        }
-                        else {
-                            _this.removeTimer(_this._speedUpTimer);
-                            _this._speedUpTimer = null;
-                        }
-                    }, this.frameInterval);
-                }
-            }
+            this._isSpeedUp = true;
         };
         MarioWorld.prototype.onAbortSpeedUp = function () {
-            var _this = this;
             this._isSpeedUp = false;
-            if (!this._speedDownTimer) {
-                this._speedDownTimer = this.getTimer(function () {
-                    if (_this._speedUpTimer) {
-                        _this.removeTimer(_this._speedUpTimer);
-                        _this._speedUpTimer = null;
-                    }
-                    if (((_this._isLeft || _this._isRight) && _this._speed >= MarioWorld.DEFAULT_SPEED) || _this._speed != 0) {
-                        _this._speed--;
-                    }
-                    else {
-                        _this.removeTimer(_this._speedDownTimer);
-                        _this._speedDownTimer = null;
-                        _this._isBraking = false;
-                    }
-                }, this.frameInterval);
-            }
         };
         MarioWorld.prototype.onSquat = function () {
-            var _this = this;
-            this.onAbortSpeedUp();
             this._isSquat = true;
-            if (!this._squatTimer) {
-                this._squatTimer = this.getTimer(function () {
-                    if (_this._speed != 0) {
-                        _this._speed--;
-                    }
-                    else {
-                        _this.removeTimer(_this._squatTimer);
-                        _this._squatTimer = null;
-                    }
-                }, this.frameInterval);
-            }
         };
         MarioWorld.prototype.onAbortSquat = function () {
-            if (this._squatTimer) {
-                this.removeTimer(this._squatTimer);
-                this._squatTimer = null;
-            }
-            this._speed = MarioWorld.DEFAULT_SPEED;
             this._isSquat = false;
         };
         MarioWorld.prototype.onRight = function () {
-            this._isRight = true;
-            if (this._direction == Charjs.Direction.Left) {
-                this._directionUpdated = true;
-            }
-            else {
-                this._directionUpdated = false;
-            }
-            this._direction = Charjs.Direction.Right;
-            if (this._speed === 0) {
-                this._speed = MarioWorld.DEFAULT_SPEED;
-            }
+            this._rightPushed = true;
+            if (!this._isLeft)
+                this._isRight = true;
         };
         MarioWorld.prototype.onAbortRight = function () {
-            var _this = this;
+            this._rightPushed = false;
             this._isRight = false;
-            if (this._isSpeedUp) {
-                this.onAbortSpeedUp();
-            }
-            else {
-                var stopTimer_1 = this.getTimer(function () {
-                    if (_this._speed != 0) {
-                        _this._speed--;
-                    }
-                    else {
-                        _this.removeTimer(stopTimer_1);
-                    }
-                }, this.frameInterval);
-            }
+            if (this._leftPushed)
+                this._isLeft = true;
         };
         MarioWorld.prototype.onLeft = function () {
-            this._isLeft = true;
-            if (this._direction == Charjs.Direction.Right) {
-                this._directionUpdated = true;
-            }
-            else {
-                this._directionUpdated = false;
-            }
-            this._direction = Charjs.Direction.Left;
-            if (this._speed === 0) {
-                this._speed = MarioWorld.DEFAULT_SPEED;
-            }
+            this._leftPushed = true;
+            if (!this._isRight)
+                this._isLeft = true;
         };
         MarioWorld.prototype.onAbortLeft = function () {
-            var _this = this;
+            this._leftPushed = false;
             this._isLeft = false;
-            if (this._isSpeedUp) {
-                this.onAbortSpeedUp();
-            }
-            else {
-                var stopTimer_2 = this.getTimer(function () {
-                    if (_this._speed != 0) {
-                        _this._speed--;
-                    }
-                    else {
-                        _this.removeTimer(stopTimer_2);
-                    }
-                }, this.frameInterval);
-            }
+            if (this._rightPushed)
+                this._isRight = true;
         };
         MarioWorld.prototype.gameOver = function () {
             var _this = this;
