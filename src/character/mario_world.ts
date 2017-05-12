@@ -236,9 +236,11 @@ namespace Charjs {
             if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
                 if (this._isLeft && this._xVector > -10) {
                     this._xVector--;
+                    if(this._xVector > 0) this._isBraking = true;
                 }
                 if (this._isRight && this._xVector < 10) {
                     this._xVector++;
+                    if(this._xVector < 0) this._isBraking = true;
                 }
             } else if (this._xVector != 0) {
                 if (this._xVector > 0) {
@@ -566,7 +568,7 @@ namespace Charjs {
                     this.onGrab();
                 }
 
-                if (e.keyCode == 66 && !this._isJumping && !this._isSquat && (this._isLeft || this._isRight)) {
+                if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
                     this.onSpeedUp();
                 }
 
@@ -574,11 +576,11 @@ namespace Charjs {
                     this.onSquat();
                 }
 
-                if (e.keyCode == 37 && !this._isSquat && !this._isRight) {
+                if (e.keyCode == 37 && !this._isSquat) {
                     this.onLeft();
                 }
 
-                if (e.keyCode == 39 && !this._isSquat && !this._isLeft) {
+                if (e.keyCode == 39 && !this._isSquat) {
                     this.onRight();
                 }
 

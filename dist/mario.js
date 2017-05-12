@@ -1310,9 +1310,13 @@ var Charjs;
             if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
                 if (this._isLeft && this._xVector > -10) {
                     this._xVector--;
+                    if (this._xVector > 0)
+                        this._isBraking = true;
                 }
                 if (this._isRight && this._xVector < 10) {
                     this._xVector++;
+                    if (this._xVector < 0)
+                        this._isBraking = true;
                 }
             }
             else if (this._xVector != 0) {
@@ -1608,16 +1612,16 @@ var Charjs;
                 if (e.keyCode == 89 && !_this._isSquat) {
                     _this.onGrab();
                 }
-                if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat && (_this._isLeft || _this._isRight)) {
+                if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat) {
                     _this.onSpeedUp();
                 }
                 if (e.keyCode == 40 && !_this._isJumping) {
                     _this.onSquat();
                 }
-                if (e.keyCode == 37 && !_this._isSquat && !_this._isRight) {
+                if (e.keyCode == 37 && !_this._isSquat) {
                     _this.onLeft();
                 }
-                if (e.keyCode == 39 && !_this._isSquat && !_this._isLeft) {
+                if (e.keyCode == 39 && !_this._isSquat) {
                     _this.onRight();
                 }
             });
