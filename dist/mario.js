@@ -1585,7 +1585,7 @@ var Charjs;
         MarioWorld.prototype.registerActionCommand = function () {
             var _this = this;
             var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
-            if (gamepads[0]) {
+            if (gamepads && gamepads[0]) {
                 this.scangamepads();
             }
             else {
