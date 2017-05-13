@@ -1563,10 +1563,21 @@ var Charjs;
                                 motion = Math.round(e.gamma);
                                 break;
                             case 'LANSCAPE':
-                                motion = Math.round(e.beta);
+                                motion = Math.round(e.gamma) - (90 * _this._deviceDirection);
                                 break;
                         }
-                        motion = motion * _this._deviceDirection;
+                        if (motion > 5) {
+                            _this.onAbortLeft();
+                            _this.onRight();
+                        }
+                        else if (motion < -5) {
+                            _this.onAbortRight();
+                            _this.onLeft();
+                        }
+                        else {
+                            _this.onAbortRight();
+                            _this.onAbortLeft();
+                        }
                         if (Math.abs(motion) >= 20 && _this._canSpeedUpForMobile) {
                             if (_this._direction == Charjs.Direction.Left && motion < 0) {
                                 _this._canSpeedUpForMobile = false;

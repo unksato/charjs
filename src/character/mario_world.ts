@@ -526,10 +526,21 @@ namespace Charjs {
                                 motion = Math.round(e.gamma);
                                 break;
                             case 'LANSCAPE':
-                                motion = Math.round(e.beta);
+                                motion = Math.round(e.gamma) - (90 * this._deviceDirection);
                                 break;
                         }
-                        motion = motion * this._deviceDirection;
+
+                        if (motion > 5) {
+                            this.onAbortLeft();
+                            this.onRight();
+                        } else if (motion < -5) {
+                            this.onAbortRight();
+                            this.onLeft();
+                        } else {
+                            this.onAbortRight();
+                            this.onAbortLeft();
+                        }
+
                         if (Math.abs(motion) >= 20 && this._canSpeedUpForMobile) {
                             if (this._direction == Direction.Left && motion < 0) {
                                 this._canSpeedUpForMobile = false;
@@ -568,10 +579,6 @@ namespace Charjs {
                     this.onSpecialJump();
                 }
 
-                // if (e.keyCode == 89 && !this._isSquat) {
-                //     this.onGrab();
-                // }
-
                 if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
                     this.onSpeedUp();
                     this.onGrab();
@@ -597,9 +604,6 @@ namespace Charjs {
                 if (e.keyCode == 88) {
                     this.onAbortJump();
                 }
-                // if (e.keyCode == 89) {
-                //     this.onAbortGrab();
-                // }
                 if (e.keyCode == 66 && this._isSpeedUp) {
                     this.onAbortSpeedUp();
                     this.onAbortGrab();
