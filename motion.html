@@ -1,0 +1,19 @@
+<html>
+
+<head>
+    <title>Charjs Sample</title>
+    <script>
+        window.onload = function () {
+            document.body.innerText = "### orientation:" + window.orientation;
+
+            window.addEventListener('orientationchange', function (e) {
+                document.body.innerText = "### orientation:" + window.orientation;
+            })
+        }
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>
