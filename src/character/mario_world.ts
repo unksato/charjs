@@ -526,7 +526,7 @@ namespace Charjs {
                                 motion = Math.round(e.gamma);
                                 break;
                             case 'LANSCAPE':
-                                motion = Math.round(e.gamma) + (90 * this._deviceDirection);
+                                motion = Math.round(e.gamma) - (90 * this._deviceDirection);
                                 break;
                         }
 

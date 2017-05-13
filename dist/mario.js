@@ -1563,7 +1563,7 @@ var Charjs;
                                 motion = Math.round(e.gamma);
                                 break;
                             case 'LANSCAPE':
-                                motion = Math.round(e.gamma) + (90 * _this._deviceDirection);
+                                motion = Math.round(e.gamma) - (90 * _this._deviceDirection);
                                 break;
                         }
                         if (motion > 5) {
