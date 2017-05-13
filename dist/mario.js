@@ -1301,22 +1301,25 @@ var Charjs;
         };
         MarioWorld.prototype.executeRun = function () {
             this._isBraking = false;
-            if ((this._isLeft || this._isRight) && !this._isSquat) {
+            var direction = this._direction;
+            if (((this._isLeft && direction == Charjs.Direction.Left) || (this._isRight && direction == Charjs.Direction.Right)) && !this._isSquat) {
                 this._speed = MarioWorld.DEFAULT_SPEED * (this._isLeft ? -1 : 1);
             }
             else {
                 this._speed = 0;
             }
+            if (this._isLeft) {
+                this._direction = Charjs.Direction.Left;
+            }
+            if (this._isRight) {
+                this._direction = Charjs.Direction.Right;
+            }
             if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
                 if (this._isLeft && this._xVector > -10) {
                     this._xVector--;
-                    if (this._xVector > 0)
-                        this._isBraking = true;
                 }
                 if (this._isRight && this._xVector < 10) {
                     this._xVector++;
-                    if (this._xVector < 0)
-                        this._isBraking = true;
                 }
             }
             else if (this._xVector != 0) {
@@ -1326,30 +1329,19 @@ var Charjs;
                 else {
                     this._xVector++;
                 }
-                this._isBraking = true;
             }
             this._speed += this._xVector;
-            var currentX = this.position.x;
+            if ((this._isLeft && this._xVector > 0) || (this._isRight && this._xVector < 0))
+                this._isBraking = true;
             if (this._speed > 0) {
-                this._direction = Charjs.Direction.Right;
                 var right = this.entity.right || this.targetDom.clientWidth;
                 this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
             }
             else if (this._speed < 0) {
-                this._direction = Charjs.Direction.Left;
                 var left = this.entity.left || 0;
                 this.position.x = Math.max(this.position.x + this.pixSize * this._speed, left);
             }
-            if (currentX == this.position.x)
-                this._isBraking = false;
             var runIndex = this._runIndex;
-            if (this._isSquat) {
-                if (this._grabedEnemy)
-                    runIndex = 14;
-                else
-                    runIndex = 8;
-                return { index: runIndex, direction: this._direction };
-            }
             if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;
             }
@@ -1357,8 +1349,10 @@ var Charjs;
                 this._currentStep = 0;
                 this._runIndex = this._runIndex ^ 1;
             }
+            if (this._speed == 0)
+                this._runIndex = 0;
             if (this._grabedEnemy) {
-                if (this._speed == 0 && (this._isRight || this._isLeft)) {
+                if (this._speed == 0 && (this._isRight || this._isLeft) && this._xVector == 0) {
                     runIndex = 12;
                     this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
                     this._grabedEnemy.zIndex = this.zIndex + 1;
@@ -1373,19 +1367,22 @@ var Charjs;
                 if (this._speed > 8 || this._speed < -8) {
                     runIndex = this._runIndex == 0 ? 4 : 5;
                 }
-                else if (this._speed == 0) {
-                    this._runIndex = 0;
-                    runIndex = 0;
-                }
                 else {
                     runIndex = this._runIndex;
                 }
                 if (!this._isJumping && this._isBraking) {
                     runIndex = 6;
-                    this._slip_effect.drawEffect({ x: this.position.x + (this._direction == Charjs.Direction.Left ? this.size.width : 0), y: this.position.y });
+                    direction = direction == Charjs.Direction.Left ? Charjs.Direction.Right : Charjs.Direction.Left;
+                    this._slip_effect.drawEffect({ x: this.position.x + (direction == Charjs.Direction.Left ? this.size.width : 0), y: this.position.y });
                 }
             }
-            return { index: runIndex, direction: this._direction };
+            if (this._isSquat) {
+                if (this._grabedEnemy)
+                    runIndex = 14;
+                else
+                    runIndex = 8;
+            }
+            return { index: runIndex, direction: direction };
             ;
         };
         MarioWorld.prototype.grabEnemy = function (enemy) {
@@ -2186,25 +2183,27 @@ var Charjs;
             return this._isKilled;
         };
         TroopaWorld.prototype.onAction = function () {
-            var directionUpdated = this.updateDirection();
-            var targetEnemy = this.doHitTestWithOtherEnemy();
-            if (targetEnemy && this._speed > 0) {
-                var ePos = targetEnemy.getPosition();
-                var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
-                var enemyCenter = this.position.x + this.size.width / 2;
-                targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
-                var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
-                this._star_effect.drawEffect(effectPos);
+            if (!this._grabbedPlayer) {
+                var directionUpdated = this.updateDirection();
+                var targetEnemy = this.doHitTestWithOtherEnemy();
+                if (targetEnemy && this._speed > 0) {
+                    var ePos = targetEnemy.getPosition();
+                    var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
+                    var enemyCenter = this.position.x + this.size.width / 2;
+                    targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                    var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                    this._star_effect.drawEffect(effectPos);
+                }
+                this.updateEntity();
+                this.executeJump();
+                if (this._direction == Charjs.Direction.Right) {
+                    this.position.x += this.pixSize * this._speed;
+                }
+                else {
+                    this.position.x -= this.pixSize * this._speed;
+                }
+                this.drawAction();
             }
-            this.updateEntity();
-            this.executeJump();
-            if (this._direction == Charjs.Direction.Right) {
-                this.position.x += this.pixSize * this._speed;
-            }
-            else {
-                this.position.x -= this.pixSize * this._speed;
-            }
-            this.drawAction();
         };
         TroopaWorld.prototype.drawAction = function () {
             var direction = this._direction;

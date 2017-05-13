@@ -182,6 +182,7 @@ namespace Charjs {
                 }
 
                 this.moveGrabedEnemy();
+
                 if (this.position.y <= ground) {
                     this._isJumping = false;
                     this._yVector = 0;
@@ -226,21 +227,28 @@ namespace Charjs {
         private executeRun(): { index: number, direction: Direction } {
 
             this._isBraking = false;
+            let direction = this._direction;
 
-            if ((this._isLeft || this._isRight) && !this._isSquat) {
+            if (((this._isLeft && direction == Direction.Left) || (this._isRight && direction == Direction.Right)) && !this._isSquat) {
                 this._speed = MarioWorld.DEFAULT_SPEED * (this._isLeft ? -1 : 1);
             } else {
                 this._speed = 0;
             }
 
+            // Update direction
+            if (this._isLeft) {
+                this._direction = Direction.Left;
+            }
+            if (this._isRight) {
+                this._direction = Direction.Right;
+            }
+
             if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
                 if (this._isLeft && this._xVector > -10) {
                     this._xVector--;
-                    if(this._xVector > 0) this._isBraking = true;
                 }
                 if (this._isRight && this._xVector < 10) {
                     this._xVector++;
-                    if(this._xVector < 0) this._isBraking = true;
                 }
             } else if (this._xVector != 0) {
                 if (this._xVector > 0) {
@@ -248,34 +256,22 @@ namespace Charjs {
                 } else {
                     this._xVector++;
                 }
-                this._isBraking = true;
             }
 
             this._speed += this._xVector;
 
-            let currentX = this.position.x;
+            if ((this._isLeft && this._xVector > 0) || (this._isRight && this._xVector < 0))
+                this._isBraking = true;
 
             if (this._speed > 0) {
-                this._direction = Direction.Right;
                 let right = this.entity.right || this.targetDom.clientWidth;
                 this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
             } else if (this._speed < 0) {
-                this._direction = Direction.Left;
                 let left = this.entity.left || 0;
                 this.position.x = Math.max(this.position.x + this.pixSize * this._speed, left);
             }
 
-            if (currentX == this.position.x) this._isBraking = false;
-
             let runIndex = this._runIndex;
-
-            if (this._isSquat) {
-                if (this._grabedEnemy)
-                    runIndex = 14;
-                else
-                    runIndex = 8;
-                return { index: runIndex, direction: this._direction };
-            }
 
             if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;
@@ -284,9 +280,11 @@ namespace Charjs {
                 this._runIndex = this._runIndex ^ 1;
             }
 
+            if (this._speed == 0) this._runIndex = 0;
+
             // grabed action
             if (this._grabedEnemy) {
-                if (this._speed == 0 && (this._isRight || this._isLeft)) {
+                if (this._speed == 0 && (this._isRight || this._isLeft) && this._xVector == 0) {
                     runIndex = 12;
                     this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
                     this._grabedEnemy.zIndex = this.zIndex + 1;
@@ -299,9 +297,6 @@ namespace Charjs {
                 // Speed up action
                 if (this._speed > 8 || this._speed < -8) {
                     runIndex = this._runIndex == 0 ? 4 : 5;
-                } else if (this._speed == 0) {
-                    this._runIndex = 0;
-                    runIndex = 0;
                 } else {
                     runIndex = this._runIndex;
                 }
@@ -309,10 +304,19 @@ namespace Charjs {
                 // Braking action
                 if (!this._isJumping && this._isBraking) {
                     runIndex = 6;
-                    this._slip_effect.drawEffect({ x: this.position.x + (this._direction == Direction.Left ? this.size.width : 0), y: this.position.y });
+                    direction = direction == Direction.Left ? Direction.Right : Direction.Left;
+                    this._slip_effect.drawEffect({ x: this.position.x + (direction == Direction.Left ? this.size.width : 0), y: this.position.y });
                 }
             }
-            return { index: runIndex, direction: this._direction };;
+
+            if (this._isSquat) {
+                if (this._grabedEnemy)
+                    runIndex = 14;
+                else
+                    runIndex = 8;
+            }
+
+            return { index: runIndex, direction: direction };;
         }
 
         private _grabedEnemy: IEnemy = null;
