@@ -555,7 +555,7 @@ namespace Charjs {
 
         registerActionCommand(): void {
             let gamepads: Gamepad[] = navigator.getGamepads ? navigator.getGamepads() : ((<any>navigator).webkitGetGamepads ? (<any>navigator).webkitGetGamepads() : []);
-            if (gamepads[0]) {
+            if (gamepads && gamepads[0]) {
                 this.scangamepads();
             } else {
                 window.addEventListener("gamepadconnected", (e) => {
