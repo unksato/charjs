@@ -330,7 +330,7 @@ var Charjs;
                     var cPosUnder = this.position.y;
                     var cPosUpper = this.position.y + this.size.height - this.size.heightOffset;
                     if (cPosLeft >= oPosLeft && cPosLeft <= oPosRight || cPosRight >= oPosLeft && cPosRight <= oPosRight) {
-                        if (cPosUnder >= oPosUpper && (this.entity.ground === null || this.entity.ground >= oPosUpper)) {
+                        if (cPosUnder >= oPosUpper && (this.entity.ground === null || this.entity.ground <= oPosUpper)) {
                             this.underObject = obj;
                             if (cPosUnder == oPosUpper && this instanceof AbstractEnemy && obj.entityEnemies.indexOf(this) == -1)
                                 obj.entityEnemies.push(this);
