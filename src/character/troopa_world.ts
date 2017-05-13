@@ -97,28 +97,30 @@ namespace Charjs {
         }
 
         onAction(): void {
-            let directionUpdated = this.updateDirection();
+            if (!this._grabbedPlayer) {
+                let directionUpdated = this.updateDirection();
 
-            let targetEnemy = this.doHitTestWithOtherEnemy();
-            if (targetEnemy && this._speed > 0) {
-                let ePos = targetEnemy.getPosition();
-                let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
-                let enemyCenter = this.position.x + this.size.width / 2;
-                targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
-                let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
-                this._star_effect.drawEffect(effectPos);
+                let targetEnemy = this.doHitTestWithOtherEnemy();
+                if (targetEnemy && this._speed > 0) {
+                    let ePos = targetEnemy.getPosition();
+                    let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
+                    let enemyCenter = this.position.x + this.size.width / 2;
+                    targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
+                    let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                    this._star_effect.drawEffect(effectPos);
+                }
+
+                this.updateEntity();
+                this.executeJump();
+
+                if (this._direction == Direction.Right) {
+                    this.position.x += this.pixSize * this._speed;
+                } else {
+                    this.position.x -= this.pixSize * this._speed;
+                }
+
+                this.drawAction();
             }
-
-            this.updateEntity();
-            this.executeJump();
-
-            if (this._direction == Direction.Right) {
-                this.position.x += this.pixSize * this._speed;
-            } else {
-                this.position.x -= this.pixSize * this._speed;
-            }
-
-            this.drawAction();
         }
 
         drawAction(): void {

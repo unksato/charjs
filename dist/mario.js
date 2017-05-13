@@ -1087,8 +1087,9 @@ var Charjs;
             _this._runIndex = 0;
             _this._currentStep = MarioWorld.STEP;
             _this._yVector = 0;
+            _this._xVector = 0;
             _this._jumpPower = 18;
-            _this._speed = MarioWorld.DEFAULT_SPEED;
+            _this._speed = 0;
             _this._gameOverWaitCount = 0;
             _this._speedUpTimer = null;
             _this._speedDownTimer = null;
@@ -1098,6 +1099,11 @@ var Charjs;
             _this._isSpecial = false;
             _this._isBraking = false;
             _this._isSquat = false;
+            _this._isRight = false;
+            _this._isLeft = false;
+            _this._rightPushed = false;
+            _this._leftPushed = false;
+            _this._isSpeedUp = false;
             _this._attackDirection = Charjs.Direction.Right;
             _this._star_effect = null;
             _this._special_effect = null;
@@ -1294,23 +1300,48 @@ var Charjs;
             }
         };
         MarioWorld.prototype.executeRun = function () {
-            var directionUpdated = this.updateDirection();
-            if (this._direction == Charjs.Direction.Right) {
+            this._isBraking = false;
+            var direction = this._direction;
+            if (((this._isLeft && direction == Charjs.Direction.Left) || (this._isRight && direction == Charjs.Direction.Right)) && !this._isSquat) {
+                this._speed = MarioWorld.DEFAULT_SPEED * (this._isLeft ? -1 : 1);
+            }
+            else {
+                this._speed = 0;
+            }
+            if (this._isLeft) {
+                this._direction = Charjs.Direction.Left;
+            }
+            if (this._isRight) {
+                this._direction = Charjs.Direction.Right;
+            }
+            if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
+                if (this._isLeft && this._xVector > -10) {
+                    this._xVector--;
+                }
+                if (this._isRight && this._xVector < 10) {
+                    this._xVector++;
+                }
+            }
+            else if (this._xVector != 0) {
+                if (this._xVector > 0) {
+                    this._xVector--;
+                }
+                else {
+                    this._xVector++;
+                }
+            }
+            this._speed += this._xVector;
+            if ((this._isLeft && this._xVector > 0) || (this._isRight && this._xVector < 0))
+                this._isBraking = true;
+            if (this._speed > 0) {
                 var right = this.entity.right || this.targetDom.clientWidth;
                 this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
             }
-            else {
+            else if (this._speed < 0) {
                 var left = this.entity.left || 0;
-                this.position.x = Math.max(this.position.x - this.pixSize * this._speed, left);
+                this.position.x = Math.max(this.position.x + this.pixSize * this._speed, left);
             }
             var runIndex = this._runIndex;
-            if (this._isSquat) {
-                if (this._grabedEnemy)
-                    runIndex = 14;
-                else
-                    runIndex = 8;
-                return { index: runIndex, direction: this._direction };
-            }
             if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;
             }
@@ -1318,8 +1349,10 @@ var Charjs;
                 this._currentStep = 0;
                 this._runIndex = this._runIndex ^ 1;
             }
+            if (this._speed == 0)
+                this._runIndex = 0;
             if (this._grabedEnemy) {
-                if (directionUpdated) {
+                if (this._speed == 0 && (this._isRight || this._isLeft) && this._xVector == 0) {
                     runIndex = 12;
                     this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
                     this._grabedEnemy.zIndex = this.zIndex + 1;
@@ -1331,29 +1364,25 @@ var Charjs;
                 }
             }
             else {
-                if (this._speed > 8) {
+                if (this._speed > 8 || this._speed < -8) {
                     runIndex = this._runIndex == 0 ? 4 : 5;
                 }
                 else {
                     runIndex = this._runIndex;
                 }
-                if (!this._isJumping) {
-                    if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                        if ((this._direction == Charjs.Direction.Left && this.position.x < this.size.width * 3) ||
-                            (this._direction == Charjs.Direction.Right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)) {
-                            runIndex = 6;
-                            if (this._speed > 2)
-                                this._speed--;
-                            this._isBraking = true;
-                            this._slip_effect.drawEffect(this.position);
-                        }
-                    }
-                    else {
-                        this._isBraking = false;
-                    }
+                if (!this._isJumping && this._isBraking) {
+                    runIndex = 6;
+                    direction = direction == Charjs.Direction.Left ? Charjs.Direction.Right : Charjs.Direction.Left;
+                    this._slip_effect.drawEffect({ x: this.position.x + (direction == Charjs.Direction.Left ? this.size.width : 0), y: this.position.y });
                 }
             }
-            return { index: runIndex, direction: this._direction };
+            if (this._isSquat) {
+                if (this._grabedEnemy)
+                    runIndex = 14;
+                else
+                    runIndex = 8;
+            }
+            return { index: runIndex, direction: direction };
             ;
         };
         MarioWorld.prototype.grabEnemy = function (enemy) {
@@ -1401,66 +1430,38 @@ var Charjs;
             }
         };
         MarioWorld.prototype.onSpeedUp = function () {
-            var _this = this;
-            if (!this._speedUpTimer) {
-                if (this._speedDownTimer) {
-                    this.removeTimer(this._speedDownTimer);
-                    this._speedDownTimer = null;
-                }
-                this._speedUpTimer = this.getTimer(function () {
-                    if (_this._speed < 10) {
-                        if (!_this._isBraking)
-                            _this._speed++;
-                    }
-                    else {
-                        _this.removeTimer(_this._speedUpTimer);
-                        _this._speedUpTimer = null;
-                    }
-                }, this.frameInterval);
-            }
+            this._isSpeedUp = true;
         };
         MarioWorld.prototype.onAbortSpeedUp = function () {
-            var _this = this;
-            if (!this._speedDownTimer) {
-                this._speedDownTimer = this.getTimer(function () {
-                    if (_this._speedUpTimer) {
-                        _this.removeTimer(_this._speedUpTimer);
-                        _this._speedUpTimer = null;
-                    }
-                    if (_this._speed > 2) {
-                        _this._speed--;
-                    }
-                    else {
-                        _this.removeTimer(_this._speedDownTimer);
-                        _this._speedDownTimer = null;
-                        _this._isBraking = false;
-                    }
-                }, this.frameInterval);
-            }
+            this._isSpeedUp = false;
         };
         MarioWorld.prototype.onSquat = function () {
-            var _this = this;
-            this.onAbortSpeedUp();
             this._isSquat = true;
-            if (!this._squatTimer) {
-                this._squatTimer = this.getTimer(function () {
-                    if (_this._speed > 0) {
-                        _this._speed--;
-                    }
-                    else {
-                        _this.removeTimer(_this._squatTimer);
-                        _this._squatTimer = null;
-                    }
-                }, this.frameInterval);
-            }
         };
         MarioWorld.prototype.onAbortSquat = function () {
-            if (this._squatTimer) {
-                this.removeTimer(this._squatTimer);
-                this._squatTimer = null;
-            }
-            this._speed = MarioWorld.DEFAULT_SPEED;
             this._isSquat = false;
+        };
+        MarioWorld.prototype.onRight = function () {
+            this._rightPushed = true;
+            if (!this._isLeft)
+                this._isRight = true;
+        };
+        MarioWorld.prototype.onAbortRight = function () {
+            this._rightPushed = false;
+            this._isRight = false;
+            if (this._leftPushed)
+                this._isLeft = true;
+        };
+        MarioWorld.prototype.onLeft = function () {
+            this._leftPushed = true;
+            if (!this._isRight)
+                this._isLeft = true;
+        };
+        MarioWorld.prototype.onAbortLeft = function () {
+            this._leftPushed = false;
+            this._isLeft = false;
+            if (this._rightPushed)
+                this._isRight = true;
         };
         MarioWorld.prototype.gameOver = function () {
             var _this = this;
@@ -1562,10 +1563,21 @@ var Charjs;
                                 motion = Math.round(e.gamma);
                                 break;
                             case 'LANSCAPE':
-                                motion = Math.round(e.beta);
+                                motion = Math.round(e.gamma) - (90 * _this._deviceDirection);
                                 break;
                         }
-                        motion = motion * _this._deviceDirection;
+                        if (motion > 5) {
+                            _this.onAbortLeft();
+                            _this.onRight();
+                        }
+                        else if (motion < -5) {
+                            _this.onAbortRight();
+                            _this.onLeft();
+                        }
+                        else {
+                            _this.onAbortRight();
+                            _this.onAbortLeft();
+                        }
                         if (Math.abs(motion) >= 20 && _this._canSpeedUpForMobile) {
                             if (_this._direction == Charjs.Direction.Left && motion < 0) {
                                 _this._canSpeedUpForMobile = false;
@@ -1605,14 +1617,18 @@ var Charjs;
                 if (e.keyCode == 88 && !_this._isSquat) {
                     _this.onSpecialJump();
                 }
-                if (e.keyCode == 89 && !_this._isSquat) {
-                    _this.onGrab();
-                }
                 if (e.keyCode == 66 && !_this._isJumping && !_this._isSquat) {
                     _this.onSpeedUp();
+                    _this.onGrab();
                 }
                 if (e.keyCode == 40 && !_this._isJumping) {
                     _this.onSquat();
+                }
+                if (e.keyCode == 37 && !_this._isSquat) {
+                    _this.onLeft();
+                }
+                if (e.keyCode == 39 && !_this._isSquat) {
+                    _this.onRight();
                 }
             });
             document.addEventListener('keyup', function (e) {
@@ -1622,14 +1638,18 @@ var Charjs;
                 if (e.keyCode == 88) {
                     _this.onAbortJump();
                 }
-                if (e.keyCode == 89) {
+                if (e.keyCode == 66 && _this._isSpeedUp) {
+                    _this.onAbortSpeedUp();
                     _this.onAbortGrab();
                 }
-                if (e.keyCode == 66) {
-                    _this.onAbortSpeedUp();
-                }
-                if (e.keyCode == 40) {
+                if (e.keyCode == 40 && _this._isSquat) {
                     _this.onAbortSquat();
+                }
+                if (e.keyCode == 37 && _this._isLeft) {
+                    _this.onAbortLeft();
+                }
+                if (e.keyCode == 39 && _this._isRight) {
+                    _this.onAbortRight();
                 }
             });
         };
@@ -2174,25 +2194,27 @@ var Charjs;
             return this._isKilled;
         };
         TroopaWorld.prototype.onAction = function () {
-            var directionUpdated = this.updateDirection();
-            var targetEnemy = this.doHitTestWithOtherEnemy();
-            if (targetEnemy && this._speed > 0) {
-                var ePos = targetEnemy.getPosition();
-                var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
-                var enemyCenter = this.position.x + this.size.width / 2;
-                targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
-                var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
-                this._star_effect.drawEffect(effectPos);
+            if (!this._grabbedPlayer) {
+                var directionUpdated = this.updateDirection();
+                var targetEnemy = this.doHitTestWithOtherEnemy();
+                if (targetEnemy && this._speed > 0) {
+                    var ePos = targetEnemy.getPosition();
+                    var targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
+                    var enemyCenter = this.position.x + this.size.width / 2;
+                    targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Charjs.Direction.Left : Charjs.Direction.Right, 10);
+                    var effectPos = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+                    this._star_effect.drawEffect(effectPos);
+                }
+                this.updateEntity();
+                this.executeJump();
+                if (this._direction == Charjs.Direction.Right) {
+                    this.position.x += this.pixSize * this._speed;
+                }
+                else {
+                    this.position.x -= this.pixSize * this._speed;
+                }
+                this.drawAction();
             }
-            this.updateEntity();
-            this.executeJump();
-            if (this._direction == Charjs.Direction.Right) {
-                this.position.x += this.pixSize * this._speed;
-            }
-            else {
-                this.position.x -= this.pixSize * this._speed;
-            }
-            this.drawAction();
         };
         TroopaWorld.prototype.drawAction = function () {
             var direction = this._direction;

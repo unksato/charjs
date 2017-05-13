@@ -6,8 +6,9 @@ namespace Charjs {
         private _currentStep = MarioWorld.STEP;
 
         private _yVector = 0;
+        private _xVector = 0;
         private _jumpPower = 18;
-        private _speed = MarioWorld.DEFAULT_SPEED;
+        private _speed = 0;
         private _gameOverWaitCount = 0;
 
         private _speedUpTimer = null;
@@ -20,6 +21,11 @@ namespace Charjs {
 
         private _isBraking = false;
         private _isSquat = false;
+        private _isRight = false;
+        private _isLeft = false;
+        private _rightPushed = false;
+        private _leftPushed = false;
+        private _isSpeedUp = false;
         private _attackDirection: Direction = Direction.Right;
 
         private _star_effect: StarEffect = null;
@@ -176,6 +182,7 @@ namespace Charjs {
                 }
 
                 this.moveGrabedEnemy();
+
                 if (this.position.y <= ground) {
                     this._isJumping = false;
                     this._yVector = 0;
@@ -218,26 +225,53 @@ namespace Charjs {
         }
 
         private executeRun(): { index: number, direction: Direction } {
-            let directionUpdated = this.updateDirection();
 
-            if (this._direction == Direction.Right) {
+            this._isBraking = false;
+            let direction = this._direction;
+
+            if (((this._isLeft && direction == Direction.Left) || (this._isRight && direction == Direction.Right)) && !this._isSquat) {
+                this._speed = MarioWorld.DEFAULT_SPEED * (this._isLeft ? -1 : 1);
+            } else {
+                this._speed = 0;
+            }
+
+            // Update direction
+            if (this._isLeft) {
+                this._direction = Direction.Left;
+            }
+            if (this._isRight) {
+                this._direction = Direction.Right;
+            }
+
+            if (this._isSpeedUp && (this._isLeft || this._isRight) && !this._isSquat) {
+                if (this._isLeft && this._xVector > -10) {
+                    this._xVector--;
+                }
+                if (this._isRight && this._xVector < 10) {
+                    this._xVector++;
+                }
+            } else if (this._xVector != 0) {
+                if (this._xVector > 0) {
+                    this._xVector--;
+                } else {
+                    this._xVector++;
+                }
+            }
+
+            this._speed += this._xVector;
+
+            if ((this._isLeft && this._xVector > 0) || (this._isRight && this._xVector < 0))
+                this._isBraking = true;
+
+            if (this._speed > 0) {
                 let right = this.entity.right || this.targetDom.clientWidth;
                 this.position.x = Math.min(this.position.x + this.pixSize * this._speed, right - this.size.width);
-            } else {
+            } else if (this._speed < 0) {
                 let left = this.entity.left || 0;
-                this.position.x = Math.max(this.position.x - this.pixSize * this._speed, left);
+                this.position.x = Math.max(this.position.x + this.pixSize * this._speed, left);
             }
 
             let runIndex = this._runIndex;
-
-            if (this._isSquat) {
-                if (this._grabedEnemy)
-                    runIndex = 14;
-                else
-                    runIndex = 8;
-                return { index: runIndex, direction: this._direction };
-            }
-
 
             if (this._currentStep < MarioWorld.STEP) {
                 this._currentStep++;
@@ -246,9 +280,11 @@ namespace Charjs {
                 this._runIndex = this._runIndex ^ 1;
             }
 
+            if (this._speed == 0) this._runIndex = 0;
+
             // grabed action
             if (this._grabedEnemy) {
-                if (directionUpdated) {
+                if (this._speed == 0 && (this._isRight || this._isLeft) && this._xVector == 0) {
                     runIndex = 12;
                     this._grabedEnemy.setPosition({ x: this.position.x, y: this.position.y });
                     this._grabedEnemy.zIndex = this.zIndex + 1;
@@ -259,30 +295,28 @@ namespace Charjs {
                 }
             } else {
                 // Speed up action
-                if (this._speed > 8) {
+                if (this._speed > 8 || this._speed < -8) {
                     runIndex = this._runIndex == 0 ? 4 : 5;
                 } else {
                     runIndex = this._runIndex;
                 }
 
                 // Braking action
-                if (!this._isJumping) {
-                    if (this._speed > 5 || (!directionUpdated && this._isBraking)) {
-                        if ((this._direction == Direction.Left && this.position.x < this.size.width * 3) ||
-                            (this._direction == Direction.Right && this.position.x > this.targetDom.clientWidth - this.size.width * 4)
-                        ) {
-                            runIndex = 6;
-                            if (this._speed > 2)
-                                this._speed--;
-                            this._isBraking = true;
-                            this._slip_effect.drawEffect(this.position);
-                        }
-                    } else {
-                        this._isBraking = false;
-                    }
+                if (!this._isJumping && this._isBraking) {
+                    runIndex = 6;
+                    direction = direction == Direction.Left ? Direction.Right : Direction.Left;
+                    this._slip_effect.drawEffect({ x: this.position.x + (direction == Direction.Left ? this.size.width : 0), y: this.position.y });
                 }
             }
-            return { index: runIndex, direction: this._direction };;
+
+            if (this._isSquat) {
+                if (this._grabedEnemy)
+                    runIndex = 14;
+                else
+                    runIndex = 8;
+            }
+
+            return { index: runIndex, direction: direction };;
         }
 
         private _grabedEnemy: IEnemy = null;
@@ -342,63 +376,45 @@ namespace Charjs {
 
 
         private onSpeedUp(): void {
-            if (!this._speedUpTimer) {
-                if (this._speedDownTimer) {
-                    this.removeTimer(this._speedDownTimer);
-                    this._speedDownTimer = null;
-                }
-                this._speedUpTimer = this.getTimer(() => {
-                    if (this._speed < 10) {
-                        if (!this._isBraking)
-                            this._speed++;
-                    } else {
-                        this.removeTimer(this._speedUpTimer);
-                        this._speedUpTimer = null;
-                    }
-                }, this.frameInterval);
-            }
+            this._isSpeedUp = true;
         }
 
         private onAbortSpeedUp(): void {
-            if (!this._speedDownTimer) {
-                this._speedDownTimer = this.getTimer(() => {
-                    if (this._speedUpTimer) {
-                        this.removeTimer(this._speedUpTimer);
-                        this._speedUpTimer = null;
-                    }
-                    if (this._speed > 2) {
-                        this._speed--;
-                    } else {
-                        this.removeTimer(this._speedDownTimer);
-                        this._speedDownTimer = null;
-                        this._isBraking = false;
-                    }
-                }, this.frameInterval);
-            }
+            this._isSpeedUp = false;
         }
 
         private onSquat(): void {
-            this.onAbortSpeedUp();
             this._isSquat = true;
-            if (!this._squatTimer) {
-                this._squatTimer = this.getTimer(() => {
-                    if (this._speed > 0) {
-                        this._speed--;
-                    } else {
-                        this.removeTimer(this._squatTimer);
-                        this._squatTimer = null;
-                    }
-                }, this.frameInterval);
-            }
         }
 
         private onAbortSquat(): void {
-            if (this._squatTimer) {
-                this.removeTimer(this._squatTimer);
-                this._squatTimer = null;
-            }
-            this._speed = MarioWorld.DEFAULT_SPEED;
             this._isSquat = false;
+        }
+
+        private onRight(): void {
+            this._rightPushed = true;
+            if (!this._isLeft)
+                this._isRight = true;
+        }
+
+        private onAbortRight(): void {
+            this._rightPushed = false;
+            this._isRight = false;
+            if (this._leftPushed)
+                this._isLeft = true;
+        }
+
+        private onLeft(): void {
+            this._leftPushed = true;
+            if (!this._isRight)
+                this._isLeft = true;
+        }
+
+        private onAbortLeft(): void {
+            this._leftPushed = false;
+            this._isLeft = false;
+            if (this._rightPushed)
+                this._isRight = true;
         }
 
         public gameOver(): void {
@@ -510,10 +526,21 @@ namespace Charjs {
                                 motion = Math.round(e.gamma);
                                 break;
                             case 'LANSCAPE':
-                                motion = Math.round(e.beta);
+                                motion = Math.round(e.gamma) - (90 * this._deviceDirection);
                                 break;
                         }
-                        motion = motion * this._deviceDirection;
+
+                        if (motion > 5) {
+                            this.onAbortLeft();
+                            this.onRight();
+                        } else if (motion < -5) {
+                            this.onAbortRight();
+                            this.onLeft();
+                        } else {
+                            this.onAbortRight();
+                            this.onAbortLeft();
+                        }
+
                         if (Math.abs(motion) >= 20 && this._canSpeedUpForMobile) {
                             if (this._direction == Direction.Left && motion < 0) {
                                 this._canSpeedUpForMobile = false;
@@ -552,16 +579,21 @@ namespace Charjs {
                     this.onSpecialJump();
                 }
 
-                if (e.keyCode == 89 && !this._isSquat) {
-                    this.onGrab();
-                }
-
                 if (e.keyCode == 66 && !this._isJumping && !this._isSquat) {
                     this.onSpeedUp();
+                    this.onGrab();
                 }
 
                 if (e.keyCode == 40 && !this._isJumping) {
                     this.onSquat();
+                }
+
+                if (e.keyCode == 37 && !this._isSquat) {
+                    this.onLeft();
+                }
+
+                if (e.keyCode == 39 && !this._isSquat) {
+                    this.onRight();
                 }
 
             });
@@ -572,15 +604,20 @@ namespace Charjs {
                 if (e.keyCode == 88) {
                     this.onAbortJump();
                 }
-                if (e.keyCode == 89) {
+                if (e.keyCode == 66 && this._isSpeedUp) {
+                    this.onAbortSpeedUp();
                     this.onAbortGrab();
                 }
-                if (e.keyCode == 66) {
-                    this.onAbortSpeedUp();
-                }
-                if (e.keyCode == 40) {
+                if (e.keyCode == 40 && this._isSquat) {
                     this.onAbortSquat();
                 }
+                if (e.keyCode == 37 && this._isLeft) {
+                    this.onAbortLeft();
+                }
+                if (e.keyCode == 39 && this._isRight) {
+                    this.onAbortRight();
+                }
+
             });
         }
 
