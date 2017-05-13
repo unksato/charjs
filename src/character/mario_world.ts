@@ -418,6 +418,7 @@ namespace Charjs {
         }
 
         public gameOver(): void {
+            if (this._gamepadTimer) clearInterval(this._gamepadTimer);
             if (this._gameMaster) this._gameMaster.doGameOver();
             this.stop();
             this._gameOverTimer = this.getTimer(() => {
@@ -496,7 +497,71 @@ namespace Charjs {
             }
         }
 
+        private _gamepadTimer = null;
+
+        scangamepads() {
+            let gamepads: Gamepad[] = navigator.getGamepads ? navigator.getGamepads() : ((<any>navigator).webkitGetGamepads ? (<any>navigator).webkitGetGamepads() : []);
+            if (gamepads[0]) {
+                this._gamepadTimer = setInterval(() => { this.updatePadStatus() }, this.frameInterval);
+            }
+        }
+
+        updatePadStatus() {
+            let gamepads: Gamepad[] = navigator.getGamepads ? navigator.getGamepads() : ((<any>navigator).webkitGetGamepads ? (<any>navigator).webkitGetGamepads() : []);
+            let gamepad = gamepads[0];
+
+            this.onAbortSquat();
+            this.onAbortLeft();
+            this.onAbortRight();
+
+            // down
+            if (gamepad.buttons[13].pressed) {
+                this.onSquat();
+            }
+            // left
+            if (gamepad.buttons[14].pressed) {
+                this.onLeft();
+            }
+            // right
+            if (gamepad.buttons[15].pressed) {
+                this.onRight();
+            }
+            // A or X or Y
+            if (gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed) {
+                if (gamepad.buttons[2].pressed || gamepad.buttons[3].pressed) {
+                    this.onSpecialJump();
+                } else {
+                    this.onJump();
+                }
+            } else {
+                this.onAbortJump();
+            }
+            // B
+            if (gamepad.buttons[0].pressed) {
+                this.onSpeedUp();
+                this.onGrab();
+            } else {
+                this.onAbortSpeedUp();
+                this.onAbortGrab();
+            }
+
+            if (gamepad.buttons[9].pressed) {
+                if (this._gameMaster.isStarting())
+                    this._gameMaster.stop();
+                else
+                    this._gameMaster.start();
+            }
+        }
+
         registerActionCommand(): void {
+            let gamepads: Gamepad[] = navigator.getGamepads ? navigator.getGamepads() : ((<any>navigator).webkitGetGamepads ? (<any>navigator).webkitGetGamepads() : []);
+            if (gamepads[0]) {
+                this.scangamepads();
+            } else {
+                window.addEventListener("gamepadconnected", (e) => {
+                    this.scangamepads();
+                })
+            }
             if (GameMaster.checkMobile()) {
                 if (window.orientation == 0) {
                     this._screenModeForMobile = 'PORTRAIT';
@@ -617,7 +682,6 @@ namespace Charjs {
                 if (e.keyCode == 39 && this._isRight) {
                     this.onAbortRight();
                 }
-
             });
         }
 
