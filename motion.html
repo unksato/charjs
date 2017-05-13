@@ -4,16 +4,24 @@
     <title>Charjs Sample</title>
     <script>
         window.onload = function () {
-            document.body.innerText = "### orientation:" + window.orientation;
+            document.getElementById("orient").innerText = window.orientation;
 
             window.addEventListener('orientationchange', function (e) {
-                document.body.innerText = "### orientation:" + window.orientation;
+                document.getElementById("orient").innerText = window.orientation;
+            })
+
+            window.addEventListener('deviceorientation', function (e) {
+                document.getElementById("gamma").innerText = Math.round(e.gamma);
             })
         }
     </script>
 </head>
 
 <body>
+    ### orientation:
+    <div id="orient"></div>
+    <br/> ### gamma:
+    <div id="gamma"></div>
 </body>
 
 </html>
