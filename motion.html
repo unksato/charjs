@@ -12,6 +12,7 @@
 
             window.addEventListener('deviceorientation', function (e) {
                 document.getElementById("gamma").innerText = Math.round(e.gamma);
+                document.getElementById("beta").innerText = Math.round(e.beta);
             })
         }
     </script>
@@ -22,6 +23,10 @@
     <div id="orient"></div>
     <br/> ### gamma:
     <div id="gamma"></div>
+    <br/> ### beta:
+    <div id="beta"></div>
+
+
 </body>
 
 </html>
