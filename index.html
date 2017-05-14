@@ -17,80 +17,45 @@
     <script type="text/javascript" src="./dist/mario.js"></script>
     <script>
         window.onload = function () {
+
+            // Create Game Controller
             var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (point) {
                 ga('send', 'event', 'Game', 'gool', 'Sample Game');
             }, function (point) {
                 ga('send', 'event', 'Game', 'gameover', 'Sample Game');
             });
+
+            // Draw ground
             controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
-            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
+            // Create Player
+            controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
 
+            // Create Enemies
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.Right);
             controller.CreateEnemyInstance(Charjs.KoopatroopaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
 
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 400, y: 0 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 432, y: 0 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 464, y: 0 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 496, y: 0 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 528, y: 0 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 432, y: 31 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 464, y: 31 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 496, y: 31 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 528, y: 31 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 464, y: 62 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 496, y: 62 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 528, y: 62 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 496, y: 93 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 528, y: 93 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 528, y: 124 });
-
-
+            // Create Blocks
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 48, y: 200 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 80, y: 200 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 112, y: 200 });
 
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 116, y: 132 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 116, y: 100 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 148, y: 100 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 180, y: 100 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 212, y: 100 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 244, y: 100 });
-            // controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 244, y: 132 });
 
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 260, y: 200 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 292, y: 200 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 200 });
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 230 });
 
-            // for(var i = 0; i < 8;i++)
-            //     controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 100 + 32 * i, y: 0 });
-
+            // Draw Background
             new Charjs.Mountains(2).drawBackgroundImage(document.body).then(function () {
                 controller.init();
                 controller.start();
                 ga('send', 'event', 'Game', 'start', 'Sample Game');
             });
-
-
-            // mario.draw(0, {x:0, y:0});
-            // mario.draw(1, {x:50, y:0});
-            // mario.draw(2, {x:100, y:0});
-            // mario.draw(3, {x:150, y:0});
-            // mario.draw(4, {x:200, y:0});
-            // mario.draw(5, {x:250, y:0});
-            // mario.draw(6, {x:300, y:0});
-            // mario.draw(7, {x:350, y:0});
-            // mario.draw(8, {x:400, y:0});
-            // mario.draw(9, {x:450, y:0});
-            // mario.draw(10, {x:500, y:0});
-            // mario.draw(11, {x:550, y:0});
-            // mario.draw(12, {x:600, y:0});
-            // mario.draw(13, {x:650, y:0});
-            // mario.draw(14, {x:700, y:0});
-            // mario.draw(15, {x:750, y:0});
-            // mario.draw(16, {x:800, y:0});
         }
     </script>
     <style type="text/css">
