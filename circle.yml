@@ -22,5 +22,5 @@ deployment:
       - git push origin :gh-pages
       - git checkout -b gh-pages
       - git add .
-      - git commit -a -m 'add dist for pages'
+      - git commit -a -m 'add dist for pages' || exit 0
       - git push origin gh-pages
