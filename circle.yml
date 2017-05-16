@@ -1,0 +1,26 @@
+general:
+  branches:
+    ignore:
+      - gh-pages
+machine:
+  node:
+    version: v6.10.3
+test:
+  pre:
+    - npm install -g grunt-cli
+    - npm install -g typescript
+  post:
+deployment:
+  production:
+    branch: master
+    commands:
+      - grunt clean
+      - grunt build
+      - git config --global user.name "${GIT_USER_NAME}"
+      - git config --global user.email "${GIT_USER_EMAIL}"
+      - git branch -rd origin/gh-pages
+      - git push origin :gh-pages
+      - git checkout -b gh-pages
+      - git add .
+      - git commit -a -m 'add dist for pages'
+      - git push origin gh-pages
