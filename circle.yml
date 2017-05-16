@@ -19,7 +19,7 @@ deployment:
       - git config --global user.name "${GIT_USER_NAME}"
       - git config --global user.email "${GIT_USER_EMAIL}"
       - git branch -rd origin/gh-pages
-      - git push origin :gh-pages
+      - git push origin :gh-pages || exit 0
       - git checkout -b gh-pages
       - git add .
       - git commit -a -m 'add dist for pages' || exit 0
