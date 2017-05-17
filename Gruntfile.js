@@ -52,7 +52,7 @@ module.exports = function(grunt){
 
         clean: {
             default: {
-                src: ['dist/*', 'src/**/*.js', 'src/**/*.js.map', 'test/**/*.js', 'test/**/*.js.map' ]
+                src: ['dist/*', 'src/**/*.js', 'src/**/*.js.map', 'test/**/*.js', 'test/**/*.js.map','output/*' ]
             }
         }
     });
