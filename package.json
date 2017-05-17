@@ -4,7 +4,7 @@
   "description": "https://unksato.github.io/charjs/",
   "main": "index.js",
   "scripts": {
-    "test": "exit 0"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
