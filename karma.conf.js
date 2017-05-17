@@ -47,6 +47,7 @@ module.exports = function(config) {
 
     remapCoverageReporter: {
       'text-summary': null,
+      lcovonly: './output/ts-coverage/lcov.info',
       html: './output/ts-coverage/',
       cobertura: './output/ts-coverage/cobertura.xml'
     },

@@ -4,6 +4,7 @@ module.exports = function(grunt){
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-coveralls');
 
     grunt.initConfig({
 
@@ -53,6 +54,14 @@ module.exports = function(grunt){
         clean: {
             default: {
                 src: ['dist/*', 'src/**/*.js', 'src/**/*.js.map', 'test/**/*.js', 'test/**/*.js.map','output/*' ]
+            }
+        },
+        coveralls:{
+            options: {
+                force: false
+            },
+            base: {
+                src: 'output/ts-coverage/lcov.info'
             }
         }
     });
