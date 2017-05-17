@@ -10,6 +10,11 @@ test:
     - npm install -g grunt-cli
     - npm install -g typescript
   post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/output/junit/.*\.xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - grunt coveralls
+    - mv output/ts-coverage $CIRCLE_ARTIFACTS
+
 deployment:
   production:
     branch: master

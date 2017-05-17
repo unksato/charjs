@@ -1,3 +1,6 @@
+[![CircleCI](https://circleci.com/gh/unksato/charjs.svg?style=svg)](https://circleci.com/gh/unksato/charjs)
+[![Coverage Status](https://coveralls.io/repos/github/unksato/charjs/badge.svg?branch=feature_unit_test)](https://coveralls.io/github/unksato/charjs?branch=feature_unit_test)
+
 # Sample
 https://unksato.github.io/charjs/
 
