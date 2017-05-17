@@ -1,7 +1,9 @@
 [![CircleCI](https://circleci.com/gh/unksato/charjs.svg?style=svg)](https://circleci.com/gh/unksato/charjs)
 [![Coverage Status](https://coveralls.io/repos/github/unksato/charjs/badge.svg?branch=feature_unit_test)](https://coveralls.io/github/unksato/charjs?branch=feature_unit_test)
+[![Join the chat at https://gitter.im/unksato/charjs](https://badges.gitter.im/unksato/charjs.svg)](https://gitter.im/unksato/charjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Sample
+
 https://unksato.github.io/charjs/
 
 # How to use
