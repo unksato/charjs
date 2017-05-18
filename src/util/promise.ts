@@ -80,18 +80,18 @@ namespace MyQ {
             return d.promise;
         }
 
-        public static all(Promises: Promise<any>[]): Promise<any[]> {
-            var PromiseLength = Promises.length;
+        public static all(promises: Promise<any>[]): Promise<any[]> {
+            var promiseLength = promises.length;
             var callbackCount = 0;
-            var PromisesArgs = [];
+            var promisesArgs = [];
             var allPromise = new Promise<any[]>();
 
             var resolve = function (index: number) {
                 return function (arg) {
                     callbackCount++;
-                    PromisesArgs[index] = arg;
-                    if (PromiseLength == callbackCount) {
-                        allPromise.resolve(PromisesArgs);
+                    promisesArgs[index] = arg;
+                    if (callbackCount == callbackCount) {
+                        allPromise.resolve(promisesArgs);
                     }
                 }
             };
@@ -101,8 +101,8 @@ namespace MyQ {
                 }
             };
 
-            for (let i = 0; i < Promises.length; i++) {
-                Promises[i].then(resolve(i)).catch(reject(i));
+            for (let i = 0; i < promises.length; i++) {
+                promises[i].then(resolve(i)).catch(reject(i));
             }
             return allPromise;
         }

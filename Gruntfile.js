@@ -19,6 +19,16 @@ module.exports = function(grunt){
                     experimentalDecorators : true
                 }
             },
+            myq: {
+                src: ["src/util/deferred.ts","src/util/promise.ts"],
+                out: "dist/myq.js",
+                options : {
+                    module : 'amd',
+                    target : 'es5',
+                    sourceMap : true,
+                    experimentalDecorators : true
+                }
+            },
             test: {
                 src: ["src/**/*.ts", "test/**/*.ts"],
                 options : {

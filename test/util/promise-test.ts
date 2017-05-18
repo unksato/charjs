@@ -21,6 +21,7 @@ class Sample {
 }
 
 const expect = chai.expect;
+const assert = chai.assert;
 
 describe('Promise', ()=>{
     it('simple resolved test',(done)=>{
@@ -50,6 +51,28 @@ describe('Promise', ()=>{
             expect(catchVal).equal('error has occured.');
             done();
         });
+    });
+
+    it('when test', (done) => {
+        let isSuccess = false;
+        MyQ.Promise.when().then(() => {
+            isSuccess = true;
+        }).finally(()=>{
+            assert.isOk(isSuccess);
+            done();
+        });
+    });
+
+    it('all success test', (done) => {
+        let p1 = new Sample().success(0);
+        let p2 = new Sample().success(10);
+        let result = null;
+        MyQ.Promise.all([p1,p2]).then((val)=>{
+            result = val;
+        }).finally(()=>{
+            expect(result).equal(['success','success']);
+            done();
+        })
     });
 
 })
