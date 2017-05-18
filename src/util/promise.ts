@@ -84,13 +84,13 @@ namespace MyQ {
             var promiseLength = promises.length;
             var callbackCount = 0;
             var promisesArgs = [];
-            var allPromise = new Promise<any[]>();
+            var allPromise = Deferred.defer();
 
             var resolve = function (index: number) {
                 return function (arg) {
                     callbackCount++;
                     promisesArgs[index] = arg;
-                    if (callbackCount == callbackCount) {
+                    if (promiseLength == callbackCount) {
                         allPromise.resolve(promisesArgs);
                     }
                 }
@@ -104,7 +104,7 @@ namespace MyQ {
             for (let i = 0; i < promises.length; i++) {
                 promises[i].then(resolve(i)).catch(reject(i));
             }
-            return allPromise;
+            return allPromise.promise;
         }
 
         public static allSettled(Promises: Promise<any>[]): Promise<any[]> {

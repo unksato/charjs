@@ -67,10 +67,13 @@ describe('Promise', ()=>{
         let p1 = new Sample().success(0);
         let p2 = new Sample().success(10);
         let result = null;
+
         MyQ.Promise.all([p1,p2]).then((val)=>{
             result = val;
         }).finally(()=>{
-            expect(result).equal(['success','success']);
+            expect(result.length).equal(2);
+            expect(result[0]).equal('success');
+            expect(result[1]).equal('success');
             done();
         })
     });
