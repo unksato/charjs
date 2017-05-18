@@ -107,17 +107,17 @@ namespace MyQ {
             return allPromise.promise;
         }
 
-        public static allSettled(Promises: Promise<any>[]): Promise<any[]> {
-            var PromiseLength = Promises.length;
+        public static allSettled(promises: Promise<any>[]): Promise<any[]> {
+            var promiseLength = promises.length;
             var callbackCount = 0;
             var results = [];
-            var allPromise = new Promise<any[]>();
+            var allPromise = Deferred.defer();
 
             var resolve = function (index: number) {
                 return function (arg) {
                     callbackCount++;
                     results[index] = { state: 'fulfilled', value: arg };
-                    if (PromiseLength == callbackCount) {
+                    if (promiseLength == callbackCount) {
                         allPromise.resolve(results);
                     }
                 }
@@ -126,20 +126,20 @@ namespace MyQ {
                 return function (e: any) {
                     callbackCount++;
                     results[index] = { state: 'rejected', reason: e };
-                    if (PromiseLength == callbackCount) {
+                    if (promiseLength == callbackCount) {
                         allPromise.resolve(results);
                     }
                 }
             };
 
-            for (let i = 0; i < Promises.length; i++) {
-                Promises[i].then(resolve(i)).catch(reject(i));
+            for (let i = 0; i < promises.length; i++) {
+                promises[i].then(resolve(i)).catch(reject(i));
             }
-            return allPromise;
+            return allPromise.promise;
         }
 
-        public static race(Promises: Promise<any>[]): Promise<any> {
-            var racePromise = new Promise<any>();
+        public static race(promises: Promise<any>[]): Promise<any> {
+            var racePromise = Deferred.defer();
             var raceCalled = false;
 
             var resolve = function (arg) {
@@ -155,11 +155,11 @@ namespace MyQ {
                 }
             };
 
-            for (let i = 0; i < Promises.length; i++) {
-                Promises[i].then(resolve).catch(reject);
+            for (let i = 0; i < promises.length; i++) {
+                promises[i].then(resolve).catch(reject);
             }
 
-            return racePromise;
+            return racePromise.promise;
         }
 
         public static reduce<T>(values: any[], func: { (defer: MyQ.Deferred<{}>, value: T) }): MyQ.Promise<{}> {
