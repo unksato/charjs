@@ -165,7 +165,7 @@ namespace MyQ {
         public static reduce<T>(values: any[], func: { (defer: MyQ.Deferred<{}>, value: T) }): MyQ.Promise<{}> {
             return values.reduce((prev: MyQ.Promise<{}>, current: T) => {
                 return prev.then(() => {
-                    let d = MyQ.Deferred.defer();
+                    let d = Deferred.defer();
                     func(d, current);
                     return d.promise;
                 });
