@@ -1,0 +1,6 @@
+{
+	"coverage": ["./output/ts-coverage/lcov.info"],
+	"sourcemapped": ["../../src/**.ts"],
+	"automaticallyShow": false,
+	"showCovered": true
+}

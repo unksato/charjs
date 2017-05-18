@@ -39,5 +39,17 @@ describe('Promise', ()=>{
             expect(secondActualVal).equal('success:success');
             done();
         });
-    })
+    });
+
+    it('simple reject test', (done) => {
+        let catchVal = null;
+        new Sample().error(0).then(()=>{
+        }).catch((e)=>{
+            catchVal = e;
+        }).finally(()=>{
+            expect(catchVal).equal('error has occured.');
+            done();
+        });
+    });
+
 })

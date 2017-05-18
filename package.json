@@ -29,7 +29,9 @@
     "karma-mocha-reporter": "^2.2.3",
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-remap-coverage": "^0.1.4",
+    "karma-sinon": "^1.0.5",
     "mocha": "^3.4.1",
+    "sinon": "^2.2.0",
     "typescript": "^2.3.2"
   }
 }
