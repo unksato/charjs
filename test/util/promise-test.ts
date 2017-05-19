@@ -148,33 +148,33 @@ describe('Promise', () => {
         });
     });
 
-    // it('reduce test', (done) => {
-    //     let datas = [
-    //         { timeout: 10, message: 'Hello' },
-    //         { timeout: 700, message: 'Promise' },
-    //         { timeout: 50, message: 'World' },
-    //         { timeout: 100, message: '!!!' }
-    //     ];
+    it('reduce test', (done) => {
+        let datas = [
+            { timeout: 10, message: 'Hello' },
+            { timeout: 700, message: 'Promise' },
+            { timeout: 50, message: 'World' },
+            { timeout: 100, message: '!!!' }
+        ];
 
-    //     let result = null;
-    //     let message = '';
+        let result = null;
+        let message = '';
 
-    //     let f = (d: MyQ.Deferred<{}>, value: { timeout: number, message: string }) => {
-    //         setTimeout(() => {
-    //             message += value.message + " ";
-    //             d.resolve(value.message);
-    //         }, value.timeout);
-    //     }
+        let f = (d: MyQ.Deferred<{}>, value: { timeout: number, message: string }) => {
+            setTimeout(() => {
+                message += value.message + " ";
+                d.resolve(value.message);
+            }, value.timeout);
+        }
 
-    //     MyQ.Promise.reduce(datas, f).then((val) => {
-    //         result = val;
-    //     }).catch((e) => {
-    //         console.log(e);
-    //     }).finally(() => {
-    //         expect(result).equal('!!!');
-    //         expect(message).equal('Hello Promise World !!! ');
-    //         done();
-    //     });
-    // });
+        MyQ.Promise.reduce(datas, f).then((val) => {
+            result = val;
+        }).catch((e) => {
+            console.log(e);
+        }).finally(() => {
+            expect(result).equal('!!!');
+            expect(message).equal('Hello Promise World !!! ');
+            done();
+        });
+    });
 
 })

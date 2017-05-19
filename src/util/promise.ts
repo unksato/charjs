@@ -163,13 +163,17 @@ namespace MyQ {
         }
 
         public static reduce<T>(values: any[], func: { (defer: MyQ.Deferred<{}>, value: T) }): MyQ.Promise<{}> {
-            return values.reduce((prev: MyQ.Promise<{}>, current: T) => {
+            let d = Deferred.defer();
+            values.reduce((prev: MyQ.Promise<{}>, current: T) => {
                 return prev.then(() => {
                     let d = Deferred.defer();
                     func(d, current);
                     return d.promise;
                 });
-            }, Promise.when());
+            }, Promise.when()).then((lastValue) => {
+                d.resolve(lastValue);
+            });
+            return d.promise;
         }
     }
 }
