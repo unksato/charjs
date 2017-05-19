@@ -1,7 +1,7 @@
 /// <reference path="../../typings/index.d.ts" />
 /// <reference path="../../src/util/compress.ts" />
 
-describe('Compress', ()=>{
+describe('Util.Compress', ()=>{
     it('RLE test', ()=>{
         let  plainMap = [[0,0,0,1,0,0]];
         let compressedMap = Util.Compression.RLE(plainMap);

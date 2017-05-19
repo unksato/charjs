@@ -18,7 +18,7 @@ class RandomGenerator {
     getNormdistRandom(max: number, min: number = 0, normdist: number = 6): number {
         let rands = [];
         for (let i = 0; i < normdist; i++) {
-            rands.push(Math.random() * (max + 1 - min)) + min;
+            rands.push(Math.floor(Math.random() * (max + 1 - min)) + min);
         }
         return Math.floor(rands.reduce((prev, current) => { return prev + current }) / normdist);
     }
