@@ -1,8 +1,17 @@
 class RandomGenerator {
     private lastRandom;
     private lastRandom2;
-    getRandom(max: number, min: number): number {
+
+    static getRandom(max: number, min: number = 0): number {
         return Math.floor(Math.random() * (max + 1 - min)) + min;
+    }
+
+    static getNormdistRandom(max: number, min: number = 0, normdist: number = 6): number {
+        let rands = [];
+        for (let i = 0; i < normdist; i++) {
+            rands.push(Math.floor(Math.random() * (max + 1 - min)) + min);
+        }
+        return Math.floor(rands.reduce((prev, current) => { return prev + current }) / normdist);
     }
 
     getCognitiveRandom(max: number, min: number = 0, distance: number = 0.3): number {
@@ -13,13 +22,5 @@ class RandomGenerator {
         this.lastRandom2 = this.lastRandom;
         this.lastRandom = rand;
         return Math.floor(rand * (max + 1 - min)) + min;
-    }
-
-    getNormdistRandom(max: number, min: number = 0, normdist: number = 6): number {
-        let rands = [];
-        for (let i = 0; i < normdist; i++) {
-            rands.push(Math.floor(Math.random() * (max + 1 - min)) + min);
-        }
-        return Math.floor(rands.reduce((prev, current) => { return prev + current }) / normdist);
     }
 }
