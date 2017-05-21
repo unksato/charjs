@@ -95,20 +95,25 @@ namespace Charjs {
                 let grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
                 let enemyCenter = ePos.x + eSize.width / 2;
                 enemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, this._speed * 3);
-                this.onPoint(enemy.getPosition());
+                this.onPoint(enemy.getPosition(), true);
 
                 this._grabedEnemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3);
-                this.onPoint(this._grabedEnemy.getPosition());
+                this.onPoint(this._grabedEnemy.getPosition(), true);
 
                 this._grabedEnemy = null;
             }
         }
 
         private _point: number = 0;
-        private onPoint(targetPos: IPosition) {
+
+        private onPoint(targetPos: IPosition, noCountUp?: boolean) {
             PointEffect.drawPoint(this.targetDom, targetPos, this._point, this.pixSize);
-            this.addScore(this._point);
-            this._point++;
+            if (noCountUp) {
+                this.addScore(0);
+            } else {
+                this.addScore(this._point);
+                this._point++;
+            }
         }
 
         private doHitTest(): HitStatus {
@@ -153,7 +158,7 @@ namespace Charjs {
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
                                 this._special_effect.drawEffect(enemys[name].getPosition());
-                                this.onPoint(enemys[name].getPosition());
+                                this.onPoint(enemys[name].getPosition(), true);
                                 enemys[name].onKilled();
                                 this._yVector = 2 * this.pixSize;
                             } else {

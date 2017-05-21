@@ -52,6 +52,7 @@ namespace Charjs {
         private _isKickBound = false;
         private _isRevivalJumping = false;
         private _grabbedPlayer: IPlayer = null;
+        private _kickPlayer: IPlayer = null;
         private _star_effect: StarEffect = null;
         private _vertical: Vertical = Vertical.Up;
 
@@ -161,9 +162,15 @@ namespace Charjs {
                         let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                         let enemyCenter = this.position.x + this.size.width / 2;
                         targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
+                        PointEffect.drawPoint(this.targetDom, targetEnemy.getPosition(), 0, this.pixSize);
+                        if (this._kickPlayer) this._kickPlayer.addScore(0);
                         this.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, 10);
+                        PointEffect.drawPoint(this.targetDom, this.position, 0, this.pixSize);
+                        if (this._kickPlayer) this._kickPlayer.addScore(0);
 
                         let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
+
+
                         this._star_effect.drawEffect(effectPos);
                         return;
                     } else {
@@ -216,12 +223,13 @@ namespace Charjs {
             this._grabbedPlayer = player;
         }
 
-        onKicked(kickDirection: Direction, kickPower: number): HitStatus {
+        onKicked(kickDirection: Direction, kickPower: number, player: IPlayer): HitStatus {
             this._yVector = 8 * this.pixSize;
             this._isKickBound = true;
             this._speed = 10;
             this._direction = kickDirection;
             this._steppedTimeout = 5000;
+            this._kickPlayer = player;
             return HitStatus.none;
         }
 
