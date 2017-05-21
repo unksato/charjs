@@ -1,4 +1,4 @@
-module.exports = function(grunt){
+module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-contrib-clean');
@@ -12,30 +12,30 @@ module.exports = function(grunt){
             default: {
                 src: ["src/**/*.ts"],
                 out: "dist/mario.js",
-                options : {
-                    module : 'amd',
-                    target : 'es5',
-                    sourceMap : true,
-                    experimentalDecorators : true
+                options: {
+                    module: 'amd',
+                    target: 'es5',
+                    sourceMap: true,
+                    experimentalDecorators: true
                 }
             },
             myq: {
-                src: ["src/util/deferred.ts","src/util/promise.ts"],
+                src: ["src/util/deferred.ts", "src/util/promise.ts"],
                 out: "dist/myq.js",
-                options : {
-                    module : 'amd',
-                    target : 'es5',
-                    sourceMap : true,
-                    experimentalDecorators : true
+                options: {
+                    module: 'amd',
+                    target: 'es5',
+                    sourceMap: true,
+                    experimentalDecorators: true
                 }
             },
             test: {
                 src: ["src/**/*.ts", "test/**/*.ts"],
-                options : {
-                    module : 'amd',
-                    target : 'es5',
-                    sourceMap : true,
-                    experimentalDecorators : true
+                options: {
+                    module: 'amd',
+                    target: 'es5',
+                    sourceMap: true,
+                    experimentalDecorators: true
                 }
             },
         },
@@ -48,7 +48,7 @@ module.exports = function(grunt){
 
         uglify: {
             default: {
-                options : {
+                options: {
                     sourceMap: 'dist/mario.min.js.map',
                     sourceMapRoot: '',
                     sourceMappingURL: 'mario.min.js.map',
@@ -56,17 +56,17 @@ module.exports = function(grunt){
                     sourceMapPrefix: 1
                 },
                 files: {
-                    'dist/mario.min.js' : ['dist/mario.js']
+                    'dist/mario.min.js': ['dist/mario.js']
                 }
             }
         },
 
         clean: {
             default: {
-                src: ['dist/*', 'src/**/*.js', 'src/**/*.js.map', 'test/**/*.js', 'test/**/*.js.map','output/*' ]
+                src: ['dist/*', 'src/**/*.js', 'src/**/*.js.map', 'test/**/*.js', 'test/**/*.js.map', 'output/*']
             }
         },
-        coveralls:{
+        coveralls: {
             options: {
                 force: false
             },
@@ -76,7 +76,7 @@ module.exports = function(grunt){
         }
     });
 
-    grunt.registerTask('build',['clean','ts','uglify']);
-    grunt.registerTask('test',['clean','ts:test','karma']);
+    grunt.registerTask('build', ['clean', 'ts:default', 'uglify']);
+    grunt.registerTask('test', ['clean', 'ts:test', 'karma']);
 
 }
