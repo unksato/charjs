@@ -20,10 +20,11 @@ class Sample {
     }
 }
 
-const expect = chai.expect;
-const assert = chai.assert;
-
 describe('Util.Promise', () => {
+
+    const expect = chai.expect;
+    const assert = chai.assert;
+
     it('simple resolved test', (done) => {
         let firstActualVal = null;
         let secondActualVal = null;
