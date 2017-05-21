@@ -161,11 +161,15 @@ namespace Charjs {
 
         private _pushedUpTimer: number = null;
 
-        onPushedUp(): void {
+        onPushedUp(player?: IPlayer): void {
             for (let enemy of this.entityEnemies) {
                 let ePos = enemy.getPosition();
                 let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                 this._star_effect.drawEffect(effectPos);
+                PointEffect.drawPoint(this.targetDom, ePos, 0, this.pixSize);
+                if (player) {
+                    player.addScore(0);
+                }
                 enemy.onEnemyAttack(Direction.Right, 0);
             }
 

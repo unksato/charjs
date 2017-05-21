@@ -181,7 +181,7 @@ namespace Charjs {
 
         public doGameOver(): void {
             if (this._gameoverCallback) {
-                this._gameoverCallback(this._point);
+                this._gameoverCallback(this._player.getScore());
             }
 
             for (let name in this._enemys) {
@@ -191,7 +191,7 @@ namespace Charjs {
 
         public doGool(): void {
             if (this._goolCallback) {
-                this._goolCallback(this._point);
+                this._goolCallback(this._player.getScore());
             }
 
             for (let name in this._enemys) {

@@ -20,9 +20,9 @@
 
             // Create Game Controller
             var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (point) {
-                ga('send', 'event', 'Game', 'gool', 'Sample Game');
+                ga('send', 'event', 'Gool', point, 'Sample Game');
             }, function (point) {
-                ga('send', 'event', 'Game', 'gameover', 'Sample Game');
+                ga('send', 'event', 'Gameover', point, 'Sample Game');
             });
 
             // Draw ground
@@ -32,6 +32,7 @@
             controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
 
             // Create Enemies
+            controller.CreateEnemyInstance(Charjs.KoopatroopaWorld, { x: 300, y: 0 }, Charjs.Direction.Left);
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.Right);
             controller.CreateEnemyInstance(Charjs.KoopatroopaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);

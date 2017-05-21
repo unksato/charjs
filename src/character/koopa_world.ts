@@ -223,7 +223,6 @@ namespace Charjs {
         }
 
         onEnemyAttack(attackDirection: Direction, kickPower: number): void {
-            if (this._xVector > 0) return;
             this._isKilled = true;
             this.stop();
             let yVector = 10 * this.pixSize;

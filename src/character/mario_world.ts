@@ -46,6 +46,8 @@ namespace Charjs {
                     this.gameOver();
                     break;
                 case HitStatus.attack:
+                    this.executeRun();
+                    this.executeJump();
                     this.draw(11, null, this._attackDirection, Vertical.Up, true);
                     this.stop();
                     setTimeout(() => {
@@ -93,9 +95,20 @@ namespace Charjs {
                 let grabedEnemyCenter = gEnemyPos.x + gEnemySize.width / 2;
                 let enemyCenter = ePos.x + eSize.width / 2;
                 enemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Right : Direction.Left, this._speed * 3);
-                this._grabedEnemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3)
+                this.onPoint(enemy.getPosition());
+
+                this._grabedEnemy.onEnemyAttack(grabedEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, this._speed * 3);
+                this.onPoint(this._grabedEnemy.getPosition());
+
                 this._grabedEnemy = null;
             }
+        }
+
+        private _point: number = 0;
+        private onPoint(targetPos: IPosition) {
+            PointEffect.drawPoint(this.targetDom, targetPos, this._point, this.pixSize);
+            this.addScore(this._point);
+            this._point++;
         }
 
         private doHitTest(): HitStatus {
@@ -121,6 +134,7 @@ namespace Charjs {
                             if (!this._grabbing) {
                                 if (this._isSpecial) {
                                     this._special_effect.drawEffect(enemys[name].getPosition());
+                                    this.onPoint(enemys[name].getPosition());
                                     enemys[name].onKilled();
                                     this._yVector = 2 * this.pixSize;
                                     return HitStatus.none;
@@ -128,7 +142,7 @@ namespace Charjs {
                                     let playerCenter = this.position.x + this.size.width / 2;
                                     let enemyCenter = ePos.x + eSize.width / 2;
                                     this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
-                                    return enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                                    return enemys[name].onKicked(this._attackDirection, this._speed * 3, this);
                                 }
                             } else {
                                 this.grabEnemy(enemys[name]);
@@ -139,6 +153,7 @@ namespace Charjs {
                         if (this._isJumping && this._yVector < 0) {
                             if (this._isSpecial) {
                                 this._special_effect.drawEffect(enemys[name].getPosition());
+                                this.onPoint(enemys[name].getPosition());
                                 enemys[name].onKilled();
                                 this._yVector = 2 * this.pixSize;
                             } else {
@@ -147,6 +162,7 @@ namespace Charjs {
                                 this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
 
                                 enemys[name].onStepped(this._attackDirection);
+                                this.onPoint(ePos);
                                 let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                                 this._star_effect.drawEffect(effectPos);
                                 this._yVector = 12 * this.pixSize;
@@ -174,7 +190,7 @@ namespace Charjs {
                 if (this.entity.ceiling != null) {
                     this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
                     if (this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0) {
-                        this.upperObject.onPushedUp();
+                        this.upperObject.onPushedUp(this);
                         this._yVector = 0;
                     }
                 } else {
@@ -184,6 +200,7 @@ namespace Charjs {
                 this.moveGrabedEnemy();
 
                 if (this.position.y <= ground) {
+                    this._point = 0;
                     this._isJumping = false;
                     this._yVector = 0;
                     this.position.y = ground;

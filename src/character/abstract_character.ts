@@ -55,13 +55,15 @@ namespace Charjs {
     export interface IPlayer extends ICharacter {
         onGool(callback?: Function): void;
         releaseEnemy(): void;
+        addScore(pointIndex: number): void;
+        getScore(): number;
     }
 
     export interface IEnemy extends ICharacter {
         onStepped(direction?: Direction): void;
         onGrabed(player: IPlayer): void;
-        onKicked(direction: Direction, kickPower: number): HitStatus;
-        onKilled(): void;
+        onKicked(direction: Direction, kickPower: number, player?: IPlayer): HitStatus;
+        onKilled(player?: IPlayer): void;
         onEnemyAttack(attackDirection: Direction, kickPower: number): void;
         isKilled(): boolean;
         isStepped(): boolean;
@@ -273,6 +275,12 @@ namespace Charjs {
         }
     }
 
+    export abstract class AbstractEffect extends AbstractObject {
+        constructor(targetDom: HTMLElement, protected pixSize = 2, public zIndex = 110, protected frameInterval = 45) {
+            super(targetDom, pixSize, undefined, undefined, false, false, zIndex);
+        }
+    }
+
     export abstract class AbstractCharacter extends AbstractObject implements ICharacter {
         abstract onAction(): void;
         abstract registerActionCommand(): void;
@@ -411,18 +419,47 @@ namespace Charjs {
     }
 
     export abstract class AbstractPlayer extends AbstractCharacter implements IPlayer {
+        score: number = 0;
         abstract onGool(callback?: Function): void;
         abstract releaseEnemy(): void;
+
+        getScore(): number {
+            return this.score;
+        }
+
+        addScore(pointIndex: number): void {
+            let point = 0;
+            switch (pointIndex) {
+                case 0:
+                    point = 200; break;
+                case 1:
+                    point = 400; break;
+                case 2:
+                    point = 800; break;
+                case 3:
+                    point = 1000; break;
+                case 4:
+                    point = 2000; break;
+                case 5:
+                    point = 4000; break;
+                case 6:
+                    point = 8000; break;
+                default:
+                // 1UP
+            }
+
+            this.score += point;
+        }
     }
 
     export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
         abstract onStepped(direction?: Direction): void;
         abstract onGrabed(player: IPlayer): void;
-        abstract onKicked(direction: number, kickPower: number): HitStatus;
+        abstract onKicked(direction: number, kickPower: number, player?: IPlayer): HitStatus;
         abstract isKilled(): boolean;
         abstract isStepped(): boolean;
         abstract drawAction(): void;
-        abstract onKilled(): void;
+        abstract onKilled(player?: IPlayer): void;
         abstract onEnemyAttack(attackDirection: Direction, kickPower: number): void;
 
         protected doHitTestWithOtherEnemy(): IEnemy {
@@ -450,15 +487,15 @@ namespace Charjs {
     }
 
     export interface IOtherObject extends IObject {
-        onPushedUp(): void;
-        onTrampled(): void;
+        onPushedUp(player?: IPlayer): void;
+        onTrampled(player?: IPlayer): void;
         isActive: boolean;
         entityEnemies: IEnemy[];
     }
 
     export abstract class AbstractOtherObject extends AbstractObject implements IOtherObject {
-        abstract onPushedUp(): void;
-        abstract onTrampled(): void;
+        abstract onPushedUp(player?: IPlayer): void;
+        abstract onTrampled(player?: IPlayer): void;
         isActive = true;
         entityEnemies: IEnemy[] = [];
     }
