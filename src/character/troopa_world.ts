@@ -70,6 +70,7 @@ namespace Charjs {
         private _star_effect: StarEffect = null;
         private _yVector = 0;
         private _grabbedPlayer: IPlayer = null;
+        private _targetPlayer: IPlayer = null;
         private _isKilled = false;
         private _isStepped = true;
         private _point: number = 0;
@@ -108,6 +109,9 @@ namespace Charjs {
                     let enemyCenter = this.position.x + this.size.width / 2;
                     targetEnemy.onEnemyAttack(targetEnemyCenter <= enemyCenter ? Direction.Left : Direction.Right, 10);
                     PointEffect.drawPoint(this.targetDom, targetEnemy.getPosition(), this._point, this.pixSize);
+                    if (this._targetPlayer) {
+                        this._targetPlayer.addScore(this._point);
+                    }
                     this._point++;
                     let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
                     this._star_effect.drawEffect(effectPos);
@@ -158,10 +162,11 @@ namespace Charjs {
             this._grabbedPlayer = player;
         }
 
-        onKicked(kickDirection: Direction, kickPower: number): HitStatus {
+        onKicked(kickDirection: Direction, kickPower: number, player?: IPlayer): HitStatus {
             this._isStepped = false;
             this._speed = 10;
             this._direction = kickDirection;
+            this._targetPlayer = player;
             return HitStatus.attack;
         }
 

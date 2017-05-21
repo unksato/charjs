@@ -107,6 +107,7 @@ namespace Charjs {
         private _point: number = 0;
         private onPoint(targetPos: IPosition) {
             PointEffect.drawPoint(this.targetDom, targetPos, this._point, this.pixSize);
+            this.addScore(this._point);
             this._point++;
         }
 
@@ -141,7 +142,7 @@ namespace Charjs {
                                     let playerCenter = this.position.x + this.size.width / 2;
                                     let enemyCenter = ePos.x + eSize.width / 2;
                                     this._attackDirection = playerCenter <= enemyCenter ? Direction.Right : Direction.Left;
-                                    return enemys[name].onKicked(this._attackDirection, this._speed * 3);
+                                    return enemys[name].onKicked(this._attackDirection, this._speed * 3, this);
                                 }
                             } else {
                                 this.grabEnemy(enemys[name]);
@@ -189,7 +190,7 @@ namespace Charjs {
                 if (this.entity.ceiling != null) {
                     this.position.y = Math.min(this.position.y + this._yVector, this.entity.ceiling - this.size.height + this.size.heightOffset);
                     if (this.position.y == this.entity.ceiling - this.size.height + this.size.heightOffset && this._yVector > 0) {
-                        this.upperObject.onPushedUp();
+                        this.upperObject.onPushedUp(this);
                         this._yVector = 0;
                     }
                 } else {
