@@ -23,7 +23,7 @@ class Sample {
 const expect = chai.expect;
 const assert = chai.assert;
 
-describe('Promise', () => {
+describe('Util.Promise', () => {
     it('simple resolved test', (done) => {
         let firstActualVal = null;
         let secondActualVal = null;
