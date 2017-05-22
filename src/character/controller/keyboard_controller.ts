@@ -5,8 +5,9 @@ namespace Charjs {
 
         constructor() { }
 
-        init(player: IPlayer, keyPattern?: any) {
+        init(player: IPlayer, keyPattern?: any): IController {
             this._player = player;
+            return this;
         }
 
         destroyCommand(): void {

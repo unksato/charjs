@@ -29,7 +29,7 @@ namespace Charjs {
     }
 
     export interface IController {
-        init(player: IPlayer, options?: any): void;
+        init(player: IPlayer, options?: any): IController;
         destroyCommand(): void;
         registerCommand(): void;
     }

@@ -7,8 +7,9 @@ namespace Charjs {
 
         constructor(private _padIndex = 0, private scanInterval = 45, private _gameMaster?: GameMaster) { }
 
-        init(player: IPlayer) {
+        init(player: IPlayer): IController {
             this._player = player;
+            return this;
         }
 
         static isGamepadConnected(index: number): boolean {

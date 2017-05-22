@@ -9,8 +9,9 @@ namespace Charjs {
         private _deviceDirection: number = 1;
         private _player: IPlayer = null;
 
-        init(player: IPlayer) {
+        init(player: IPlayer): IController {
             this._player = player;
+            return this;
         }
 
         private touch(touchLength: number) {
