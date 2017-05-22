@@ -11,6 +11,11 @@ namespace Charjs {
             this._player = player;
         }
 
+        static isGamepadConnected(index: number): boolean {
+            let gamepads: Gamepad[] = navigator.getGamepads ? navigator.getGamepads() : ((<any>navigator).webkitGetGamepads ? (<any>navigator).webkitGetGamepads() : []);
+            return gamepads[index] != null;
+        }
+
         private scangamepads() {
             let gamepads: Gamepad[] = navigator.getGamepads ? navigator.getGamepads() : ((<any>navigator).webkitGetGamepads ? (<any>navigator).webkitGetGamepads() : []);
             if (gamepads[this._padIndex]) {

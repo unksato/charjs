@@ -31,9 +31,16 @@
             // Create Player
             var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
 
-            var oneCon = new Charjs.KeyboardController();
+            var oneCon = null;
+
+            if (Charjs.GamepadController.isGamepadConnected(0)) {
+                oneCon = new Charjs.GamepadController();
+            } else {
+                oneCon = new Charjs.KeyboardController();
+            }
             oneCon.init(mario);
             oneCon.registerCommand();
+
 
             // Create Enemies
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
