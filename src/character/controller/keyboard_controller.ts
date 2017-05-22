@@ -1,0 +1,60 @@
+namespace Charjs {
+
+    export class KeyboardController implements IController {
+        private _player: IPlayer;
+
+        constructor() { }
+
+        init(player: IPlayer, keyPattern?: any) {
+            this._player = player;
+        }
+
+        destroyCommand(): void {
+        }
+
+        registerCommand(): void {
+            document.addEventListener('keydown', (e) => {
+                if (e.keyCode == 65 && !this._player.isSquat()) {
+                    this._player.onJump();
+                }
+                if (e.keyCode == 88 && !this._player.isSquat()) {
+                    this._player.onSpecialJump();
+                }
+                if (e.keyCode == 66 && !this._player.isJumping() && !this._player.isSquat()) {
+                    this._player.onSpeedUp();
+                    this._player.onGrab();
+                }
+                if (e.keyCode == 40 && !this._player.isJumping()) {
+                    this._player.onSquat();
+                }
+                if (e.keyCode == 37 && !this._player.isSquat()) {
+                    this._player.onLeft();
+                }
+                if (e.keyCode == 39 && !this._player.isSquat()) {
+                    this._player.onRight();
+                }
+            });
+            document.addEventListener('keyup', (e) => {
+                if (e.keyCode == 65) {
+                    this._player.onAbortJump();
+                }
+                if (e.keyCode == 88) {
+                    this._player.onAbortJump();
+                }
+                if (e.keyCode == 66) {
+                    this._player.onAbortSpeedUp();
+                    this._player.onAbortGrab();
+                }
+                if (e.keyCode == 40) {
+                    this._player.onAbortSquat();
+                }
+                if (e.keyCode == 37) {
+                    this._player.onAbortLeft();
+                }
+                if (e.keyCode == 39) {
+                    this._player.onAbortRight();
+                }
+            });
+        }
+    }
+}

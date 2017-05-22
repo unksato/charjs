@@ -28,6 +28,12 @@ namespace Charjs {
         heightOffset: number;
     }
 
+    export interface IController {
+        init(player: IPlayer, options?: any): void;
+        destroyCommand(): void;
+        registerCommand(): void;
+    }
+
     export class Entity {
         public ground: number = null;
         public ceiling: number = null;
@@ -44,6 +50,7 @@ namespace Charjs {
         setPosition(position: IPosition): void;
         getCharSize(): ISize;
         getCurrntElement(): HTMLCanvasElement;
+        getDirection(): Direction;
     }
 
     export interface ICharacter extends IObject {
@@ -57,6 +64,23 @@ namespace Charjs {
         releaseEnemy(): void;
         addScore(pointIndex: number): void;
         getScore(): number;
+
+        isSquat(): boolean;
+        isJumping(): boolean;
+
+        onGrab(): void;
+        onAbortGrab(): void;
+        onJump(): void;
+        onAbortJump(): void;
+        onSpeedUp(): void;
+        onAbortSpeedUp(): void;
+        onSpecialJump(): void;
+        onSquat(): void;
+        onAbortSquat(): void;
+        onLeft(): void;
+        onAbortLeft(): void;
+        onRight(): void;
+        onAbortRight(): void;
     }
 
     export interface IEnemy extends ICharacter {
@@ -273,6 +297,10 @@ namespace Charjs {
         public getCurrntElement(): HTMLCanvasElement {
             return this.currentAction;
         }
+
+        public getDirection(): Direction {
+            return this._direction;
+        }
     }
 
     export abstract class AbstractEffect extends AbstractObject {
@@ -420,6 +448,25 @@ namespace Charjs {
 
     export abstract class AbstractPlayer extends AbstractCharacter implements IPlayer {
         score: number = 0;
+
+        abstract isSquat(): boolean;
+        abstract isJumping(): boolean;
+
+        abstract onGrab(): void;
+        abstract onAbortGrab(): void;
+        abstract onJump(): void;
+        abstract onAbortJump(): void;
+        abstract onSpeedUp(): void;
+        abstract onAbortSpeedUp(): void;
+        abstract onSpecialJump(): void;
+        abstract onSquat(): void;
+        abstract onAbortSquat(): void;
+        abstract onLeft(): void;
+        abstract onAbortLeft(): void;
+        abstract onRight(): void;
+        abstract onAbortRight(): void;
+
+
         abstract onGool(callback?: Function): void;
         abstract releaseEnemy(): void;
 
