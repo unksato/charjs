@@ -6,7 +6,19 @@ namespace Charjs {
         private _player: IPlayer = null;
         private _isPausePressed = false;
 
-        constructor(private _padIndex = 0, private scanInterval = 45) { }
+        public static DefaultKeyAssign: IKeyAssign = {
+            left: 14,
+            right: 15,
+            up: 12,
+            down: 13,
+            a: 1,
+            b: 0,
+            x: 2,
+            y: 3,
+            pause: 9
+        };
+
+        constructor(private _padIndex = 0, private _keyAssign: IKeyAssign = GamepadController.DefaultKeyAssign, private scanInterval = 45) { }
 
         init(player: IPlayer): IController {
             this._player = player;
@@ -34,20 +46,20 @@ namespace Charjs {
             this._player.onAbortRight();
 
             // down
-            if (gamepad.buttons[13].pressed) {
+            if (gamepad.buttons[this._keyAssign.down].pressed) {
                 this._player.onSquat();
             }
             // left
-            if (gamepad.buttons[14].pressed) {
+            if (gamepad.buttons[this._keyAssign.left].pressed) {
                 this._player.onLeft();
             }
             // right
-            if (gamepad.buttons[15].pressed) {
+            if (gamepad.buttons[this._keyAssign.right].pressed) {
                 this._player.onRight();
             }
             // A or X or Y
-            if (gamepad.buttons[1].pressed || gamepad.buttons[2].pressed || gamepad.buttons[3].pressed) {
-                if (gamepad.buttons[2].pressed || gamepad.buttons[3].pressed) {
+            if (gamepad.buttons[this._keyAssign.a].pressed || gamepad.buttons[this._keyAssign.x].pressed || gamepad.buttons[this._keyAssign.y].pressed) {
+                if (gamepad.buttons[this._keyAssign.x].pressed || gamepad.buttons[this._keyAssign.y].pressed) {
                     this._player.onSpecialJump();
                 } else {
                     this._player.onJump();
@@ -56,7 +68,7 @@ namespace Charjs {
                 this._player.onAbortJump();
             }
             // B
-            if (gamepad.buttons[0].pressed) {
+            if (gamepad.buttons[this._keyAssign.b].pressed) {
                 this._player.onSpeedUp();
                 this._player.onGrab();
             } else {
@@ -64,12 +76,12 @@ namespace Charjs {
                 this._player.onAbortGrab();
             }
 
-            if (gamepad.buttons[9].pressed) {
-                if(!this._isPausePressed){
+            if (gamepad.buttons[this._keyAssign.pause].pressed) {
+                if (!this._isPausePressed) {
                     this._isPausePressed = true;
                     this._player.onPause();
                 }
-            }else{
+            } else {
                 this._isPausePressed = false;
             }
         }

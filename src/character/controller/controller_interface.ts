@@ -1,5 +1,5 @@
 namespace Charjs {
-    export interface IButtonAssign{
+    export interface IKeyAssign {
         right: number;
         left: number;
         up: number;
