@@ -29,27 +29,30 @@
             controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             // Create Player
-            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
-
+            var luigi = controller.CreatePlayerInstance(Charjs.LuigiWorld, { x: 0, y: 0 });
+            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 600, y: 0 });
             // Create Controller for player
-            var oneCon = null;
+            // var oneCon = null;
 
-            if (Charjs.GamepadController.isGamepadConnected(0)) {
-                oneCon = new Charjs.GamepadController();
-            } else {
-                if (Charjs.GameUtil.checkMobile()) {
-                    oneCon = new Charjs.TouchController();
-                } else {
-                    oneCon = new Charjs.KeyboardController();
-                }
-            }
+            // if (Charjs.GamepadController.isGamepadConnected(0)) {
+            //     oneCon = new Charjs.GamepadController();
+            // } else {
+            //     if (Charjs.GameUtil.checkMobile()) {
+            //         oneCon = new Charjs.TouchController();
+            //     } else {
+            //         oneCon = new Charjs.KeyboardController();
+            //     }
+            // }
+            // oneCon.init(luigi).registerCommand();
+            var oneCon = new Charjs.KeyboardController();
+            var twoCon = new Charjs.KeyboardController();
             oneCon.init(mario).registerCommand();
-
+            twoCon.init(luigi).registerCommand();
 
             // Create Enemies
-            controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
-            controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.Right);
-            controller.CreateEnemyInstance(Charjs.KoopatroopaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
+            // controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
+            // controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 60, y: 300 }, Charjs.Direction.Right);
+            // controller.CreateEnemyInstance(Charjs.KoopatroopaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
 
             // Create Blocks
             controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 48, y: 200 });

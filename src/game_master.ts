@@ -60,14 +60,16 @@ namespace Charjs {
         private _objects: { [key: string]: IOtherObject } = {}
         private _objectCount = 0;
 
-        private _player: IPlayer = null;
+        private _players: { [key: string]: IPlayer } = {};
+        private _playerCount = 0;
 
         private _isStarting = false;
 
         public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition, direction = Direction.Right): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
-            char._name = 'player';
-            this._player = <any>char;
+            char._name = 'player' + this._playerCount;
+            this._playerCount++;
+            this._players[char._name] = <any>char;
             char._gameMaster = this;
             return char;
         }
@@ -131,8 +133,8 @@ namespace Charjs {
         }
 
         public init(): void {
-            if (this._player) {
-                this._player.init(true);
+            for (let name in this._players) {
+                this._players[name].init(true);
             }
             for (let name in this._enemys) {
                 this._enemys[name].init(true);
@@ -144,8 +146,8 @@ namespace Charjs {
             for (let name in this._enemys) {
                 this._enemys[name].start();
             }
-            if (this._player) {
-                this._player.start();
+            for (let name in this._players) {
+                this._players[name].start();
             }
 
             this.registerCommand();
@@ -169,92 +171,92 @@ namespace Charjs {
         }
 
         public doGameOver(): void {
-            if (this._gameoverCallback) {
-                this._gameoverCallback(this._player.getScore());
-            }
+            // if (this._gameoverCallback) {
+            //     this._gameoverCallback(this._player.getScore());
+            // }
 
-            for (let name in this._enemys) {
-                this._enemys[name].stop();
-            }
+            // for (let name in this._enemys) {
+            //     this._enemys[name].stop();
+            // }
         }
 
         public doGool(): void {
-            if (this._goolCallback) {
-                this._goolCallback(this._player.getScore());
-            }
+            // if (this._goolCallback) {
+            //     this._goolCallback(this._player.getScore());
+            // }
 
-            for (let name in this._enemys) {
-                this._enemys[name].stop();
-            }
+            // for (let name in this._enemys) {
+            //     this._enemys[name].stop();
+            // }
 
-            let screen = document.body;
+            // let screen = document.body;
 
-            let blackScreen = document.createElement('div');
-            blackScreen.setAttribute("width", screen.clientWidth.toString());
-            blackScreen.setAttribute("height", screen.clientHeight.toString());
+            // let blackScreen = document.createElement('div');
+            // blackScreen.setAttribute("width", screen.clientWidth.toString());
+            // blackScreen.setAttribute("height", screen.clientHeight.toString());
 
-            let backgroundOpacity = 0;
+            // let backgroundOpacity = 0;
 
-            let goolDimTimer = this.addEvent(() => {
-                if (Math.floor(backgroundOpacity) != 1) {
-                    backgroundOpacity += 0.01;
-                } else {
-                    this.removeEvent(goolDimTimer);
-                    this._player.stop();
-                    this._player.onGool(() => {
+            // let goolDimTimer = this.addEvent(() => {
+            //     if (Math.floor(backgroundOpacity) != 1) {
+            //         backgroundOpacity += 0.01;
+            //     } else {
+            //         this.removeEvent(goolDimTimer);
+            //         this._player.stop();
+            //         this._player.onGool(() => {
 
-                        let goolDimOffTimer = this.addEvent(() => {
+            //             let goolDimOffTimer = this.addEvent(() => {
 
-                            if (backgroundOpacity.toFixed(2) != "0.20") {
-                                backgroundOpacity -= 0.05;
-                            } else {
-                                this.removeEvent(goolDimOffTimer);
-                                this._player.start();
-                                let circleSize = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
-                                let circleAnimationCount = 0;
-                                let circleTimer = this.addEvent(() => {
-                                    circleSize -= 20;
-                                    let rect = this._player.getCurrntElement().getBoundingClientRect();
-                                    this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
-                                    circleAnimationCount++;
-                                    if (circleSize <= 0) {
-                                        this.removeEvent(circleTimer);
-                                        this._player.destroy();
-                                    }
-                                });
-                            }
-                            blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
-                        });
-                    });
-                }
-                blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
-            });
+            //                 if (backgroundOpacity.toFixed(2) != "0.20") {
+            //                     backgroundOpacity -= 0.05;
+            //                 } else {
+            //                     this.removeEvent(goolDimOffTimer);
+            //                     this._player.start();
+            //                     let circleSize = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
+            //                     let circleAnimationCount = 0;
+            //                     let circleTimer = this.addEvent(() => {
+            //                         circleSize -= 20;
+            //                         let rect = this._player.getCurrntElement().getBoundingClientRect();
+            //                         this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
+            //                         circleAnimationCount++;
+            //                         if (circleSize <= 0) {
+            //                             this.removeEvent(circleTimer);
+            //                             this._player.destroy();
+            //                         }
+            //                     });
+            //                 }
+            //                 blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
+            //             });
+            //         });
+            //     }
+            //     blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
+            // });
 
-            this.targetDom.appendChild(blackScreen);
+            // this.targetDom.appendChild(blackScreen);
         }
 
         private drawBlackClipCircle(targetDom: HTMLElement, rect: ClientRect, size: number, count: number): void {
-            let element = document.createElement("canvas");
-            let ctx = element.getContext("2d");
-            let width = targetDom.scrollWidth;
-            let height = targetDom.scrollHeight;
-            element.id = `bkout_circle_${count}`;
-            element.setAttribute("width", width.toString());
-            element.setAttribute("height", height.toString());
-            element.style.cssText = `z-index: ${this._player.zIndex + 1}; position: absolute;`;
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, width, height);
+            // let element = document.createElement("canvas");
+            // let ctx = element.getContext("2d");
+            // let width = targetDom.scrollWidth;
+            // let height = targetDom.scrollHeight;
+            // element.id = `bkout_circle_${count}`;
+            // element.setAttribute("width", width.toString());
+            // element.setAttribute("height", height.toString());
+            // element.style.cssText = `z-index: ${this._player.zIndex + 1}; position: absolute;`;
+            // ctx.fillStyle = "black";
+            // ctx.fillRect(0, 0, width, height);
 
-            if (size > 0) {
-                ctx.globalCompositeOperation = "destination-out";
-                ctx.beginPath();
-                ctx.arc(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
-            }
-            ctx.fill();
+            // if (size > 0) {
+            //     ctx.globalCompositeOperation = "destination-out";
+            //     ctx.beginPath();
+            //     ctx.arc(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
+            // }
+            // ctx.fill();
 
-            targetDom.appendChild(element);
-            if (count != 0)
-                targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
+            // targetDom.appendChild(element);
+            // if (count != 0)
+            //     targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
         }
     }
 }
