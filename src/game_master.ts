@@ -156,17 +156,6 @@ namespace Charjs {
         }
 
         public registerCommand(): void {
-            document.addEventListener('keypress', this.defaultCommand);
-        }
-
-        defaultCommand = (e: KeyboardEvent) => {
-            if (e.keyCode == 32) {
-                if (this._isStarting) {
-                    this.stop();
-                } else {
-                    this.start();
-                }
-            }
         }
 
         public start(): void {
@@ -266,14 +255,6 @@ namespace Charjs {
             targetDom.appendChild(element);
             if (count != 0)
                 targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
-        }
-
-        public static checkMobile(): boolean {
-            if ((navigator.userAgent.indexOf('iPhone') > 0 && navigator.userAgent.indexOf('iPad') == -1) || navigator.userAgent.indexOf('iPod') > 0 || navigator.userAgent.indexOf('Android') > 0) {
-                return true;
-            } else {
-                return false;
-            }
         }
     }
 }

@@ -29,7 +29,22 @@
             controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             // Create Player
-            controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
+            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
+
+            // Create Controller for player
+            var oneCon = null;
+
+            if (Charjs.GamepadController.isGamepadConnected(0)) {
+                oneCon = new Charjs.GamepadController();
+            } else {
+                if (Charjs.GameUtil.checkMobile()) {
+                    oneCon = new Charjs.TouchController();
+                } else {
+                    oneCon = new Charjs.KeyboardController();
+                }
+            }
+            oneCon.init(mario).registerCommand();
+
 
             // Create Enemies
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
