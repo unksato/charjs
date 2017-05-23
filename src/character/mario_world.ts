@@ -447,6 +447,16 @@ namespace Charjs {
                 this._isRight = true;
         }
 
+        onPause(): void {
+            if(this._gameMaster){
+                if(this._gameMaster.isStarting()){
+                    this._gameMaster.stop();
+                }else{
+                    this._gameMaster.start();
+                }
+            }
+        }
+
         isSquat(): boolean {
             return this._isSquat;
         }

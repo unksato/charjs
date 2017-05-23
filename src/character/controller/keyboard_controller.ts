@@ -34,6 +34,9 @@ namespace Charjs {
                 if (e.keyCode == 39) {
                     this._player.onRight();
                 }
+                if (e.keyCode == 32) {
+                    this._player.onPause();
+                }
             });
             document.addEventListener('keyup', (e) => {
                 if (e.keyCode == 65) {

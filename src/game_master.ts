@@ -156,17 +156,6 @@ namespace Charjs {
         }
 
         public registerCommand(): void {
-            document.addEventListener('keypress', this.defaultCommand);
-        }
-
-        defaultCommand = (e: KeyboardEvent) => {
-            if (e.keyCode == 32) {
-                if (this._isStarting) {
-                    this.stop();
-                } else {
-                    this.start();
-                }
-            }
         }
 
         public start(): void {

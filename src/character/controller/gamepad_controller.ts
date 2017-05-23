@@ -4,8 +4,9 @@ namespace Charjs {
 
         private _gamepadTimer = null;
         private _player: IPlayer = null;
+        private _isPausePressed = false;
 
-        constructor(private _padIndex = 0, private scanInterval = 45, private _gameMaster?: GameMaster) { }
+        constructor(private _padIndex = 0, private scanInterval = 45) { }
 
         init(player: IPlayer): IController {
             this._player = player;
@@ -64,12 +65,12 @@ namespace Charjs {
             }
 
             if (gamepad.buttons[9].pressed) {
-                if (this._gameMaster) {
-                    if (this._gameMaster.isStarting())
-                        this._gameMaster.stop();
-                    else
-                        this._gameMaster.start();
+                if(!this._isPausePressed){
+                    this._isPausePressed = true;
+                    this._player.onPause();
                 }
+            }else{
+                this._isPausePressed = false;
             }
         }
 

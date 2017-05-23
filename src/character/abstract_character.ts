@@ -81,6 +81,7 @@ namespace Charjs {
         onAbortLeft(): void;
         onRight(): void;
         onAbortRight(): void;
+        onPause(): void;
     }
 
     export interface IEnemy extends ICharacter {
@@ -465,7 +466,7 @@ namespace Charjs {
         abstract onAbortLeft(): void;
         abstract onRight(): void;
         abstract onAbortRight(): void;
-
+        abstract onPause(): void;
 
         abstract onGool(callback?: Function): void;
         abstract releaseEnemy(): void;
