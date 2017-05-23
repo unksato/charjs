@@ -75,7 +75,7 @@ namespace Charjs {
             });
 
             window.addEventListener('deviceorientation', (e) => {
-                if (!this._player.isSquat()) {
+                // if (!this._player.isSquat()) {
                     let motion = 0;
                     switch (this._screenModeForMobile) {
                         case 'PORTRAIT':
@@ -109,7 +109,7 @@ namespace Charjs {
                         this._player.onAbortSpeedUp();
                         this._canSpeedUpForMobile = true;
                     }
-                }
+                // }
             });
             window.addEventListener('orientationchange', (e) => {
                 if (window.matchMedia("(orientation: portrait)").matches) {

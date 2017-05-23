@@ -359,7 +359,9 @@ namespace Charjs {
         }
 
         onGrab(): void {
-            this._grabbing = true;
+            if(!this._isJumping && !this._isSquat){
+                this._grabbing = true;
+            }
         }
 
         onAbortGrab(): void {
@@ -376,7 +378,7 @@ namespace Charjs {
         }
 
         onJump(): void {
-            if (!this._isJumping) {
+            if (!this._isJumping && !this._isSquat) {
                 this._isJumping = true;
                 this._isSpecial = false;
                 this._yVector = this._jumpPower * this.pixSize;
@@ -384,7 +386,7 @@ namespace Charjs {
         }
 
         onSpecialJump(): void {
-            if (!this._isJumping) {
+            if (!this._isJumping && !this._isSquat) {
                 this._isJumping = true;
                 this._isSpecial = true;
                 this._yVector = this._jumpPower * this.pixSize;
@@ -406,7 +408,9 @@ namespace Charjs {
         }
 
         onSquat(): void {
-            this._isSquat = true;
+            if(!this._isJumping){
+                this._isSquat = true;
+            }
         }
 
         onAbortSquat(): void {
@@ -414,9 +418,11 @@ namespace Charjs {
         }
 
         onRight(): void {
-            this._rightPushed = true;
-            if (!this._isLeft)
-                this._isRight = true;
+            if(!this._isSquat){
+                this._rightPushed = true;
+                if (!this._isLeft)
+                    this._isRight = true;
+            }
         }
 
         onAbortRight(): void {
@@ -427,9 +433,11 @@ namespace Charjs {
         }
 
         onLeft(): void {
-            this._leftPushed = true;
-            if (!this._isRight)
-                this._isLeft = true;
+            if(!this._isSquat){
+                this._leftPushed = true;
+                if (!this._isRight)
+                    this._isLeft = true;
+            }
         }
 
         onAbortLeft(): void {
