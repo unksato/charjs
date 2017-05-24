@@ -19,9 +19,9 @@
         window.onload = function () {
 
             // Create Game Controller
-            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (point) {
+            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (name, point) {
                 ga('send', 'event', 'Gool', point, 'Sample Game');
-            }, function (point) {
+            }, function (name, point) {
                 ga('send', 'event', 'Gameover', point, 'Sample Game');
             });
 

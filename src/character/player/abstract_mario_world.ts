@@ -466,7 +466,7 @@ namespace Charjs {
         }
 
         public gameOver(): void {
-            if (this._gameMaster) this._gameMaster.doGameOver();
+            if (this._gameMaster) this._gameMaster.doGameOver(this);
             this.stop();
             this._gameOverTimer = this.getTimer(() => {
                 if (this._gameOverWaitCount < 20) {

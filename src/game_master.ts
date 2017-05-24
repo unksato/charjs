@@ -5,17 +5,17 @@ namespace Charjs {
         static GAME_MASTERS = {};
         private _point = 0;
 
-        constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (point: number) }, private _gameoverCallback?: { (point: number) }) {
+        constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (name : string, point: number) }, private _gameoverCallback?: { (name : string, point: number) }) {
         }
 
-        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (point: number) }, clearCallback?: { (point: number) }): GameMaster {
+        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name : string, point: number) }, gameoverCallback?: { (name : string, point: number) }): GameMaster {
             let master = GameMaster.GAME_MASTERS[gameName];
             if (master) {
                 return master;
             }
 
             if (targetDom) {
-                master = new GameMaster(targetDom, charSize, frameInterval, goolCallback, clearCallback);
+                master = new GameMaster(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
                 GameMaster.GAME_MASTERS[gameName] = master;
                 return master;
             } else {
@@ -100,7 +100,16 @@ namespace Charjs {
             this.cleanEntityEnemiesFromAllObjects(char);
             delete this._enemys[char._name];
             if (Object.keys(this._enemys).length == 0) {
-                this.doGool();
+                let goolPlayer = null;
+                for(let p in this._players){
+                    if (goolPlayer == null){
+                        goolPlayer = this._players[p];
+                    }else{
+                        goolPlayer = goolPlayer.getScore() < this._players[p].getScore() ? this._players[p] : goolPlayer;
+                    }
+                }
+
+                this.doGool(goolPlayer);
             }
         }
 
@@ -170,93 +179,93 @@ namespace Charjs {
             this._isStarting = false;
         }
 
-        public doGameOver(): void {
-            // if (this._gameoverCallback) {
-            //     this._gameoverCallback(this._player.getScore());
-            // }
+        public doGameOver(player: IPlayer): void {
+            if (this._gameoverCallback) {
+                this._gameoverCallback(player._name, player.getScore());
+            }
 
-            // for (let name in this._enemys) {
-            //     this._enemys[name].stop();
-            // }
+            for (let name in this._enemys) {
+                this._enemys[name].stop();
+            }
         }
 
-        public doGool(): void {
-            // if (this._goolCallback) {
-            //     this._goolCallback(this._player.getScore());
-            // }
+        public doGool(player: IPlayer): void {
+            if (this._goolCallback) {
+                this._goolCallback(player._name, player.getScore());
+            }
 
-            // for (let name in this._enemys) {
-            //     this._enemys[name].stop();
-            // }
+            for (let name in this._enemys) {
+                this._enemys[name].stop();
+            }
 
-            // let screen = document.body;
+            let screen = document.body;
 
-            // let blackScreen = document.createElement('div');
-            // blackScreen.setAttribute("width", screen.clientWidth.toString());
-            // blackScreen.setAttribute("height", screen.clientHeight.toString());
+            let blackScreen = document.createElement('div');
+            blackScreen.setAttribute("width", screen.clientWidth.toString());
+            blackScreen.setAttribute("height", screen.clientHeight.toString());
 
-            // let backgroundOpacity = 0;
+            let backgroundOpacity = 0;
 
-            // let goolDimTimer = this.addEvent(() => {
-            //     if (Math.floor(backgroundOpacity) != 1) {
-            //         backgroundOpacity += 0.01;
-            //     } else {
-            //         this.removeEvent(goolDimTimer);
-            //         this._player.stop();
-            //         this._player.onGool(() => {
+            let goolDimTimer = this.addEvent(() => {
+                if (Math.floor(backgroundOpacity) != 1) {
+                    backgroundOpacity += 0.01;
+                } else {
+                    this.removeEvent(goolDimTimer);
+                    player.stop();
+                    player.onGool(() => {
 
-            //             let goolDimOffTimer = this.addEvent(() => {
+                        let goolDimOffTimer = this.addEvent(() => {
 
-            //                 if (backgroundOpacity.toFixed(2) != "0.20") {
-            //                     backgroundOpacity -= 0.05;
-            //                 } else {
-            //                     this.removeEvent(goolDimOffTimer);
-            //                     this._player.start();
-            //                     let circleSize = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
-            //                     let circleAnimationCount = 0;
-            //                     let circleTimer = this.addEvent(() => {
-            //                         circleSize -= 20;
-            //                         let rect = this._player.getCurrntElement().getBoundingClientRect();
-            //                         this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
-            //                         circleAnimationCount++;
-            //                         if (circleSize <= 0) {
-            //                             this.removeEvent(circleTimer);
-            //                             this._player.destroy();
-            //                         }
-            //                     });
-            //                 }
-            //                 blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
-            //             });
-            //         });
-            //     }
-            //     blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
-            // });
+                            if (backgroundOpacity.toFixed(2) != "0.20") {
+                                backgroundOpacity -= 0.05;
+                            } else {
+                                this.removeEvent(goolDimOffTimer);
+                                player.start();
+                                let circleSize = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
+                                let circleAnimationCount = 0;
+                                let circleTimer = this.addEvent(() => {
+                                    circleSize -= 20;
+                                    let rect = player.getCurrntElement().getBoundingClientRect();
+                                    this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount, player.zIndex + 1);
+                                    circleAnimationCount++;
+                                    if (circleSize <= 0) {
+                                        this.removeEvent(circleTimer);
+                                        player.destroy();
+                                    }
+                                });
+                            }
+                            blackScreen.style.cssText = `z-index: ${player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
+                        });
+                    });
+                }
+                blackScreen.style.cssText = `z-index: ${player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
+            });
 
-            // this.targetDom.appendChild(blackScreen);
+            this.targetDom.appendChild(blackScreen);
         }
 
-        private drawBlackClipCircle(targetDom: HTMLElement, rect: ClientRect, size: number, count: number): void {
-            // let element = document.createElement("canvas");
-            // let ctx = element.getContext("2d");
-            // let width = targetDom.scrollWidth;
-            // let height = targetDom.scrollHeight;
-            // element.id = `bkout_circle_${count}`;
-            // element.setAttribute("width", width.toString());
-            // element.setAttribute("height", height.toString());
-            // element.style.cssText = `z-index: ${this._player.zIndex + 1}; position: absolute;`;
-            // ctx.fillStyle = "black";
-            // ctx.fillRect(0, 0, width, height);
+        private drawBlackClipCircle(targetDom: HTMLElement, rect: ClientRect, size: number, count: number, zIndex: number): void {
+            let element = document.createElement("canvas");
+            let ctx = element.getContext("2d");
+            let width = targetDom.scrollWidth;
+            let height = targetDom.scrollHeight;
+            element.id = `bkout_circle_${count}`;
+            element.setAttribute("width", width.toString());
+            element.setAttribute("height", height.toString());
+            element.style.cssText = `z-index: ${zIndex}; position: absolute;`;
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, width, height);
 
-            // if (size > 0) {
-            //     ctx.globalCompositeOperation = "destination-out";
-            //     ctx.beginPath();
-            //     ctx.arc(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
-            // }
-            // ctx.fill();
+            if (size > 0) {
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                ctx.arc(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, size, 0, Math.PI * 2, false);
+            }
+            ctx.fill();
 
-            // targetDom.appendChild(element);
-            // if (count != 0)
-            //     targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
+            targetDom.appendChild(element);
+            if (count != 0)
+                targetDom.removeChild(document.getElementById(`bkout_circle_${count - 1}`));
         }
     }
 }
