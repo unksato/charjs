@@ -112,6 +112,7 @@ namespace Charjs {
         private _animationIndex = null;
         private _isStarting = false;
         private _star_effect: StarEffect = null;
+        private _pushedUpTimer: number = null;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 90, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, false, true, zIndex - 2, frameInterval);
@@ -126,12 +127,12 @@ namespace Charjs {
 
         private start(): void {
             if (this._animationIndex !== null && this.animation != null) {
-                this.isActive = false;
+                this._isActive = false;
                 this._isStarting = true;
                 this._pushedUpTimer = this.getTimer(() => {
                     if (this._animationIndex >= this.animation.length) {
                         this.animation = null;
-                        this.isActive = true;
+                        this._isActive = true;
                         this._animationIndex = null;
                         this.removeCommand();
                         this.stop();
@@ -159,18 +160,13 @@ namespace Charjs {
             }
         }
 
-        private _pushedUpTimer: number = null;
+        isActive() {
+            return this._isActive;
+        }
 
-        onPushedUp(player?: IPlayer): void {
+        onPushedUp(player: IPlayer): void {
             for (let enemy of this.entityEnemies) {
-                let ePos = enemy.getPosition();
-                let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
-                this._star_effect.drawEffect(effectPos);
-                PointEffect.drawPoint(this.targetDom, ePos, 0, this.pixSize);
-                if (player) {
-                    player.addScore(0);
-                }
-                enemy.onEnemyAttack(Direction.Right, 0);
+                enemy.onPushedUp(player);
             }
 
             if (!this._pushedUpTimer) {
@@ -181,9 +177,7 @@ namespace Charjs {
             }
         }
 
-        onTrampled(): void {
-
-        }
+        onStepped(player: IPlayer): void { }
 
         private registerCommand() {
             document.addEventListener('keypress', this.defaultCommand);

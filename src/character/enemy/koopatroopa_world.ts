@@ -68,19 +68,12 @@ namespace Charjs {
         private _step = KoopatroopaWorld.STEP;
         private _currentStep = 0;
         private _actionIndex = 0;
-        private _isKilled = false;
         private _yVector = 0;
         private _isRevivalJumping = false;
-        private _star_effect: StarEffect = null;
         private _vertical: Vertical = Vertical.Up;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
-            this._star_effect = new StarEffect(targetDom, pixSize).init();
-        }
-
-        isKilled(): boolean {
-            return this._isKilled;
         }
 
         private executeJump(): void {
@@ -136,13 +129,13 @@ namespace Charjs {
         }
 
         onKilled(): void {
-            this._isKilled = true;
+            this._isActive = false;
             this.destroy();
         }
 
-        onStepped(attackDirection: Direction): void {
+        onStepped(player: IPlayer, attackDirection: Direction): void {
             if (this._gameMaster) {
-                this._isKilled = true;
+                this._isActive = false;
                 let troopa = this._gameMaster.CreateEnemyInstance(TroopaWorld, this.position, this._direction);
                 let koopa = this._gameMaster.CreateEnemyInstance(KoopaWorld, { x: this.position.x + 20, y: this.position.y }, attackDirection);
                 troopa.init(true).start();
@@ -161,7 +154,7 @@ namespace Charjs {
 
         onEnemyAttack(attackDirection: Direction, kickPower: number): void {
             this.stop();
-            this._isKilled = true;
+            this._isActive = false;
             let yVector = 10 * this.pixSize;
             let direction = attackDirection == Direction.Right ? 1 : -1;
 

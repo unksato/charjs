@@ -5,10 +5,10 @@ namespace Charjs {
         static GAME_MASTERS = {};
         private _point = 0;
 
-        constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (name : string, point: number) }, private _gameoverCallback?: { (name : string, point: number) }) {
+        constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (name: string, point: number) }, private _gameoverCallback?: { (name: string, point: number) }) {
         }
 
-        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name : string, point: number) }, gameoverCallback?: { (name : string, point: number) }): GameMaster {
+        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameMaster {
             let master = GameMaster.GAME_MASTERS[gameName];
             if (master) {
                 return master;
@@ -57,7 +57,7 @@ namespace Charjs {
 
         private _enemys: { [key: string]: IEnemy } = {}
         private _enemyCount = 0;
-        private _objects: { [key: string]: IOtherObject } = {}
+        private _objects: { [key: string]: IObject } = {}
         private _objectCount = 0;
 
         private _players: { [key: string]: IPlayer } = {};
@@ -101,10 +101,10 @@ namespace Charjs {
             delete this._enemys[char._name];
             if (Object.keys(this._enemys).length == 0) {
                 let goolPlayer = null;
-                for(let p in this._players){
-                    if (goolPlayer == null){
+                for (let p in this._players) {
+                    if (goolPlayer == null) {
                         goolPlayer = this._players[p];
-                    }else{
+                    } else {
                         goolPlayer = goolPlayer.getScore() < this._players[p].getScore() ? this._players[p] : goolPlayer;
                     }
                 }
@@ -117,11 +117,11 @@ namespace Charjs {
             return this._enemys;
         }
 
-        public getApproachedObjects(target: ICharacter, radius: number): IOtherObject[] {
+        public getApproachedObjects(target: ICharacter, radius: number): IObject[] {
             let objs = [];
             this.cleanEntityEnemiesFromAllObjects(target);
             for (let name in this._objects) {
-                if (this._objects[name].isActive) {
+                if (this._objects[name].isActive()) {
                     let objPos = this._objects[name].getPosition();
                     let charPos = target.getPosition();
                     if (charPos.x - radius < objPos.x && objPos.x < charPos.x + radius &&
@@ -136,7 +136,9 @@ namespace Charjs {
         public cleanEntityEnemiesFromAllObjects(target: ICharacter) {
             if (target instanceof AbstractEnemy) {
                 for (let name in this._objects) {
-                    this._objects[name].entityEnemies.some((v, i, array) => { if (v == target) array.splice(i, 1); return true; });
+                    if (this._objects[name] instanceof AbstractOtherObject) {
+                        (<AbstractOtherObject>this._objects[name]).entityEnemies.some((v, i, array) => { if (v == target) array.splice(i, 1); return true; });
+                    }
                 }
             }
         }
