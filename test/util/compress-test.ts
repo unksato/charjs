@@ -1,8 +1,5 @@
 /// <reference path="../../typings/index.d.ts" />
 /// <reference path="../../src/util/compress.ts" />
-/// <reference path="../../src/character/abstract_character.ts" />
-/// <reference path="../../src/character/effect/point_effect.ts" />
-
 
 describe('Util.Compress', () => {
 
