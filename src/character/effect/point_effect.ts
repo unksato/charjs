@@ -80,6 +80,9 @@ namespace Charjs {
         //     ]
         // ];
 
+        onPushedUp(player: IPlayer) { }
+        onStepped(player: IPlayer) { }
+
         init(): PointEffect {
             super.init();
             return this;

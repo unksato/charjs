@@ -46,23 +46,16 @@ namespace Charjs {
         private _step = GoombaWorld.STEP;
         private _currentStep = 0;
         private _actionIndex = 0;
-        private _isKilled = false;
         private _yVector = 0;
         private _jumpPower = 12;
         private _isKickBound = false;
         private _isRevivalJumping = false;
         private _grabbedPlayer: IPlayer = null;
         private _kickPlayer: IPlayer = null;
-        private _star_effect: StarEffect = null;
         private _vertical: Vertical = Vertical.Up;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
-            this._star_effect = new StarEffect(targetDom, pixSize).init();
-        }
-
-        isKilled(): boolean {
-            return this._isKilled;
         }
 
         private executeJump(): void {
@@ -169,9 +162,7 @@ namespace Charjs {
                         if (this._kickPlayer) this._kickPlayer.addScore(0);
 
                         let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
-
-
-                        this._star_effect.drawEffect(effectPos);
+                        StarEffect.drawStar(this.targetDom, effectPos, this.pixSize);
                         return;
                     } else {
                         if (!this.isStepped()) {
@@ -209,7 +200,7 @@ namespace Charjs {
         }
 
         onKilled(): void {
-            this._isKilled = true;
+            this._isActive = false;
             this.destroy();
         }
 
@@ -235,7 +226,7 @@ namespace Charjs {
 
         onEnemyAttack(attackDirection: Direction, kickPower: number): void {
             this.stop();
-            this._isKilled = true;
+            this._isActive = false;
             let yVector = 10 * this.pixSize;
             let direction = (attackDirection == Direction.Right ? 1 : -1);
 

@@ -19,9 +19,9 @@
         window.onload = function () {
 
             // Create Game Controller
-            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (point) {
+            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (name, point) {
                 ga('send', 'event', 'Gool', point, 'Sample Game');
-            }, function (point) {
+            }, function (name, point) {
                 ga('send', 'event', 'Gameover', point, 'Sample Game');
             });
 
@@ -29,22 +29,26 @@
             controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             // Create Player
-            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 0, y: 0 });
-
+            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
             // Create Controller for player
-            var oneCon = null;
-
-            if (Charjs.GamepadController.isGamepadConnected(0)) {
-                oneCon = new Charjs.GamepadController();
+            if (Charjs.GameUtil.checkMobile()) {
+                var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
+                var touchController = new Charjs.TouchController();
+                touchController.init(mario).registerCommand();
             } else {
-                if (Charjs.GameUtil.checkMobile()) {
-                    oneCon = new Charjs.TouchController();
+                if (Charjs.GamepadController.isGamepadConnected(0)) {
+                    var gamepad1 = new Charjs.GamepadController();
+                    gamepad1.init(mario).registerCommand();
+                    if (Charjs.GamepadController.isGamepadConnected(1)) {
+                        var luigi = controller.CreatePlayerInstance(Charjs.LuigiWorld, { x: document.body.clientWidth - 42, y: 0 }, Charjs.Direction.Left);
+                        var gamepad2 = new Charjs.GamepadController(1);
+                        gamepad2.init(luigi).registerCommand();
+                    }
                 } else {
-                    oneCon = new Charjs.KeyboardController();
+                    var keybord = new Charjs.KeyboardController();
+                    keybord.init(mario).registerCommand();
                 }
             }
-            oneCon.init(mario).registerCommand();
-
 
             // Create Enemies
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);

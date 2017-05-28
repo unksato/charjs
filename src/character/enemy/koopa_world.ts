@@ -92,7 +92,6 @@ namespace Charjs {
         // ]];
 
         private _yVector = 0;
-        private _isKilled = false;
         private static STEP = 2;
         private _step = KoopaWorld.STEP;
         private _currentStep = 0;
@@ -100,14 +99,10 @@ namespace Charjs {
         private _xVector = 0;
         private static DEFAULT_SPEED = 1;
         private _speed = KoopaWorld.DEFAULT_SPEED;
-        private _star_effect: StarEffect = null;
-        private _slip_effect: SlipEffect = null;
         private _vertical = Vertical.Up;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
-            this._star_effect = new StarEffect(targetDom, pixSize).init();
-            this._slip_effect = new SlipEffect(targetDom, this.pixSize).init();
         }
 
         private executeJump(): void {
@@ -166,7 +161,7 @@ namespace Charjs {
             let action = this._actionIndex;
 
             if (this._xVector > 0) {
-                this._slip_effect.drawEffect(this.position);
+                SlipEffect.drawSlip(this.targetDom, this.position, this.pixSize);
                 action = 2;
             } else {
                 if (this._currentStep < this._step) {
@@ -189,10 +184,6 @@ namespace Charjs {
             this.draw(action, null, this._direction, this._vertical, true);
         }
 
-        isKilled(): boolean {
-            return this._isKilled;
-        }
-
         onKilled(): void {
             this.destroy();
         }
@@ -202,7 +193,7 @@ namespace Charjs {
         }
 
         onStepped(): void {
-            this._isKilled = true;
+            this._isActive = false;
             this.stop();
             this.draw(4, null, this._direction, Vertical.Up, true);
             let timercount = 0;
@@ -223,7 +214,7 @@ namespace Charjs {
         }
 
         onEnemyAttack(attackDirection: Direction, kickPower: number): void {
-            this._isKilled = true;
+            this._isActive = false;
             this.stop();
             let yVector = 10 * this.pixSize;
             let direction = (attackDirection == Direction.Right ? 1 : -1);

@@ -57,7 +57,7 @@ namespace Charjs {
         //     [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
         // ]];
 
-        private static animation = [
+        private animation = [
             { index: 2, direction: Direction.Right },
             { index: 1, direction: Direction.Left },
             { index: 0, direction: Direction.Right },
@@ -67,17 +67,14 @@ namespace Charjs {
         private animationIndex = 4;
         private _speed = 0;
         private _actionIndex = 0;
-        private _star_effect: StarEffect = null;
         private _yVector = 0;
         private _grabbedPlayer: IPlayer = null;
         private _targetPlayer: IPlayer = null;
-        private _isKilled = false;
         private _isStepped = true;
         private _point: number = 0;
 
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, true, zIndex - 1, frameInterval);
-            this._star_effect = new StarEffect(targetDom, pixSize).init();
         }
 
         private executeJump(): void {
@@ -94,16 +91,12 @@ namespace Charjs {
             }
         }
 
-        isKilled(): boolean {
-            return this._isKilled;
-        }
-
         onAction(): void {
             if (!this._grabbedPlayer) {
                 let directionUpdated = this.updateDirection();
 
                 let targetEnemy = this.doHitTestWithOtherEnemy();
-                if (targetEnemy && this._speed > 0 && !targetEnemy.isKilled()) {
+                if (targetEnemy && this._speed > 0 && targetEnemy.isActive()) {
                     let ePos = targetEnemy.getPosition();
                     let targetEnemyCenter = ePos.x + targetEnemy.getCharSize().width / 2;
                     let enemyCenter = this.position.x + this.size.width / 2;
@@ -114,7 +107,7 @@ namespace Charjs {
                     }
                     this._point++;
                     let effectPos: IPosition = { x: (this.position.x + ePos.x) / 2, y: (this.position.y + ePos.y) / 2 };
-                    this._star_effect.drawEffect(effectPos);
+                    StarEffect.drawStar(this.targetDom, effectPos, this.pixSize);
                 }
 
                 this.updateEntity();
@@ -133,11 +126,11 @@ namespace Charjs {
         drawAction(): void {
             let direction = this._direction;
             if (this._speed > 0) {
-                if (this.animationIndex >= TroopaWorld.animation.length) {
+                if (this.animationIndex >= this.animation.length) {
                     this.animationIndex = 0;
                 }
-                this._actionIndex = TroopaWorld.animation[this.animationIndex].index;
-                direction = TroopaWorld.animation[this.animationIndex].direction;
+                this._actionIndex = this.animation[this.animationIndex].index;
+                direction = this.animation[this.animationIndex].direction;
                 this.animationIndex++;
             }
 
@@ -171,7 +164,7 @@ namespace Charjs {
         }
 
         onEnemyAttack(attackDirection: Direction, kickPower: number): void {
-            this._isKilled = true;
+            this._isActive = false;
             this.stop();
             let yVector = 10 * this.pixSize;
             let direction = (attackDirection == Direction.Right ? 1 : -1);

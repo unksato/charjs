@@ -1,315 +1,6 @@
+/// <reference path="abstract_object.ts" />
+
 namespace Charjs {
-    export enum Direction {
-        Right,
-        Left
-    }
-
-    export enum Vertical {
-        Up,
-        Down
-    }
-
-    export enum HitStatus {
-        none,
-        dammage,
-        attack,
-        grab
-    }
-
-    export interface IPosition {
-        x: number;
-        y: number;
-    }
-
-    export interface ISize {
-        width: number;
-        height: number;
-        widthOffset: number;
-        heightOffset: number;
-    }
-
-    export interface IController {
-        init(player: IPlayer, options?: any): IController;
-        destroyCommand(): void;
-        registerCommand(): void;
-    }
-
-    export class Entity {
-        public ground: number = null;
-        public ceiling: number = null;
-        public right: number = null;
-        public left: number = null;
-    }
-
-    export interface IObject {
-        _name: string;
-        zIndex: number;
-        init(shadow?: boolean): void;
-        destroy(): void;
-        getPosition(): IPosition;
-        setPosition(position: IPosition): void;
-        getCharSize(): ISize;
-        getCurrntElement(): HTMLCanvasElement;
-        getDirection(): Direction;
-    }
-
-    export interface ICharacter extends IObject {
-        start(): void;
-        stop(): void;
-        onAction(): void;
-    }
-
-    export interface IPlayer extends ICharacter {
-        onGool(callback?: Function): void;
-        releaseEnemy(): void;
-        addScore(pointIndex: number): void;
-        getScore(): number;
-
-        isSquat(): boolean;
-        isJumping(): boolean;
-
-        onGrab(): void;
-        onAbortGrab(): void;
-        onJump(): void;
-        onAbortJump(): void;
-        onSpeedUp(): void;
-        onAbortSpeedUp(): void;
-        onSpecialJump(): void;
-        onSquat(): void;
-        onAbortSquat(): void;
-        onLeft(): void;
-        onAbortLeft(): void;
-        onRight(): void;
-        onAbortRight(): void;
-        onPause(): void;
-    }
-
-    export interface IEnemy extends ICharacter {
-        onStepped(direction?: Direction): void;
-        onGrabed(player: IPlayer): void;
-        onKicked(direction: Direction, kickPower: number, player?: IPlayer): HitStatus;
-        onKilled(player?: IPlayer): void;
-        onEnemyAttack(attackDirection: Direction, kickPower: number): void;
-        isKilled(): boolean;
-        isStepped(): boolean;
-        drawAction(): void;
-    }
-
-    export abstract class AbstractPixel {
-        protected static SHADOW_SIZE = 2;
-
-        protected static drawPixel(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, alpha: number = 1) {
-            ctx.globalAlpha = alpha;
-            ctx.beginPath();
-            ctx.rect(x * size, y * size, size, size);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        }
-        protected static createCanvasElement(width: number, height: number, zIndex: number, shadow: boolean = false): HTMLCanvasElement {
-            let element = document.createElement("canvas");
-            if (shadow) {
-                width += AbstractPixel.SHADOW_SIZE;
-            }
-            element.setAttribute("width", width.toString());
-            element.setAttribute("height", height.toString());
-            element.style.cssText = `z-index: ${zIndex}; position: absolute; bottom: 0;`;
-            return element;
-        }
-
-        toImage(element: HTMLCanvasElement): MyQ.Promise<HTMLImageElement> {
-            let q = MyQ.Deferred.defer<HTMLImageElement>();
-            let img = new Image();
-            img.onload = () => {
-                q.resolve(img);
-            }
-            img.src = element.toDataURL();
-            return q.promise;
-        }
-
-        static deepCopy<T>(obj: T): T {
-            return JSON.parse(JSON.stringify(obj));
-        }
-    }
-
-    export abstract class AbstractObject extends AbstractPixel implements IObject {
-        public _name = '';
-
-        public _gameMaster: GameMaster = null;
-
-        abstract chars: number[][][];
-        abstract cchars: number[][][];
-        abstract colors: string[];
-
-        protected currentAction: HTMLCanvasElement = null;
-        protected _rightActions: HTMLCanvasElement[] = [];
-        protected _leftActions: HTMLCanvasElement[] = [];
-        protected _verticalRightActions: HTMLCanvasElement[] = [];
-        protected _verticalLeftActions: HTMLCanvasElement[] = [];
-
-        protected size: ISize = { height: 0, width: 0, widthOffset: 0, heightOffset: 0 };
-        protected entity: Entity = { ground: null, ceiling: null, right: null, left: null };
-
-        constructor(protected targetDom: HTMLElement, protected pixSize = 2, protected position: IPosition = { x: 0, y: 0 }, protected _direction = Direction.Right, private useLeft = true, private useVertical = true, public zIndex = 100, protected frameInterval = 45) {
-            super();
-        }
-
-        protected uncompress() {
-            if (this.cchars && this.cchars.length > 0) {
-                this.chars = [];
-                for (let cchar of this.cchars) {
-                    this.chars.push(Util.Compression.RLD(cchar));
-                }
-            } else {
-                // // for debbuging code
-                // this.cchars = [];
-                // for (let char of this.chars) {
-                //     this.cchars.push(Util.Compression.RLE(char));
-                // }
-                // console.log(this._name + ":" + JSON.stringify(this.cchars));
-            }
-        }
-
-        protected getTimer(func: Function, interval: number): number {
-            if (this._gameMaster) {
-                return this._gameMaster.addEvent(func);
-            } else {
-                return setInterval(func, interval);
-            }
-        }
-
-        protected removeTimer(id: number): void {
-            if (this._gameMaster) {
-                this._gameMaster.removeEvent(id);
-            } else {
-                clearInterval(id);
-            }
-        }
-
-        init(shadow: boolean = false): AbstractObject {
-            this.uncompress();
-            for (let charactor of this.chars) {
-                this._rightActions.push(this.createCharacterAction(charactor, shadow));
-                if (this.useLeft)
-                    this._leftActions.push(this.createCharacterAction(charactor, shadow, true));
-                if (this.useVertical) {
-                    this._verticalRightActions.push(this.createCharacterAction(charactor, shadow, false, true));
-                    if (this.useLeft)
-                        this._verticalLeftActions.push(this.createCharacterAction(charactor, shadow, true, true));
-                }
-            }
-            return this;
-        }
-
-        private createCharacterAction(charactorMap: number[][], shadow: boolean, isReverse: boolean = false, isVerticalRotation: boolean = false): HTMLCanvasElement {
-            this.size.width = this.pixSize * charactorMap[0].length;
-            this.size.height = this.pixSize * charactorMap.length;
-            let element = AbstractObject.createCanvasElement(this.size.width, this.size.height, this.zIndex, shadow);
-            AbstractCharacter.drawCharacter(element.getContext('2d'), charactorMap, this.colors, this.pixSize, isReverse, isVerticalRotation, shadow);
-            return element;
-        }
-
-        protected static drawCharacter(ctx: CanvasRenderingContext2D, map: number[][], colors: string[], size: number, reverse: boolean, vertical: boolean, shadow: boolean): void {
-            if (reverse)
-                ctx.transform(-1, 0, 0, 1, map[0].length * size, 0);
-            if (vertical)
-                ctx.transform(1, 0, 0, -1, 0, map.length * size);
-
-            if (shadow) {
-                for (let y = 0; y < map.length; y++) {
-                    for (let x = 0; x < map[y].length; x++) {
-                        if (map[y][x] != 0) {
-                            AbstractObject.drawPixel(ctx, x + (1 * (reverse ? -1 : 1)), y + (1 * (vertical ? -1 : 1)), size, '#000', 0.3);
-                        }
-                    }
-                }
-            }
-            for (let y = 0; y < map.length; y++) {
-                for (let x = 0; x < map[y].length; x++) {
-                    if (map[y][x] != 0) {
-                        AbstractObject.drawPixel(ctx, x, y, size, colors[map[y][x]]);
-                    }
-                }
-            }
-        }
-
-        protected removeCharacter(target?: HTMLCanvasElement): void {
-            if (target) {
-                this.targetDom.removeChild(target);
-            } else {
-                if (this.currentAction != null) {
-                    this.targetDom.removeChild(this.currentAction);
-                    this.currentAction = null;
-                }
-            }
-        }
-
-        public draw(index: number = 0, position: IPosition = null, direction: Direction = Direction.Right, vertical: Vertical = Vertical.Up, removeCurrent = false, drawOffset = this.pixSize, clone = false): HTMLCanvasElement {
-            if (removeCurrent && !clone) this.removeCharacter();
-            position = position || this.position;
-            let action = null;
-            if (vertical == Vertical.Up) {
-                action = direction == Direction.Right ? this._rightActions[index] : this._leftActions[index];
-            } else {
-                action = direction == Direction.Right ? this._verticalRightActions[index] : this._verticalLeftActions[index];
-            }
-            if (clone) {
-                action = this.cloneCanvas(action);
-            } else {
-                this.currentAction = action;
-            }
-
-            action.style.left = position.x + 'px';
-            action.style.bottom = (position.y - drawOffset) + 'px';
-            action.style.zIndex = this.zIndex.toString();
-            this.targetDom.appendChild(action);
-
-            return action;
-        }
-
-        private cloneCanvas(oldCanvas: HTMLCanvasElement): HTMLCanvasElement {
-            let canvas = AbstractPixel.createCanvasElement(oldCanvas.width, oldCanvas.height, this.zIndex + 1);
-            let ctx = canvas.getContext("2d");
-            ctx.drawImage(oldCanvas, 0, 0);
-            return canvas;
-        }
-
-        public refresh() {
-            this.currentAction.style.left = this.position.x + 'px';
-            this.currentAction.style.bottom = this.position.y + 'px';
-        }
-
-        public destroy(): void {
-            this.removeCharacter();
-        }
-
-        public getPosition(): IPosition {
-            return this.position;
-        }
-
-        public setPosition(pos: IPosition): void {
-            this.position = pos;
-        }
-
-        public getCharSize(): ISize {
-            return this.size;
-        }
-
-        public getCurrntElement(): HTMLCanvasElement {
-            return this.currentAction;
-        }
-
-        public getDirection(): Direction {
-            return this._direction;
-        }
-    }
-
-    export abstract class AbstractEffect extends AbstractObject {
-        constructor(targetDom: HTMLElement, protected pixSize = 2, public zIndex = 110, protected frameInterval = 45) {
-            super(targetDom, pixSize, undefined, undefined, false, false, zIndex);
-        }
-    }
-
     export abstract class AbstractCharacter extends AbstractObject implements ICharacter {
         abstract onAction(): void;
         abstract registerActionCommand(): void;
@@ -320,20 +11,20 @@ namespace Charjs {
 
         public registerCommand(): void {
             if (!this._gameMaster) {
-                document.addEventListener('keypress', this.defaultCommand);
+                // document.addEventListener('keypress', this.defaultCommand);
             }
             this.registerActionCommand();
         }
 
-        defaultCommand = (e: KeyboardEvent) => {
-            if (e.keyCode == 32) {
-                if (this._isStarting) {
-                    this.stop();
-                } else {
-                    this.start();
-                }
-            }
-        }
+        // defaultCommand = (e: KeyboardEvent) => {
+        //     if (e.keyCode == 32) {
+        //         if (this._isStarting) {
+        //             this.stop();
+        //         } else {
+        //             this.start();
+        //         }
+        //     }
+        // }
 
         public init(shadow: boolean = false) {
             super.init(shadow);
@@ -361,14 +52,14 @@ namespace Charjs {
             if (this._gameMaster && this instanceof AbstractEnemy) {
                 this._gameMaster.deleteEnemy(<any>this);
             }
-            document.removeEventListener('keypress', this.defaultCommand);
+            // document.removeEventListener('keypress', this.defaultCommand);
             super.destroy();
         }
 
-        protected upperObject: IOtherObject = null;
-        protected underObject: IOtherObject = null;
-        protected rightObject: IOtherObject = null;
-        protected leftObject: IOtherObject = null;
+        protected upperObject: IObject = null;
+        protected underObject: IObject = null;
+        protected rightObject: IObject = null;
+        protected leftObject: IObject = null;
 
         protected updateEntity(): void {
             if (this._gameMaster) {
@@ -399,8 +90,10 @@ namespace Charjs {
                         // ground update
                         if (cPosUnder >= oPosUpper && (this.entity.ground === null || this.entity.ground <= oPosUpper)) {
                             this.underObject = obj;
-                            if (cPosUnder == oPosUpper && this instanceof AbstractEnemy && obj.entityEnemies.indexOf(this) == -1)
-                                obj.entityEnemies.push(this);
+                            if (obj instanceof AbstractOtherObject) {
+                                if (cPosUnder == oPosUpper && this instanceof AbstractEnemy && obj.entityEnemies.indexOf(this) == -1)
+                                    obj.entityEnemies.push(this);
+                            }
                             this.entity.ground = oPosUpper;
                             continue;
                         }
@@ -445,164 +138,5 @@ namespace Charjs {
 
             return currentDirection != this._direction;
         }
-    }
-
-    export abstract class AbstractPlayer extends AbstractCharacter implements IPlayer {
-        score: number = 0;
-
-        abstract isSquat(): boolean;
-        abstract isJumping(): boolean;
-
-        abstract onGrab(): void;
-        abstract onAbortGrab(): void;
-        abstract onJump(): void;
-        abstract onAbortJump(): void;
-        abstract onSpeedUp(): void;
-        abstract onAbortSpeedUp(): void;
-        abstract onSpecialJump(): void;
-        abstract onSquat(): void;
-        abstract onAbortSquat(): void;
-        abstract onLeft(): void;
-        abstract onAbortLeft(): void;
-        abstract onRight(): void;
-        abstract onAbortRight(): void;
-        abstract onPause(): void;
-
-        abstract onGool(callback?: Function): void;
-        abstract releaseEnemy(): void;
-
-        getScore(): number {
-            return this.score;
-        }
-
-        addScore(pointIndex: number): void {
-            let point = 0;
-            switch (pointIndex) {
-                case 0:
-                    point = 200; break;
-                case 1:
-                    point = 400; break;
-                case 2:
-                    point = 800; break;
-                case 3:
-                    point = 1000; break;
-                case 4:
-                    point = 2000; break;
-                case 5:
-                    point = 4000; break;
-                case 6:
-                    point = 8000; break;
-                default:
-                // 1UP
-            }
-
-            this.score += point;
-        }
-    }
-
-    export abstract class AbstractEnemy extends AbstractCharacter implements IEnemy {
-        abstract onStepped(direction?: Direction): void;
-        abstract onGrabed(player: IPlayer): void;
-        abstract onKicked(direction: number, kickPower: number, player?: IPlayer): HitStatus;
-        abstract isKilled(): boolean;
-        abstract isStepped(): boolean;
-        abstract drawAction(): void;
-        abstract onKilled(player?: IPlayer): void;
-        abstract onEnemyAttack(attackDirection: Direction, kickPower: number): void;
-
-        protected doHitTestWithOtherEnemy(): IEnemy {
-            if (this._gameMaster) {
-                let enemys = this._gameMaster.getEnemys();
-                for (let name in enemys) {
-                    if (enemys[name] != this && !enemys[name].isKilled()) {
-                        let ePos = enemys[name].getPosition();
-                        let eSize = enemys[name].getCharSize()
-                        if (this.position.y > ePos.y + eSize.height)
-                            continue;
-                        if (ePos.y > this.position.y + this.size.height)
-                            continue;
-                        if (this.position.x > ePos.x + eSize.width)
-                            continue;
-                        if (ePos.x > this.position.x + this.size.width)
-                            continue;
-                        return enemys[name];
-                    }
-                }
-            }
-            return null;
-        }
-
-    }
-
-    export interface IOtherObject extends IObject {
-        onPushedUp(player?: IPlayer): void;
-        onTrampled(player?: IPlayer): void;
-        isActive: boolean;
-        entityEnemies: IEnemy[];
-    }
-
-    export abstract class AbstractOtherObject extends AbstractObject implements IOtherObject {
-        abstract onPushedUp(player?: IPlayer): void;
-        abstract onTrampled(player?: IPlayer): void;
-        isActive = true;
-        entityEnemies: IEnemy[] = [];
-    }
-
-    export abstract class AbstractGround extends AbstractObject {
-        abstract setBorderImage(): void;
-
-        protected createBorderImage(): MyQ.Promise<string> {
-            this.uncompress();
-
-            let q = MyQ.Deferred.defer<string>();
-
-            let element = document.createElement("canvas");
-
-            let ctx = element.getContext("2d");
-            let size = this.pixSize * this.chars[0].length * 3;
-
-            element.setAttribute("width", size.toString());
-            element.setAttribute("height", size.toString());
-
-            let offsetSize = this.pixSize * this.chars[0].length;
-
-            let drawProcess: MyQ.Promise<{}>[] = [];
-
-            drawProcess.push(this.drawImage(ctx, this.chars[0], false, false, 0, 0));
-            drawProcess.push(this.drawImage(ctx, this.chars[1], false, false, offsetSize, 0));
-            drawProcess.push(this.drawImage(ctx, this.chars[0], true, false, offsetSize * 2, 0));
-            drawProcess.push(this.drawImage(ctx, this.chars[2], false, false, 0, offsetSize));
-            drawProcess.push(this.drawImage(ctx, this.chars[3], false, false, offsetSize, offsetSize));
-            drawProcess.push(this.drawImage(ctx, this.chars[2], true, false, offsetSize * 2, offsetSize));
-            drawProcess.push(this.drawImage(ctx, this.chars[0], false, true, 0, offsetSize * 2));
-            drawProcess.push(this.drawImage(ctx, this.chars[1], false, true, offsetSize, offsetSize * 2));
-            drawProcess.push(this.drawImage(ctx, this.chars[0], true, true, offsetSize * 2, offsetSize * 2));
-
-            MyQ.Promise.all(drawProcess).then(() => {
-                q.resolve(element.toDataURL());
-            });
-
-            return q.promise;
-        }
-
-        private drawImage(ctx: CanvasRenderingContext2D, map: number[][], reverse: boolean, vertical: boolean, offsetX: number, offsetY: number): MyQ.Promise<{}> {
-            let q = MyQ.Deferred.defer();
-            this.createImage(map, reverse, vertical).then((img) => {
-                ctx.drawImage(img, offsetX, offsetY);
-                q.resolve({});
-            });
-            return q.promise;
-        }
-
-        private createImage(map: number[][], reverse: boolean, vertical: boolean): MyQ.Promise<HTMLImageElement> {
-            let element = document.createElement('canvas');
-            let ctx = element.getContext("2d");
-            let size = this.pixSize * map.length;
-            element.setAttribute("width", size.toString());
-            element.setAttribute("height", size.toString());
-            AbstractCharacter.drawCharacter(ctx, map, this.colors, this.pixSize, reverse, vertical, false);
-            return this.toImage(element);
-        }
-
     }
 }

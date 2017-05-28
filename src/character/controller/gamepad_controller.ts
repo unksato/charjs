@@ -22,6 +22,7 @@ namespace Charjs {
 
         init(player: IPlayer): IController {
             this._player = player;
+            this._player.setController(this);
             return this;
         }
 

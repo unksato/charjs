@@ -1,7 +1,7 @@
 // Karma configuration
 // Generated on Wed May 17 2017 11:18:14 GMT+0900 (東京 (標準時))
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -9,11 +9,22 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha','chai','sinon'],
+    frameworks: ['mocha', 'chai', 'sinon'],
 
     // list of files / patterns to load in the browser
     files: [
-      './src/**/*.js',
+      './src/character/abstract_pixel.js',
+      './src/character/abstract_object.js',
+      './src/character/abstract_character.js',
+      './src/character/controller/**/*.js',
+      './src/character/effect/**/*.js',
+      './src/character/enemy/**/*.js',
+      './src/character/object/**/*.js',
+      './src/character/player/abstract_player.js',
+      './src/character/player/abstract_mario_world.js',
+      './src/character/player/mario_world.js',
+      './src/character/player/luigi_world.js',
+      './src/util/**/*.js',
       './test/**/*-test.js'
     ],
 
@@ -30,7 +41,7 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['mocha','junit','coverage','remap-coverage'],
+    reporters: ['mocha', 'junit', 'coverage', 'remap-coverage'],
 
     junitReporter: {
       outputDir: 'output/junit/'

@@ -5,17 +5,17 @@ namespace Charjs {
         static GAME_MASTERS = {};
         private _point = 0;
 
-        constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (point: number) }, private _gameoverCallback?: { (point: number) }) {
+        constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (name: string, point: number) }, private _gameoverCallback?: { (name: string, point: number) }) {
         }
 
-        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (point: number) }, clearCallback?: { (point: number) }): GameMaster {
+        public static GetController(gameName: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameMaster {
             let master = GameMaster.GAME_MASTERS[gameName];
             if (master) {
                 return master;
             }
 
             if (targetDom) {
-                master = new GameMaster(targetDom, charSize, frameInterval, goolCallback, clearCallback);
+                master = new GameMaster(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
                 GameMaster.GAME_MASTERS[gameName] = master;
                 return master;
             } else {
@@ -57,17 +57,19 @@ namespace Charjs {
 
         private _enemys: { [key: string]: IEnemy } = {}
         private _enemyCount = 0;
-        private _objects: { [key: string]: IOtherObject } = {}
+        private _objects: { [key: string]: IObject } = {}
         private _objectCount = 0;
 
-        private _player: IPlayer = null;
+        private _players: { [key: string]: IPlayer } = {};
+        private _playerCount = 0;
 
         private _isStarting = false;
 
         public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition, direction = Direction.Right): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
-            char._name = 'player';
-            this._player = <any>char;
+            char._name = 'player' + this._playerCount;
+            this._playerCount++;
+            this._players[char._name] = <any>char;
             char._gameMaster = this;
             return char;
         }
@@ -98,7 +100,16 @@ namespace Charjs {
             this.cleanEntityEnemiesFromAllObjects(char);
             delete this._enemys[char._name];
             if (Object.keys(this._enemys).length == 0) {
-                this.doGool();
+                let goolPlayer = null;
+                for (let p in this._players) {
+                    if (goolPlayer == null) {
+                        goolPlayer = this._players[p];
+                    } else {
+                        goolPlayer = goolPlayer.getScore() < this._players[p].getScore() ? this._players[p] : goolPlayer;
+                    }
+                }
+
+                this.doGool(goolPlayer);
             }
         }
 
@@ -106,11 +117,11 @@ namespace Charjs {
             return this._enemys;
         }
 
-        public getApproachedObjects(target: ICharacter, radius: number): IOtherObject[] {
+        public getApproachedObjects(target: ICharacter, radius: number): IObject[] {
             let objs = [];
             this.cleanEntityEnemiesFromAllObjects(target);
             for (let name in this._objects) {
-                if (this._objects[name].isActive) {
+                if (this._objects[name].isActive()) {
                     let objPos = this._objects[name].getPosition();
                     let charPos = target.getPosition();
                     if (charPos.x - radius < objPos.x && objPos.x < charPos.x + radius &&
@@ -119,20 +130,29 @@ namespace Charjs {
                     }
                 }
             }
+
+            for (let name in this._players) {
+                if (target != this._players[name]) {
+                    objs.push(this._players[name]);
+                }
+            }
+
             return objs;
         }
 
         public cleanEntityEnemiesFromAllObjects(target: ICharacter) {
             if (target instanceof AbstractEnemy) {
                 for (let name in this._objects) {
-                    this._objects[name].entityEnemies.some((v, i, array) => { if (v == target) array.splice(i, 1); return true; });
+                    if (this._objects[name] instanceof AbstractOtherObject) {
+                        (<AbstractOtherObject>this._objects[name]).entityEnemies.some((v, i, array) => { if (v == target) array.splice(i, 1); return true; });
+                    }
                 }
             }
         }
 
         public init(): void {
-            if (this._player) {
-                this._player.init(true);
+            for (let name in this._players) {
+                this._players[name].init(true);
             }
             for (let name in this._enemys) {
                 this._enemys[name].init(true);
@@ -144,8 +164,8 @@ namespace Charjs {
             for (let name in this._enemys) {
                 this._enemys[name].start();
             }
-            if (this._player) {
-                this._player.start();
+            for (let name in this._players) {
+                this._players[name].start();
             }
 
             this.registerCommand();
@@ -168,19 +188,24 @@ namespace Charjs {
             this._isStarting = false;
         }
 
-        public doGameOver(): void {
+        public doGameOver(player: IPlayer): void {
             if (this._gameoverCallback) {
-                this._gameoverCallback(this._player.getScore());
+                this._gameoverCallback(player._name, player.getScore());
             }
 
-            for (let name in this._enemys) {
-                this._enemys[name].stop();
+            delete this._players[player._name];
+            this._playerCount--;
+
+            if (this._playerCount == 0) {
+                for (let name in this._enemys) {
+                    this._enemys[name].stop();
+                }
             }
         }
 
-        public doGool(): void {
+        public doGool(player: IPlayer): void {
             if (this._goolCallback) {
-                this._goolCallback(this._player.getScore());
+                this._goolCallback(player._name, player.getScore());
             }
 
             for (let name in this._enemys) {
@@ -200,8 +225,8 @@ namespace Charjs {
                     backgroundOpacity += 0.01;
                 } else {
                     this.removeEvent(goolDimTimer);
-                    this._player.stop();
-                    this._player.onGool(() => {
+                    player.stop();
+                    player.onGool(() => {
 
                         let goolDimOffTimer = this.addEvent(() => {
 
@@ -209,31 +234,31 @@ namespace Charjs {
                                 backgroundOpacity -= 0.05;
                             } else {
                                 this.removeEvent(goolDimOffTimer);
-                                this._player.start();
+                                player.start();
                                 let circleSize = screen.clientWidth > screen.clientHeight ? screen.clientWidth : screen.clientHeight;
                                 let circleAnimationCount = 0;
                                 let circleTimer = this.addEvent(() => {
                                     circleSize -= 20;
-                                    let rect = this._player.getCurrntElement().getBoundingClientRect();
-                                    this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount);
+                                    let rect = player.getCurrntElement().getBoundingClientRect();
+                                    this.drawBlackClipCircle(screen, rect, circleSize, circleAnimationCount, player.zIndex + 1);
                                     circleAnimationCount++;
                                     if (circleSize <= 0) {
                                         this.removeEvent(circleTimer);
-                                        this._player.destroy();
+                                        player.destroy();
                                     }
                                 });
                             }
-                            blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
+                            blackScreen.style.cssText = `z-index: ${player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
                         });
                     });
                 }
-                blackScreen.style.cssText = `z-index: ${this._player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
+                blackScreen.style.cssText = `z-index: ${player.zIndex - 1}; position: absolute; background-color:black; width: 100vw; height: 100vh; border: 0;opacity: ${backgroundOpacity};`;
             });
 
             this.targetDom.appendChild(blackScreen);
         }
 
-        private drawBlackClipCircle(targetDom: HTMLElement, rect: ClientRect, size: number, count: number): void {
+        private drawBlackClipCircle(targetDom: HTMLElement, rect: ClientRect, size: number, count: number, zIndex: number): void {
             let element = document.createElement("canvas");
             let ctx = element.getContext("2d");
             let width = targetDom.scrollWidth;
@@ -241,7 +266,7 @@ namespace Charjs {
             element.id = `bkout_circle_${count}`;
             element.setAttribute("width", width.toString());
             element.setAttribute("height", height.toString());
-            element.style.cssText = `z-index: ${this._player.zIndex + 1}; position: absolute;`;
+            element.style.cssText = `z-index: ${zIndex}; position: absolute;`;
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, width, height);
 
