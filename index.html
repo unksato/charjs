@@ -30,24 +30,25 @@
 
             // Create Player
             var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
-            var luigi = controller.CreatePlayerInstance(Charjs.LuigiWorld, { x: document.body.clientWidth - 42, y: 0 }, Charjs.Direction.Left);
             // Create Controller for player
-            // var oneCon = null;
-
-            // if (Charjs.GamepadController.isGamepadConnected(0)) {
-            //     oneCon = new Charjs.GamepadController();
-            // } else {
-            //     if (Charjs.GameUtil.checkMobile()) {
-            //         oneCon = new Charjs.TouchController();
-            //     } else {
-            //         oneCon = new Charjs.KeyboardController();
-            //     }
-            // }
-            // oneCon.init(luigi).registerCommand();
-            var oneCon = new Charjs.GamepadController();
-            var twoCon = new Charjs.GamepadController(1);
-            oneCon.init(mario).registerCommand();
-            twoCon.init(luigi).registerCommand();
+            if (Charjs.GameUtil.checkMobile()) {
+                var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
+                var touchController = new Charjs.TouchController();
+                touchController.init(mario).registerCommand();
+            } else {
+                if (Charjs.GamepadController.isGamepadConnected(0)) {
+                    var gamepad1 = new Charjs.GamepadController();
+                    gamepad1.init(mario).registerCommand();
+                    if (Charjs.GamepadController.isGamepadConnected(1)) {
+                        var luigi = controller.CreatePlayerInstance(Charjs.LuigiWorld, { x: document.body.clientWidth - 42, y: 0 }, Charjs.Direction.Left);
+                        var gamepad2 = new Charjs.GamepadController(1);
+                        gamepad2.init(luigi).registerCommand();
+                    }
+                } else {
+                    var keybord = new Charjs.KeyboardController();
+                    keybord.init(mario).registerCommand();
+                }
+            }
 
             // Create Enemies
             controller.CreateEnemyInstance(Charjs.GoombaWorld, { x: 150, y: 0 }, Charjs.Direction.Left);
