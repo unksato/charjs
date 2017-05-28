@@ -130,6 +130,13 @@ namespace Charjs {
                     }
                 }
             }
+
+            for (let name in this._players) {
+                if (target != this._players[name]) {
+                    objs.push(this._players[name]);
+                }
+            }
+
             return objs;
         }
 
@@ -186,8 +193,13 @@ namespace Charjs {
                 this._gameoverCallback(player._name, player.getScore());
             }
 
-            for (let name in this._enemys) {
-                this._enemys[name].stop();
+            delete this._players[player._name];
+            this._playerCount--;
+
+            if (this._playerCount == 0) {
+                for (let name in this._enemys) {
+                    this._enemys[name].stop();
+                }
             }
         }
 

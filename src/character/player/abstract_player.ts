@@ -26,6 +26,12 @@ namespace Charjs {
         abstract onGool(callback?: Function): void;
         abstract releaseEnemy(): void;
 
+        protected _gameController: IController = null;
+
+        setController(gameController: IController) {
+            this._gameController = gameController;
+        }
+
         getScore(): number {
             return this.score;
         }

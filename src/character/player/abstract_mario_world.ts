@@ -31,7 +31,6 @@ namespace Charjs {
         private _leftPushed = false;
         private _attackDirection: Direction = Direction.Right;
 
-
         constructor(targetDom, pixSize: number, position: IPosition, direction: Direction = Direction.Right, zIndex = 100, frameInterval = 45) {
             super(targetDom, pixSize, position, direction, true, false, zIndex, frameInterval);
         }
@@ -471,6 +470,7 @@ namespace Charjs {
 
         public gameOver(): void {
             if (this._gameMaster) this._gameMaster.doGameOver(this);
+            if (this._gameController) this._gameController.destroyCommand();
             this.stop();
             this._gameOverTimer = this.getTimer(() => {
                 if (this._gameOverWaitCount < 20) {

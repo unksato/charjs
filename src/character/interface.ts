@@ -70,6 +70,8 @@ namespace Charjs {
         addScore(pointIndex: number): void;
         getScore(): number;
 
+        setController(gameController: IController): void;
+
         isSquat(): boolean;
         isJumping(): boolean;
 
