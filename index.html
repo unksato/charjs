@@ -32,7 +32,6 @@
             var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
             // Create Controller for player
             if (Charjs.GameUtil.checkMobile()) {
-                var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
                 var touchController = new Charjs.TouchController();
                 touchController.init(mario).registerCommand();
             } else {
