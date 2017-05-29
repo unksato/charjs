@@ -15,6 +15,8 @@ namespace Charjs {
         abstract onSpeedUp(): void;
         abstract onAbortSpeedUp(): void;
         abstract onSpecialJump(): void;
+        abstract onLookup(): void;
+        abstract onAbortLookup(): void;
         abstract onSquat(): void;
         abstract onAbortSquat(): void;
         abstract onLeft(): void;
