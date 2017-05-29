@@ -84,11 +84,11 @@ namespace Charjs {
                         break;
                     case 'LANSCAPE':
                         motionRun = Math.round(e.beta) * this._deviceDirection;
-                        motionUp = 90 - (Math.round(e.gamma) * this._deviceDirection);
+                        motionUp = 90 - (Math.round(e.gamma) * this._deviceDirection * -1);
                         break;
                 }
 
-                if (motionUp > 60) {
+                if (motionUp > 70) {
                     this._player.onLookup();
                 } else {
                     this._player.onAbortLookup();
