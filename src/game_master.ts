@@ -88,6 +88,7 @@ namespace Charjs {
             char._name = 'obj_' + this._objectCount;
             this._objectCount++;
             this._objects[char._name] = <any>char;
+            char._gameMaster = this;
             return char;
         }
 

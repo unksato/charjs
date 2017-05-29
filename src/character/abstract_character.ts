@@ -11,20 +11,20 @@ namespace Charjs {
 
         public registerCommand(): void {
             if (!this._gameMaster) {
-                // document.addEventListener('keypress', this.defaultCommand);
+                document.addEventListener('keypress', this.defaultCommand);
             }
             this.registerActionCommand();
         }
 
-        // defaultCommand = (e: KeyboardEvent) => {
-        //     if (e.keyCode == 32) {
-        //         if (this._isStarting) {
-        //             this.stop();
-        //         } else {
-        //             this.start();
-        //         }
-        //     }
-        // }
+        defaultCommand = (e: KeyboardEvent) => {
+            if (e.keyCode == 32) {
+                if (this._isStarting) {
+                    this.stop();
+                } else {
+                    this.start();
+                }
+            }
+        }
 
         public init(shadow: boolean = false) {
             super.init(shadow);
@@ -52,7 +52,9 @@ namespace Charjs {
             if (this._gameMaster && this instanceof AbstractEnemy) {
                 this._gameMaster.deleteEnemy(<any>this);
             }
-            // document.removeEventListener('keypress', this.defaultCommand);
+            if (!this._gameMaster) {
+                document.removeEventListener('keypress', this.defaultCommand);
+            }
             super.destroy();
         }
 
