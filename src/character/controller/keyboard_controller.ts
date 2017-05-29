@@ -37,6 +37,9 @@ namespace Charjs {
                     this._player.onSpeedUp();
                     this._player.onGrab();
                 }
+                if (e.keyCode == this._keyAssign.up) {
+                    this._player.onLookup();
+                }
                 if (e.keyCode == this._keyAssign.down) {
                     this._player.onSquat();
                 }
@@ -57,6 +60,9 @@ namespace Charjs {
                 if (e.keyCode == this._keyAssign.b) {
                     this._player.onAbortSpeedUp();
                     this._player.onAbortGrab();
+                }
+                if (e.keyCode == this._keyAssign.up) {
+                    this._player.onAbortLookup();
                 }
                 if (e.keyCode == this._keyAssign.down) {
                     this._player.onAbortSquat();

@@ -42,10 +42,15 @@ namespace Charjs {
             let gamepads: Gamepad[] = navigator.getGamepads ? navigator.getGamepads() : ((<any>navigator).webkitGetGamepads ? (<any>navigator).webkitGetGamepads() : []);
             let gamepad = gamepads[this._padIndex];
 
+            this._player.onAbortLookup();
             this._player.onAbortSquat();
             this._player.onAbortLeft();
             this._player.onAbortRight();
 
+            // up
+            if (gamepad.buttons[this._keyAssign.up].pressed) {
+                this._player.onLookup();
+            }
             // down
             if (gamepad.buttons[this._keyAssign.down].pressed) {
                 this._player.onSquat();

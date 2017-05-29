@@ -75,41 +75,48 @@ namespace Charjs {
             });
 
             window.addEventListener('deviceorientation', (e) => {
-                // if (!this._player.isSquat()) {
-                    let motion = 0;
-                    switch (this._screenModeForMobile) {
-                        case 'PORTRAIT':
-                            motion = Math.round(e.gamma);
-                            break;
-                        case 'LANSCAPE':
-                            motion = Math.round(e.beta) * this._deviceDirection;
-                            break;
-                    }
+                let motionRun = 0;
+                let motionUp = 0;
+                switch (this._screenModeForMobile) {
+                    case 'PORTRAIT':
+                        motionRun = Math.round(e.gamma);
+                        motionUp = 90 - Math.round(e.beta);
+                        break;
+                    case 'LANSCAPE':
+                        motionRun = Math.round(e.beta) * this._deviceDirection;
+                        motionUp = Math.round(e.alpha) * this._deviceDirection;
+                        break;
+                }
 
-                    if (motion > 5) {
-                        this._player.onAbortLeft();
-                        this._player.onRight();
-                    } else if (motion < -5) {
-                        this._player.onAbortRight();
-                        this._player.onLeft();
-                    } else {
-                        this._player.onAbortRight();
-                        this._player.onAbortLeft();
-                    }
+                if (motionUp > 40) {
+                    this._player.onLookup();
+                } else {
+                    this._player.onAbortLookup();
+                }
 
-                    if (Math.abs(motion) >= 20 && this._canSpeedUpForMobile) {
-                        if (this._player.getDirection() == Direction.Left && motion < 0) {
-                            this._canSpeedUpForMobile = false;
-                            this._player.onSpeedUp();
-                        } else if (this._player.getDirection() == Direction.Right && motion > 0) {
-                            this._canSpeedUpForMobile = false;
-                            this._player.onSpeedUp();
-                        }
-                    } else if (Math.abs(motion) < 20 && !this._canSpeedUpForMobile) {
-                        this._player.onAbortSpeedUp();
-                        this._canSpeedUpForMobile = true;
+                if (motionRun > 5) {
+                    this._player.onAbortLeft();
+                    this._player.onRight();
+                } else if (motionRun < -5) {
+                    this._player.onAbortRight();
+                    this._player.onLeft();
+                } else {
+                    this._player.onAbortRight();
+                    this._player.onAbortLeft();
+                }
+
+                if (Math.abs(motionRun) >= 20 && this._canSpeedUpForMobile) {
+                    if (this._player.getDirection() == Direction.Left && motionRun < 0) {
+                        this._canSpeedUpForMobile = false;
+                        this._player.onSpeedUp();
+                    } else if (this._player.getDirection() == Direction.Right && motionRun > 0) {
+                        this._canSpeedUpForMobile = false;
+                        this._player.onSpeedUp();
                     }
-                // }
+                } else if (Math.abs(motionRun) < 20 && !this._canSpeedUpForMobile) {
+                    this._player.onAbortSpeedUp();
+                    this._canSpeedUpForMobile = true;
+                }
             });
             window.addEventListener('orientationchange', (e) => {
                 if (window.matchMedia("(orientation: portrait)").matches) {
