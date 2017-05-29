@@ -84,11 +84,11 @@ namespace Charjs {
                         break;
                     case 'LANSCAPE':
                         motionRun = Math.round(e.beta) * this._deviceDirection;
-                        motionUp = Math.round(e.alpha) * this._deviceDirection;
+                        motionUp = Math.round(e.alpha) * this._deviceDirection * -1;
                         break;
                 }
 
-                if (motionUp > 40) {
+                if (motionUp > 60) {
                     this._player.onLookup();
                 } else {
                     this._player.onAbortLookup();
@@ -105,7 +105,7 @@ namespace Charjs {
                     this._player.onAbortLeft();
                 }
 
-                if (Math.abs(motionRun) >= 20 && this._canSpeedUpForMobile) {
+                if (Math.abs(motionRun) >= 30 && this._canSpeedUpForMobile) {
                     if (this._player.getDirection() == Direction.Left && motionRun < 0) {
                         this._canSpeedUpForMobile = false;
                         this._player.onSpeedUp();
@@ -113,7 +113,7 @@ namespace Charjs {
                         this._canSpeedUpForMobile = false;
                         this._player.onSpeedUp();
                     }
-                } else if (Math.abs(motionRun) < 20 && !this._canSpeedUpForMobile) {
+                } else if (Math.abs(motionRun) < 30 && !this._canSpeedUpForMobile) {
                     this._player.onAbortSpeedUp();
                     this._canSpeedUpForMobile = true;
                 }
