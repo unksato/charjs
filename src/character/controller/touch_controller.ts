@@ -84,7 +84,7 @@ namespace Charjs {
                         break;
                     case 'LANSCAPE':
                         motionRun = Math.round(e.beta) * this._deviceDirection;
-                        motionUp = Math.round(e.alpha) * this._deviceDirection * -1;
+                        motionUp = 90 - (Math.round(e.gamma) * this._deviceDirection);
                         break;
                 }
 
