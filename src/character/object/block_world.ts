@@ -134,7 +134,6 @@ namespace Charjs {
                         this.animation = null;
                         this._isActive = true;
                         this._animationIndex = null;
-                        this.removeCommand();
                         this.stop();
                         return;
                     }
@@ -172,29 +171,11 @@ namespace Charjs {
             if (!this._pushedUpTimer) {
                 this.animation = NormalBlockWorld.getAnimation(this.pixSize);
                 this._animationIndex = 0;
-                this.registerCommand();
                 this.start();
             }
         }
 
         onStepped(player: IPlayer): void { }
 
-        private registerCommand() {
-            document.addEventListener('keypress', this.defaultCommand);
-        }
-
-        private removeCommand() {
-            document.removeEventListener('keypress', this.defaultCommand);
-        }
-
-        defaultCommand = (e: KeyboardEvent) => {
-            if (e.keyCode == 32) {
-                if (this._isStarting) {
-                    this.stop();
-                } else {
-                    this.start();
-                }
-            }
-        }
     }
 }
