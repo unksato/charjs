@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/e105eabd48e1cb8bdff114b17c5907230f63c334/peerjs/index.d.ts",
+    "raw": "registry:dt/peerjs#0.0.0+20160510232759",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/e105eabd48e1cb8bdff114b17c5907230f63c334/peerjs/index.d.ts"
+  }
+}
