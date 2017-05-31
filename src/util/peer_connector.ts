@@ -9,6 +9,7 @@ namespace Charjs {
         private _peerId = null;
         private _isOpened = false;
         private _isConnected = false;
+        private _reciveCallback = null;
 
         private static staticPeer = null;
 
@@ -75,8 +76,12 @@ namespace Charjs {
             }
         }
 
+        setReciveCallback(func: Function) {
+            this._reciveCallback = func;
+        }
+
         onRecive(data: any) {
-            console.log(data);
+            this._reciveCallback(data);
         }
     }
 

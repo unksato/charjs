@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <title>Charjs Sample</title>
+    <script type="text/javascript" src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+    <script type="text/javascript" src="./dist/mario.js"></script>
+    <script>
+        window.onload = function () {
+        }
+        function connect() {
+            peer = Charjs.PeerConnector.getPeer();
+            peer.setReciveCallback(recive);
+            peer.connect(document.getElementById('session_id').value).then(function () {
+                alert('connection created.');
+            })
+        }
+        function recive(data) {
+            document.getElementById('receive_message').value += data + '\n';
+        }
+        function onsend() {
+            peer.send(document.getElementById('message').value);
+        }
+    </script>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td align="right">session id:</td>
+            <td>
+                <input id="session_id"><button onclick="connect()">connect</button>
+                <td>
+        </tr>
+        <tr>
+            <td align="right">message:</td>
+            <td><input type="text" id="message"><button onclick="onsend()">send</button></td>
+        </tr>
+        <tr>
+            <td align="right">receive:</td>
+            <td><textarea id="receive_message"></textarea></td>
+        </tr>
+    </table>
+</body>
+
+</html>
