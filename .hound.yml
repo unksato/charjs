@@ -1,5 +1,3 @@
-fail_on_violations: true
-
 tslint:
   enabled: true
   config_file: tslint.json
