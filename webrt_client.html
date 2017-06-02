@@ -15,10 +15,18 @@
             })
         }
         function recive(data) {
-            document.getElementById('receive_message').value += data + '\n';
+            var d = decodeData(data);
+            var latency = new Date().getTime() - new Date(d.date).getTime();
+            document.getElementById('receive_message').value += d.message + "(" + latency + ")" + '\n';
         }
         function onsend() {
-            peer.send(document.getElementById('message').value);
+            peer.send(createData(document.getElementById('message').value));
+        }
+        function createData(message) {
+            return JSON.stringify({ message: message, date: new Date() });
+        }
+        function decodeData(json) {
+            return JSON.parse(json);
         }
     </script>
 </head>
