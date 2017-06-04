@@ -64,16 +64,8 @@ namespace Charjs {
         onAction(): void;
     }
 
-    export interface IPlayer extends ICharacter {
-        onGool(callback?: Function): void;
-        releaseEnemy(): void;
-        addScore(pointIndex: number): void;
-        getScore(): number;
-
+    export interface IOperatePlayer {
         setController(gameController: IController): void;
-
-        isSquat(): boolean;
-        isJumping(): boolean;
 
         onGrab(): void;
         onAbortGrab(): void;
@@ -91,6 +83,17 @@ namespace Charjs {
         onRight(): void;
         onAbortRight(): void;
         onPause(): void;
+    }
+
+    export interface IPlayer extends ICharacter, IOperatePlayer {
+        onGool(callback?: Function): void;
+        releaseEnemy(): void;
+        addScore(pointIndex: number): void;
+        getScore(): number;
+
+        isSquat(): boolean;
+        isJumping(): boolean;
+
     }
 
     export interface IEnemy extends ICharacter {

@@ -11,9 +11,9 @@ namespace Charjs {
         private _isConnected = false;
         private _reciveCallback = null;
 
-        private static staticPeer = null;
+        private static staticPeer: PeerConnector = null;
 
-        static getPeer(apiKey?: string) {
+        static getPeer(apiKey?: string): PeerConnector {
             if (!PeerConnector.staticPeer) {
                 PeerConnector.staticPeer = new PeerConnector(apiKey);
             }

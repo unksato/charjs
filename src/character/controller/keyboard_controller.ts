@@ -1,7 +1,7 @@
 namespace Charjs {
 
     export class KeyboardController implements IController {
-        private _player: IPlayer;
+        private _player: IOperatePlayer;
 
         public static DefaultKeyAssign: IKeyAssign = {
             left: 37,
@@ -17,8 +17,9 @@ namespace Charjs {
 
         constructor(private _keyAssign: IKeyAssign = KeyboardController.DefaultKeyAssign) { }
 
-        init(player: IPlayer, keyPattern?: any): IController {
+        init(player: IOperatePlayer, keyPattern?: any): IController {
             this._player = player;
+            this._player.setController(this);
             return this;
         }
 

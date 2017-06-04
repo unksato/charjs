@@ -1,0 +1,85 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Charjs Sample</title>
+    <script type="text/javascript" src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+    <script type="text/javascript" src="../dist/mario.js"></script>
+    <script>
+        window.onload = function () {
+
+            // Create Game Controller
+            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (name, point) {
+            }, function (name, point) {
+            });
+
+            // Draw ground
+            controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
+
+            // Create Player
+            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
+            // Create Controller for player
+            var remoteHostController = new Charjs.RemoteControllerHost();
+            remoteHostController.init(mario).registerCommand(function (id) {
+                console.log(id);
+            });
+
+            // Create Blocks
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 48, y: 200 });
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 80, y: 200 });
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 112, y: 200 });
+
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 148, y: 100 });
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 180, y: 100 });
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 212, y: 100 });
+
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 260, y: 200 });
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 292, y: 200 });
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 200 });
+            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 230 });
+
+            // Draw Background
+            new Charjs.Mountains(2).drawBackgroundImage(document.body).then(function () {
+                controller.init();
+                controller.start();
+            });
+        }
+    </script>
+    <style type="text/css">
+        <!-- body {
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        div#container {
+            margin: 0px;
+            z-index: 2;
+        }
+
+        div#world {
+            height: 85vh;
+            width: 100vw;
+            position: absolute;
+            z-index: 2;
+        }
+
+        div#ground {
+            top: 85vh;
+            height: calc(20vh - 32px);
+            width: calc(100vw - 64px);
+            z-index: 1;
+            position: absolute;
+        }
+
+        -->
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="world"></div>
+        <div id="ground"></div>
+    </div>
+</body>
+
+</html>

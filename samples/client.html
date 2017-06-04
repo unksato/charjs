@@ -1,0 +1,29 @@
+<html>
+
+<head>
+    <title>Charjs Sample</title>
+    <script type="text/javascript" src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+    <script type="text/javascript" src="../dist/mario.js"></script>
+    <script>
+        window.onload = function () {
+        }
+        function connect() {
+            var remotePlayer = new Charjs.RemoteControllerClient(document.getElementById('peerId').value);
+            var keyboard = new Charjs.KeyboardController();
+            keyboard.init(remotePlayer).registerCommand();
+        }
+    </script>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td align="right">session id:</td>
+            <td>
+                <input id="peerId"><button onclick="connect()">connect</button>
+                <td>
+        </tr>
+    </table>
+</body>
+
+</html>

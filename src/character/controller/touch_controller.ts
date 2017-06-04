@@ -7,9 +7,9 @@ namespace Charjs {
         private _canSpeedUpForMobile: boolean = true;
         private _screenModeForMobile: string = 'PORTRAIT';
         private _deviceDirection: number = 1;
-        private _player: IPlayer = null;
+        private _player: IOperatePlayer = null;
 
-        init(player: IPlayer): IController {
+        init(player: IOperatePlayer): IController {
             this._player = player;
             return this;
         }
@@ -106,13 +106,16 @@ namespace Charjs {
                 }
 
                 if (Math.abs(motionRun) >= 30 && this._canSpeedUpForMobile) {
-                    if (this._player.getDirection() == Direction.Left && motionRun < 0) {
-                        this._canSpeedUpForMobile = false;
-                        this._player.onSpeedUp();
-                    } else if (this._player.getDirection() == Direction.Right && motionRun > 0) {
-                        this._canSpeedUpForMobile = false;
-                        this._player.onSpeedUp();
-                    }
+                    //// TODO: check this logic...
+                    // if (this._player.getDirection() == Direction.Left && motionRun < 0) {
+                    //     this._canSpeedUpForMobile = false;
+                    //     this._player.onSpeedUp();
+                    // } else if (this._player.getDirection() == Direction.Right && motionRun > 0) {
+                    //     this._canSpeedUpForMobile = false;
+                    //     this._player.onSpeedUp();
+                    // }
+                    this._canSpeedUpForMobile = false;
+                    this._player.onSpeedUp();
                 } else if (Math.abs(motionRun) < 30 && !this._canSpeedUpForMobile) {
                     this._player.onAbortSpeedUp();
                     this._canSpeedUpForMobile = true;

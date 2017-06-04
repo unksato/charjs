@@ -3,7 +3,7 @@ namespace Charjs {
     export class GamepadController implements IController {
 
         private _gamepadTimer = null;
-        private _player: IPlayer = null;
+        private _player: IOperatePlayer = null;
         private _isPausePressed = false;
 
         public static DefaultKeyAssign: IKeyAssign = {
@@ -20,7 +20,7 @@ namespace Charjs {
 
         constructor(private _padIndex = 0, private _keyAssign: IKeyAssign = GamepadController.DefaultKeyAssign, private scanInterval = 45) { }
 
-        init(player: IPlayer): IController {
+        init(player: IOperatePlayer): IController {
             this._player = player;
             this._player.setController(this);
             return this;
