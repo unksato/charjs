@@ -5,6 +5,7 @@ namespace Charjs {
         static GAME_MASTERS = {};
         private _point = 0;
 
+
         constructor(private targetDom: HTMLElement, private charSize: number = 2, private frameInterval = 45, private _goolCallback?: { (name: string, point: number) }, private _gameoverCallback?: { (name: string, point: number) }) {
         }
 

@@ -2,6 +2,11 @@
 
 namespace Charjs {
 
+    interface IPeerEvent {
+        eventName: string;
+        data: any;
+    }
+
     export class PeerConnector {
         private static API_KEY = 'fikef0tx5c3j714i';
         private _peer: PeerJs.Peer = null;
@@ -9,7 +14,8 @@ namespace Charjs {
         private _peerId = null;
         private _isOpened = false;
         private _isConnected = false;
-        private _reciveCallback = null;
+        private _peerEvent = {};
+        private _peerInitialized = false;
 
         private static staticPeer: PeerConnector = null;
 
@@ -70,18 +76,21 @@ namespace Charjs {
             return d.promise;
         }
 
-        send(data: any) {
+        send(evnetName: string, data: any) {
             if (this._connection) {
-                this._connection.send(data);
+                this._connection.send(JSON.stringify({ evnetName, data }));
             }
         }
 
-        setReciveCallback(func: Function) {
-            this._reciveCallback = func;
+        setReciveCallback(eventName: string, func: Function) {
+            this._peerEvent[eventName] = func;
         }
 
-        onRecive(data: any) {
-            this._reciveCallback(data);
+        onRecive(data: string) {
+            let func = null;
+            let event: IPeerEvent = JSON.parse(data)
+            func = this._peerEvent[event.eventName];
+            if (func) func(event.data);
         }
     }
 

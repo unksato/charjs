@@ -1,6 +1,6 @@
 namespace Charjs {
 
-    export class RemoteControllerClient implements IOperatePlayer {
+    export class RemoteClient implements IOperatePlayer {
         protected _gameController: IController = null;
         private _buttonUpdated = false;
         private _peerClinet: PeerConnector = null;
@@ -19,20 +19,21 @@ namespace Charjs {
             pause: false
         };
 
-        constructor(private _peerId: string) { }
+        constructor() { }
+
+        setPeer(peer: PeerConnector): RemoteClient {
+            this._peerClinet = peer;
+            return this;
+        }
 
         setController(gameController: IController) {
             this._gameController = gameController;
-            this._peerClinet = PeerConnector.getPeer();
-            this._peerClinet.connect(this._peerId).then(() => {
-                this._timer = setInterval(() => {
-                    if (this._buttonUpdated) {
-                        this._peerClinet.send(JSON.stringify(this._butttonState));
-                        this._buttonUpdated = false;
-                    }
-                }, 20);
-            });
-
+            this._timer = setInterval(() => {
+                if (this._buttonUpdated) {
+                    this._peerClinet.send(`player0`, this._butttonState);
+                    this._buttonUpdated = false;
+                }
+            }, 20);
         }
 
         sendButtonState() {

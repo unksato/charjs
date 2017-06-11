@@ -16,26 +16,23 @@ namespace Charjs {
 
         private _peerHost: PeerConnector = null;
         private _player: IPlayer;
-        private _hostId = null;
         private _isPausePressed = false;
 
         constructor() {
         }
 
-        init(player: IPlayer, keyPattern?: any): IController {
+        init(player: IPlayer): RemoteControllerHost {
             this._player = player;
             return this;
         }
 
-        registerCommand(callback?: { (id: string) }): void {
-            this._peerHost = PeerConnector.getPeer();
-            this._peerHost.setReciveCallback(this.onRecive);
-            this._peerHost.open().then((id) => {
-                this._hostId = id;
-                if (callback) {
-                    callback(id);
-                }
-            });
+        setPeer(peer: PeerConnector): RemoteControllerHost {
+            this._peerHost = peer;
+            return this;
+        }
+
+        registerCommand(): void {
+            this._peerHost.setReciveCallback(`${this._player._name}:controll`, this.onRecive);
         }
 
         destroyCommand(): void {

@@ -32,4 +32,9 @@ describe('Util.Random', () => {
         mathMock.restore();
     });
 
+    it('generateUUIDv4 test', () => {
+        let uuid = RandomGenerator.generateUUIDv4();
+        expect(uuid.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/) != null).equal(true);
+    });
+
 });
