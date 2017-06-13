@@ -66,9 +66,9 @@ namespace Charjs {
 
         private _isStarting = false;
 
-        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition, direction = Direction.Right): C {
+        public CreatePlayerInstance<C extends AbstractPlayer>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition, direction = Direction.Right, name?: string): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
-            char._name = 'player' + this._playerCount;
+            char._name = name ? name : RandomGenerator.generateUUIDv4();
             this._playerCount++;
             this._players[char._name] = <any>char;
             char._gameMaster = this;
@@ -77,7 +77,7 @@ namespace Charjs {
 
         public CreateEnemyInstance<C extends AbstractEnemy>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition, direction = Direction.Right): C {
             let char = new clz(this.targetDom, this.charSize, position, direction, 100, this.frameInterval);
-            char._name = 'enemy_' + this._enemyCount;
+            char._name = RandomGenerator.generateUUIDv4();
             this._enemyCount++;
             this._enemys[char._name] = <any>char;
             char._gameMaster = this;
@@ -86,7 +86,7 @@ namespace Charjs {
 
         public CreateObjectInstance<C extends AbstractOtherObject>(clz: { new (targetDom, pixSize, position, direction, zIndex, frame): C }, position: IPosition): C {
             let char = new clz(this.targetDom, this.charSize, position, Direction.Right, 90, this.frameInterval);
-            char._name = 'obj_' + this._objectCount;
+            char._name = RandomGenerator.generateUUIDv4();
             this._objectCount++;
             this._objects[char._name] = <any>char;
             char._gameMaster = this;
