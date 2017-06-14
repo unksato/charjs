@@ -1,3 +1,5 @@
+/// <reference path="./abstract_game_peer.ts" />
+
 namespace Charjs {
     export class GameHost extends AbstractGamePeer {
 

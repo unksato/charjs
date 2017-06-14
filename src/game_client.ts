@@ -1,3 +1,5 @@
+/// <reference path="./abstract_game_peer.ts" />
+
 namespace Charjs {
     export class GameClinet extends AbstractGamePeer {
 
@@ -11,7 +13,5 @@ namespace Charjs {
                 // send init message
             });
         }
-
-
     }
 }

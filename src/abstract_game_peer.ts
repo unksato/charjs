@@ -25,7 +25,7 @@ namespace Charjs {
 
         createRemotePlayer(command: IRemoteCommand) {
             let args: any[] = [];
-            args.push(ClassUtil.getClass(command.target));
+            args.push(ClassUtil.getClass(command.target, Charjs));
 
             let master = GameMaster.GetController(this._peerId);
             let player = master.CreatePlayerInstance.apply(this, args.concat(command.data));
@@ -35,7 +35,7 @@ namespace Charjs {
 
         createRemoteEnemy(command: IRemoteCommand) {
             let args: any[] = [];
-            args.push(ClassUtil.getClass(command.target));
+            args.push(ClassUtil.getClass(command.target, Charjs));
 
             let master = GameMaster.GetController(this._peerId);
             let player = master.CreatePlayerInstance.apply(this, args.concat(command.data));
@@ -43,7 +43,7 @@ namespace Charjs {
 
         createRemoteObject(command: IRemoteCommand) {
             let args: any[] = [];
-            args.push(ClassUtil.getClass(command.target));
+            args.push(ClassUtil.getClass(command.target, Charjs));
 
             let master = GameMaster.GetController(this._peerId);
             master.CreateObjectInstance.apply(this, args.concat(command.data));

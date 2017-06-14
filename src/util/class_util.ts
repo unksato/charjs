@@ -4,10 +4,9 @@ namespace Charjs {
     }
 
     export class ClassUtil {
-        static getClass<T>(className: string): Clazz<T> {
-            const g = window;
+        static getClass<T>(className: string, nameSpace?: any): Clazz<T> {
             const p = className.split(".");
-            let c = g;
+            let c = nameSpace || window;
             if (p.length >= 0) {
                 for (let i of p) {
                     if (typeof c[i] === "undefined") {
@@ -18,18 +17,18 @@ namespace Charjs {
                 }
             }
 
-            if (this.isClassLike<T>(c, className)) {
+            if (this.isClass<T>(c, className)) {
                 return <any>c;
             } else {
                 throw TypeError(`${className} is not a Class.`)
             }
         }
 
-        private static isClassLike<T>(classLike: any, className: string): classLike is T {
+        private static isClass<T>(obj: any, className: string): boolean {
             const cnl = className.split(".");
-            return (typeof classLike === "function")
-                && (typeof classLike.prototype !== "undefined")
-                && (classLike.name === cnl[cnl.length - 1]);
+            return (typeof obj === "function")
+                && (typeof obj.prototype !== "undefined")
+                && (obj.name === cnl[cnl.length - 1]);
         }
     }
 }
