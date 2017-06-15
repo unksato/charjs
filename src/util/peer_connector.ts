@@ -42,7 +42,7 @@ namespace Charjs {
                     this._peerId = id;
                     this._peer.on('connection', (con) => {
                         this._connection = con;
-                        con.on('data', (data) => {
+                        this._connection.on('data', (data) => {
                             this.onRecive(data);
                         })
                     })
@@ -61,14 +61,14 @@ namespace Charjs {
             if (!this._isOpened && !this._isConnected) {
                 this._peer = new Peer({ key: this.apiKey });
                 this._peerId = peerId;
-                let con = this._peer.connect(peerId);
-                con.on('open', () => {
-                    this._connection = con;
-                    con.on('data', (data) => {
+                this._connection = this._peer.connect(peerId);
+                this._connection.on('open', () => {
+                    this._connection.on('data', (data) => {
                         this.onRecive(data);
                     });
-                    d.resolve(undefined);
+                    d.resolve({});
                 });
+
             } else {
                 d.reject('peer already opened.');
             }
@@ -76,9 +76,9 @@ namespace Charjs {
             return d.promise;
         }
 
-        send(evnetName: string, data: any) {
+        send(eventName: string, data: any) {
             if (this._connection) {
-                this._connection.send(JSON.stringify({ evnetName, data }));
+                this._connection.send(JSON.stringify({ eventName, data }));
             }
         }
 

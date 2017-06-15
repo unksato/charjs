@@ -8,9 +8,9 @@
         window.onload = function () {
         }
         function connect() {
-            var remotePlayer = new Charjs.RemoteControllerClient(document.getElementById('peerId').value);
-            var keyboard = new Charjs.KeyboardController();
-            keyboard.init(remotePlayer).registerCommand();
+            Charjs.GameClient.GetController(document.getElementById('peerId').value, document.getElementById('world'), 2, undefined, function (name, point) {
+            }, function (name, point) {
+            });
         }
     </script>
 </head>
@@ -24,6 +24,10 @@
                 <td>
         </tr>
     </table>
+    <div id="container">
+        <div id="world"></div>
+        <div id="ground"></div>
+    </div>
 </body>
 
 </html>

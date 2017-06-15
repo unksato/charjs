@@ -9,39 +9,41 @@
         window.onload = function () {
 
             // Create Game Controller
-            var controller = Charjs.GameMaster.GetController('sample', document.getElementById('world'), 2, undefined, function (name, point) {
+            var host = Charjs.GameHost.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
 
             // Draw ground
-            controller.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
-
-            // Create Player
-            var mario = controller.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
-            // Create Controller for player
-            var remoteHostController = new Charjs.RemoteControllerHost();
-            remoteHostController.init(mario).registerCommand(function (id) {
-                console.log(id);
-            });
-
-            // Create Blocks
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 48, y: 200 });
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 80, y: 200 });
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 112, y: 200 });
-
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 148, y: 100 });
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 180, y: 100 });
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 212, y: 100 });
-
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 260, y: 200 });
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 292, y: 200 });
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 200 });
-            controller.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 230 });
+            host.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             // Draw Background
             new Charjs.Mountains(2).drawBackgroundImage(document.body).then(function () {
-                controller.init();
-                controller.start();
+                host.openHost().then(function (id) {
+                    // Print Game ID
+                    console.log(id);
+                    host.onInit().then(function () {
+                        var mario = host.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
+
+                        // Create Blocks
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 48, y: 200 });
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 80, y: 200 });
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 112, y: 200 });
+
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 148, y: 100 });
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 180, y: 100 });
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 212, y: 100 });
+
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 260, y: 200 });
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 292, y: 200 });
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 200 });
+                        host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 230 });
+
+
+                        host.init();
+                        host.start();
+
+                    });
+                })
             });
         }
     </script>
