@@ -20,8 +20,8 @@
             new Charjs.Mountains(2).drawBackgroundImage(document.body).then(function () {
                 host.openHost().then(function (id) {
                     // Print Game ID
-                    console.log(id);
-                    host.onInit().then(function () {
+                    document.getElementById("peerid").innerText = id;
+                    host.onRemoteInit().then(function () {
                         var mario = host.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
 
                         // Create Blocks
@@ -38,10 +38,8 @@
                         host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 200 });
                         host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 230 });
 
-
                         host.init();
                         host.start();
-
                     });
                 })
             });
@@ -73,11 +71,26 @@
             position: absolute;
         }
 
+        table#gameid {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+
         -->
     </style>
 </head>
 
 <body>
+    <table id="gameid">
+        <tr>
+            <td align="right">Game ID:</td>
+            <td>
+                <div id="peerid" />
+                <td>
+        </tr>
+    </table>
     <div id="container">
         <div id="world"></div>
         <div id="ground"></div>

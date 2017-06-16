@@ -33,9 +33,19 @@ namespace Charjs {
         }
 
         public registerEvent() {
+            this._peer.setReciveCallback(AbstractGamePeer.INIT_COMMAND, this._init);
+            this._peer.setReciveCallback(AbstractGamePeer.START_COMMAND, this._start);
             this._peer.setReciveCallback(AbstractGamePeer.CREATE_PLAYER_COMMAND, this.createRemotePlayer);
             this._peer.setReciveCallback(AbstractGamePeer.CREATE_ENEMY_COMMAND, this.createRemoteEnemy);
             this._peer.setReciveCallback(AbstractGamePeer.CREATE_OBJECT_COMMAND, this.createRemoteObject);
+        }
+
+        _init = (command: IRemoteCommand) => {
+            super.init();
+        }
+
+        _start = (command: IRemoteCommand) => {
+            super.start();
         }
 
         createRemotePlayer = (command: IRemoteCommand) => {

@@ -11,6 +11,8 @@ namespace Charjs {
         protected _peer: PeerConnector = null;
         protected _peerId: string = null;
 
+        protected static INIT_COMMAND = "initGame";
+        protected static START_COMMAND = "start";
         protected static CREATE_PLAYER_COMMAND = "createPlayer";
         protected static CREATE_ENEMY_COMMAND = "createEnemy";
         protected static CREATE_OBJECT_COMMAND = "createObject";

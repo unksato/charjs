@@ -8,19 +8,56 @@
         window.onload = function () {
         }
         function connect() {
-            Charjs.GameClient.GetController(document.getElementById('peerId').value, document.getElementById('world'), 2, undefined, function (name, point) {
+            var client = Charjs.GameClient.GetController(document.getElementById('peerId').value, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
+            client.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
+            new Charjs.Mountains(2).drawBackgroundImage(document.body);
         }
     </script>
+    <style type="text/css">
+        <!-- body {
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        div#container {
+            margin: 0px;
+            z-index: 2;
+        }
+
+        div#world {
+            height: 85vh;
+            width: 100vw;
+            position: absolute;
+            z-index: 2;
+        }
+
+        div#ground {
+            top: 85vh;
+            height: calc(20vh - 32px);
+            width: calc(100vw - 64px);
+            z-index: 1;
+            position: absolute;
+        }
+
+        table#gameid {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+
+        -->
+    </style>
 </head>
 
 <body>
-    <table>
+    <table id="gameid">
         <tr>
-            <td align="right">session id:</td>
+            <td align="right">Game ID:</td>
             <td>
-                <input id="peerId"><button onclick="connect()">connect</button>
+                <input id="peerId"> <button onclick="connect()">connect</button>
                 <td>
         </tr>
     </table>

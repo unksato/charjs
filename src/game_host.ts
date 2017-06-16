@@ -48,15 +48,28 @@ namespace Charjs {
             return d.promise;
         }
 
-        public onInit(): MyQ.Promise<{}> {
+        public init() {
+            this._peer.send(GameHost.INIT_COMMAND, {});
+            super.init();
+        }
+
+        public start() {
+            this._peer.send(GameHost.START_COMMAND, {});
+            super.start();
+        }
+
+        public onRemoteInit(): MyQ.Promise<{}> {
             return this._initDefer.promise;
         }
 
         public CreatePlayerInstance(clz: any, position: IPosition, direction = Direction.Right, name?: string): AbstractPlayer {
+            name = name || RandomGenerator.generateUUIDv4();
+
             let command: IRemoteCommand = {
                 target: clz.name,
                 data: [position, direction, name]
             }
+
             this._peer.send(GameHost.CREATE_PLAYER_COMMAND, command);
             return super.CreatePlayerInstance(clz, position, direction, name);
         }
