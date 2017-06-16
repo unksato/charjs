@@ -5,14 +5,18 @@
     <script type="text/javascript" src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
     <script type="text/javascript" src="../dist/mario.js"></script>
     <script>
+        var client = null;
+
         window.onload = function () {
-        }
-        function connect() {
-            var client = Charjs.GameClient.GetController(document.getElementById('peerId').value, document.getElementById('world'), 2, undefined, function (name, point) {
+            new Charjs.Mountains(2).drawBackgroundImage(document.body);
+            client = Charjs.GameClient.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
             client.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
-            new Charjs.Mountains(2).drawBackgroundImage(document.body);
+
+        }
+        function connect() {
+            client.connectToRemoteHost(document.getElementById('peerId').value);
         }
     </script>
     <style type="text/css">

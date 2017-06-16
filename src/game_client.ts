@@ -14,8 +14,8 @@ namespace Charjs {
             }
 
             if (targetDom) {
-                gameClient = new GameClient(targetDom, charSize, frameInterval, goolCallback, gameoverCallback).connectToRemoteHost(gameId);
-                GameClient.GAME_MASTERS[gameId] = gameClient;
+                gameClient = new GameClient(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
+                gameClient.createPeer();
                 gameClient.registerEvent();
                 return gameClient;
             } else {
@@ -24,6 +24,7 @@ namespace Charjs {
         }
 
         public connectToRemoteHost(peerId: string) {
+            GameClient.GAME_MASTERS[peerId] = this;
             this.setPeerId(peerId);
             this.createPeer().connect(this._peerId).then(() => {
                 // send init message
