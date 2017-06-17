@@ -4,6 +4,10 @@
     <title>Charjs Sample</title>
     <script type="text/javascript" src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
     <script type="text/javascript" src="../dist/mario.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Aldrich');
+    </style>
+
     <script>
         var client = null;
 
@@ -16,13 +20,48 @@
 
         }
         function connect() {
-            client.connectToRemoteHost(document.getElementById('peerId').value);
+            if (document.getElementById('peerId').value) {
+                client.connectToRemoteHost(document.getElementById('peerId').value);
+                document.getElementById("connect_button").remove();
+            }
         }
     </script>
     <style type="text/css">
         <!-- body {
             margin: 0px;
             overflow: hidden;
+            font-family: 'Aldrich', sans-serif;
+            text-shadow: 1px 1px 2px #000;
+            color: #EEE;
+            font-size: 16px;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 100%;
+        }
+
+        button {
+            font-size: 12px;
+            padding: 3px 10px;
+            color: #fff;
+            border-style: none;
+            border-radius: 3px;
+            box-shadow: 1px 1px 1px 1px #666;
+            text-shadow: 1px 1px 2px #000;
+            background: #299;
+            cursor: pointer;
+        }
+
+        input {
+            color: white;
+            background-color: transparent;
+            border-style: none;
+            border-bottom: dotted;
         }
 
         div#container {
@@ -61,8 +100,9 @@
         <tr>
             <td align="right">Game ID:</td>
             <td>
-                <input id="peerId"> <button onclick="connect()">connect</button>
-                <td>
+                <input id="peerId">
+                <button onclick="connect()" id="connect_button">connect</button>
+            </td>
         </tr>
     </table>
     <div id="container">
