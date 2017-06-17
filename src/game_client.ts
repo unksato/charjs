@@ -55,8 +55,8 @@ namespace Charjs {
 
             let master = GameClient.GetController(this._peerId);
             let player = master.CreatePlayerInstance.apply(this, args.concat(command.data));
-            let controller = new Charjs.RemoteControllerHost().setPeer(this._peer).init(player);
-            this._peer.setReciveCallback("control", controller.onRecive);
+            let controller = new PlayerProxy(player, this._peer);
+            this._peer.setReciveCallback(player._name, controller.onCommand);
         }
 
         createRemoteEnemy = (command: IRemoteCommand) => {

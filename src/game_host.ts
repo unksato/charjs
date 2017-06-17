@@ -5,16 +5,6 @@ namespace Charjs {
 
         private _initDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();;
 
-        public getRemoteClient(): RemoteClient {
-            return new RemoteClient();
-        }
-
-        public getRemoteControllerHost(player: IPlayer): RemoteControllerHost {
-            let remoteController = new RemoteControllerHost().setPeer(this.createPeer()).init(player);
-            remoteController.registerCommand();
-            return remoteController;
-        }
-
         public static GetController(gameId?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
             let gameHost = null;
             if (gameId) {

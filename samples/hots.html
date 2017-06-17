@@ -22,7 +22,6 @@
                     // Print Game ID
                     document.getElementById("peerid").innerText = id;
                     host.onRemoteInit().then(function () {
-                        var mario = host.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
 
                         // Create Blocks
                         host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 48, y: 200 });
@@ -37,6 +36,11 @@
                         host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 292, y: 200 });
                         host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 200 });
                         host.CreateObjectInstance(Charjs.NormalBlockWorld, { x: 324, y: 230 });
+
+                        var mario = host.CreatePlayerInstance(Charjs.MarioWorld, { x: 10, y: 0 });
+                        var keybord = new Charjs.KeyboardController();
+                        var marioProxy = new Charjs.PlayerProxy(mario, host._peer);
+                        keybord.init(marioProxy).registerCommand();
 
                         host.init();
                         host.start();
