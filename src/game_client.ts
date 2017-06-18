@@ -3,6 +3,8 @@
 namespace Charjs {
     export class GameClient extends AbstractGamePeer {
 
+        private _hostInitDoneDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();
+
 
         public static GetController(gameId?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
             let gameClient = null;
@@ -23,22 +25,30 @@ namespace Charjs {
             }
         }
 
-        public connectToRemoteHost(peerId: string) {
+        public connectToRemoteHost(peerId: string): MyQ.Promise<{}> {
             GameClient.GAME_MASTERS[peerId] = this;
             this.setPeerId(peerId);
             this.createPeer().connect(this._peerId).then(() => {
-                // send init message
-                this._peer.send("init", []);
+                this._peer.send(AbstractGamePeer.CONNECTED_COMMAND, []);
             });
-            return this;
+            return this._hostInitDoneDefer.promise;
         }
 
         public registerEvent() {
+            this._peer.setReciveCallback(AbstractGamePeer.HOST_INIT_DONE_COMMAND, this._hostInitDone);
             this._peer.setReciveCallback(AbstractGamePeer.INIT_COMMAND, this._init);
             this._peer.setReciveCallback(AbstractGamePeer.START_COMMAND, this._start);
             this._peer.setReciveCallback(AbstractGamePeer.CREATE_PLAYER_COMMAND, this.createRemotePlayer);
             this._peer.setReciveCallback(AbstractGamePeer.CREATE_ENEMY_COMMAND, this.createRemoteEnemy);
             this._peer.setReciveCallback(AbstractGamePeer.CREATE_OBJECT_COMMAND, this.createRemoteObject);
+        }
+
+        public initDone() {
+            this._peer.send(AbstractGamePeer.CLIENT_INIT_DONE_COMMAND, []);
+        }
+
+        _hostInitDone = (command: IRemoteCommand) => {
+            this._hostInitDoneDefer.resolve({});
         }
 
         _init = (command: IRemoteCommand) => {
@@ -73,6 +83,18 @@ namespace Charjs {
 
             let master = GameClient.GetController(this._peerId);
             master.CreateObjectInstance.apply(this, args.concat(command.data));
+        }
+
+        public CreatePlayerInstanceWithRemote(clz: any, position: IPosition, direction = Direction.Right, name?: string): AbstractPlayer {
+            name = name || RandomGenerator.generateUUIDv4();
+
+            let command: IRemoteCommand = {
+                target: clz.name,
+                data: [position, direction, name]
+            }
+
+            this._peer.send(GameHost.CREATE_PLAYER_COMMAND, command);
+            return super.CreatePlayerInstance(clz, position, direction, name);
         }
     }
 }

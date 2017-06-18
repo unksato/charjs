@@ -21,8 +21,16 @@
         }
         function connect() {
             if (document.getElementById('peerId').value) {
-                client.connectToRemoteHost(document.getElementById('peerId').value);
-                document.getElementById("connect_button").remove();
+                client.connectToRemoteHost(document.getElementById('peerId').value).then(function () {
+                    document.getElementById("connect_button").remove();
+
+                    var luigi = client.CreatePlayerInstanceWithRemote(Charjs.LuigiWorld, { x: 100, y: 0 });
+                    var keybord = new Charjs.KeyboardController();
+                    var luigiProxy = new Charjs.PlayerProxy(luigi, client._peer);
+                    keybord.init(luigiProxy).registerCommand();
+
+                    client.initDone();
+                });
             }
         }
     </script>
@@ -43,6 +51,7 @@
             font-family: inherit;
             text-shadow: 1px 1px 2px #000;
             font-size: 100%;
+            outline: 0;
         }
 
         button {

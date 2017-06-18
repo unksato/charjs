@@ -3,7 +3,8 @@
 namespace Charjs {
     export class GameHost extends AbstractGamePeer {
 
-        private _initDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();;
+        private _initDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();
+        private _clientInitDoneDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();
 
         public static GetController(gameId?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
             let gameHost = null;
@@ -26,33 +27,64 @@ namespace Charjs {
             let d = MyQ.Deferred.defer<string>();
             let peer = this.createPeer()
 
-            peer.setReciveCallback("init", () => {
+            peer.setReciveCallback(AbstractGamePeer.CONNECTED_COMMAND, () => {
                 this._initDefer.resolve({});
             });
+            peer.setReciveCallback(AbstractGamePeer.CLIENT_INIT_DONE_COMMAND, () => {
+                this._clientInitDoneDefer.resolve({});
+            })
 
             peer.open().then((id) => {
                 this._peerId = id;
-                GameHost[id] = this;
+                GameHost.GAME_MASTERS[id] = this;
                 d.resolve(id);
             });
+
+            peer.setReciveCallback(AbstractGamePeer.CREATE_PLAYER_COMMAND, this.create2ndPlayer);
+
             return d.promise;
         }
 
-        public init() {
+        create2ndPlayer = (command: IRemoteCommand) => {
+            let args: any[] = [];
+            args.push(ClassUtil.getClass(command.target, Charjs));
+
+            let master = GameHost.GetController(this._peerId);
+            let player = master.CreatePlayerInstance.apply(this, args.concat(command.data));
+            let controller = new PlayerProxy(player, this._peer);
+            this._peer.setReciveCallback(player._name, controller.onCommand);
+        }
+
+        public initDone() {
+            this._peer.send(AbstractGamePeer.HOST_INIT_DONE_COMMAND, []);
+        }
+
+        public start() {
+            this.clinetInit().then(() => {
+                this._init();
+                this._start();
+            });
+        }
+
+        private _init() {
             this._peer.send(GameHost.INIT_COMMAND, {});
             super.init();
         }
 
-        public start() {
+        private _start() {
             this._peer.send(GameHost.START_COMMAND, {});
             super.start();
         }
 
-        public onRemoteInit(): MyQ.Promise<{}> {
+        public onClientConnected(): MyQ.Promise<{}> {
             return this._initDefer.promise;
         }
 
-        public CreatePlayerInstance(clz: any, position: IPosition, direction = Direction.Right, name?: string): AbstractPlayer {
+        public clinetInit(): MyQ.Promise<{}> {
+            return this._clientInitDoneDefer.promise;
+        }
+
+        public CreatePlayerInstanceWithRemote(clz: any, position: IPosition, direction = Direction.Right, name?: string): AbstractPlayer {
             name = name || RandomGenerator.generateUUIDv4();
 
             let command: IRemoteCommand = {
@@ -64,7 +96,7 @@ namespace Charjs {
             return super.CreatePlayerInstance(clz, position, direction, name);
         }
 
-        public CreateEnemyInstance(clz: any, position: IPosition, direction = Direction.Right): AbstractEnemy {
+        public CreateEnemyInstanceWithRemote(clz: any, position: IPosition, direction = Direction.Right): AbstractEnemy {
             let command: IRemoteCommand = {
                 target: clz.name,
                 data: [position, direction]
@@ -73,7 +105,7 @@ namespace Charjs {
             return super.CreateEnemyInstance(clz, position, direction);
         }
 
-        public CreateObjectInstance(clz: any, position: IPosition): AbstractOtherObject {
+        public CreateObjectInstanceWithRemote(clz: any, position: IPosition): AbstractOtherObject {
             let command: IRemoteCommand = {
                 target: clz.name,
                 data: [position]
