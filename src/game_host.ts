@@ -59,7 +59,7 @@ namespace Charjs {
             this._peer.send(AbstractGamePeer.HOST_INIT_DONE_COMMAND, []);
         }
 
-        public start() {
+        public gameStart() {
             this.clinetInit().then(() => {
                 this._init();
                 this._start();

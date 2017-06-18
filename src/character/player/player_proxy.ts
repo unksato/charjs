@@ -39,6 +39,7 @@ namespace Charjs {
                 if (this._buttonUpdated) {
                     this._peerClinet.send(this._player._name, this._butttonState);
                     this._buttonUpdated = false;
+                    this._butttonState.pause = false;
                 }
             }, 20);
         }
@@ -85,12 +86,7 @@ namespace Charjs {
             }
 
             if (command.pause) {
-                if (!this._isPausePressed) {
-                    this._isPausePressed = true;
-                    this._player.onPause();
-                }
-            } else {
-                this._isPausePressed = false;
+                this._player.onPause();
             }
         }
 
@@ -195,11 +191,7 @@ namespace Charjs {
         }
 
         onPause() {
-            if (!this._butttonState.pause) {
-                this._butttonState.pause = true;
-            } else {
-                this._butttonState.pause = false;
-            }
+            this._butttonState.pause = true;
             this.sendButtonState();
             this._player.onPause();
         }

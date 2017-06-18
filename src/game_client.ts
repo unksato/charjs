@@ -74,7 +74,7 @@ namespace Charjs {
             args.push(ClassUtil.getClass(command.target, Charjs));
 
             let master = GameClient.GetController(this._peerId);
-            let player = master.CreatePlayerInstance.apply(this, args.concat(command.data));
+            master.CreateEnemyInstance.apply(this, args.concat(command.data));
         }
 
         createRemoteObject = (command: IRemoteCommand) => {

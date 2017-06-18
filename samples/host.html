@@ -40,13 +40,16 @@
                         host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 324, y: 200 });
                         host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 324, y: 230 });
 
+                        host.CreateEnemyInstanceWithRemote(Charjs.KoopatroopaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
+
+
                         var mario = host.CreatePlayerInstanceWithRemote(Charjs.MarioWorld, { x: 10, y: 0 });
                         var keybord = new Charjs.KeyboardController();
                         var marioProxy = new Charjs.PlayerProxy(mario, host._peer);
                         keybord.init(marioProxy).registerCommand();
 
                         host.initDone();
-                        host.start();
+                        host.gameStart();
                     });
                 })
             });
