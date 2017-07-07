@@ -1,3 +1,5 @@
+/// <reference path="./abstract_mario_world.ts" />
+
 namespace Charjs {
     export class MarioWorld extends AbstractMarioWorld {
         colors = [

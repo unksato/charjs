@@ -1,3 +1,5 @@
+/// <reference path="../abstract_character.ts" />
+
 namespace Charjs {
     export abstract class AbstractPlayer extends AbstractCharacter implements IPlayer {
         score: number = 0;

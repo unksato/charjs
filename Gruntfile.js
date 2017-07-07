@@ -11,7 +11,7 @@ module.exports = function (grunt) {
 
         ts: {
             default: {
-                src: ["src/**/*.ts"],
+                src: ["src/**/*.ts","!src/bookmarklet/**"],
                 out: "dist/mario.js",
                 options: {
                     module: 'amd',
@@ -19,6 +19,14 @@ module.exports = function (grunt) {
                     sourceMap: true,
                     experimentalDecorators: true
                 }
+            },
+            mario: {
+                src: "src/bookmarklet/mario_world.ts",
+                out: "bookmarklet/mario_world.js",
+                options: {
+                    module: 'amd',
+                    target: 'es5'
+                }                
             },
             myq: {
                 src: ["src/util/deferred.ts", "src/util/promise.ts"],
