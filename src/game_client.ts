@@ -5,19 +5,18 @@ namespace Charjs {
 
         private _hostInitDoneDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();
 
-
-        public static GetController(gameId?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
+        public static GetController(apiKey?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
             let gameClient = null;
-            if (gameId) {
-                gameClient = GameClient.GAME_MASTERS[gameId];
-                if (gameClient) {
-                    return gameClient;
-                }
-            }
+            // if (gameId) {
+            //     gameClient = GameClient.GAME_MASTERS[gameId];
+            //     if (gameClient) {
+            //         return gameClient;
+            //     }
+            // }
 
             if (targetDom) {
                 gameClient = new GameClient(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
-                gameClient.createPeer();
+                gameClient.createPeer(apiKey);
                 gameClient.registerEvent();
                 return gameClient;
             } else {

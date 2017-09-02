@@ -3212,17 +3212,11 @@ var Charjs;
             };
             return _this;
         }
-        GameClient.GetController = function (gameId, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
+        GameClient.GetController = function (apiKey, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
             var gameClient = null;
-            if (gameId) {
-                gameClient = GameClient.GAME_MASTERS[gameId];
-                if (gameClient) {
-                    return gameClient;
-                }
-            }
             if (targetDom) {
                 gameClient = new GameClient(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
-                gameClient.createPeer();
+                gameClient.createPeer(apiKey);
                 gameClient.registerEvent();
                 return gameClient;
             }
