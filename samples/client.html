@@ -2,7 +2,10 @@
 
 <head>
     <title>Charjs Sample</title>
+    <!--
     <script type="text/javascript" src="./peerjs/0.3.14/peer.min.js"></script>
+    -->
+    <script src="https://skyway.io/dist/0.3/peer.js"></script>
     <script type="text/javascript" src="../dist/mario.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css?family=Aldrich');
@@ -13,7 +16,7 @@
 
         window.onload = function () {
             new Charjs.Mountains(2).drawBackgroundImage(document.body);
-            client = Charjs.GameClient.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
+            client = Charjs.GameClient.GetController('28d0ebae-c7f0-45f8-83ed-1e2cac9bf17a', document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
             client.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));

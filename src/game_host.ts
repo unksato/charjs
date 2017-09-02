@@ -5,18 +5,20 @@ namespace Charjs {
 
         private _initDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();
         private _clientInitDoneDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();
+        private _apiKey: string = undefined;
 
-        public static GetController(gameId?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
+        public static GetController(apiKey?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
             let gameHost = null;
-            if (gameId) {
-                gameHost = GameHost.GAME_MASTERS[gameId];
-                if (gameHost) {
-                    return gameHost;
-                }
-            }
+            // if (gameId) {
+            //     gameHost = GameHost.GAME_MASTERS[gameId];
+            //     if (gameHost) {
+            //         return gameHost;
+            //     }
+            // }
 
             if (targetDom) {
                 gameHost = new GameHost(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
+                gameHost._apiKey = apiKey;
                 return gameHost;
             } else {
                 return null;
@@ -25,7 +27,7 @@ namespace Charjs {
 
         public openHost(): MyQ.Promise<string> {
             let d = MyQ.Deferred.defer<string>();
-            let peer = this.createPeer()
+            let peer = this.createPeer(this._apiKey)
 
             peer.setReciveCallback(AbstractGamePeer.CONNECTED_COMMAND, () => {
                 this._initDefer.resolve({});

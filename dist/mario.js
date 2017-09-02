@@ -276,9 +276,9 @@ var Charjs;
             _this._peerId = null;
             return _this;
         }
-        AbstractGamePeer.prototype.createPeer = function () {
+        AbstractGamePeer.prototype.createPeer = function (apiKey) {
             if (!this._peer)
-                this._peer = Charjs.PeerConnector.getPeer();
+                this._peer = Charjs.PeerConnector.getPeer(apiKey);
             return this._peer;
         };
         AbstractGamePeer.prototype.setPeerId = function (peerId) {
@@ -3272,6 +3272,7 @@ var Charjs;
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._initDefer = MyQ.Deferred.defer();
             _this._clientInitDoneDefer = MyQ.Deferred.defer();
+            _this._apiKey = undefined;
             _this.create2ndPlayer = function (command) {
                 var args = [];
                 args.push(Charjs.ClassUtil.getClass(command.target, Charjs));
@@ -3282,16 +3283,11 @@ var Charjs;
             };
             return _this;
         }
-        GameHost.GetController = function (gameId, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
+        GameHost.GetController = function (apiKey, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
             var gameHost = null;
-            if (gameId) {
-                gameHost = GameHost.GAME_MASTERS[gameId];
-                if (gameHost) {
-                    return gameHost;
-                }
-            }
             if (targetDom) {
                 gameHost = new GameHost(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
+                gameHost._apiKey = apiKey;
                 return gameHost;
             }
             else {
@@ -3301,7 +3297,7 @@ var Charjs;
         GameHost.prototype.openHost = function () {
             var _this = this;
             var d = MyQ.Deferred.defer();
-            var peer = this.createPeer();
+            var peer = this.createPeer(this._apiKey);
             peer.setReciveCallback(Charjs.AbstractGamePeer.CONNECTED_COMMAND, function () {
                 _this._initDefer.resolve({});
             });

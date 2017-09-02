@@ -22,9 +22,9 @@ namespace Charjs {
 
         protected static CONNECTED_COMMAND = "connectSuccess";
 
-        public createPeer(): PeerConnector {
+        public createPeer(apiKey?: string): PeerConnector {
             if (!this._peer)
-                this._peer = PeerConnector.getPeer();
+                this._peer = PeerConnector.getPeer(apiKey);
             return this._peer;
         }
 
