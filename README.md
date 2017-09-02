@@ -4,7 +4,12 @@
 
 # Sample
 
-https://unksato.github.io/charjs/
+[Single Play Sample 1](https://unksato.github.io/charjs/)  
+[Single Play Sample 2](https://unksato.github.io/charjs/samples/oneup.html)  
+[Single Play Sample 3](https://unksato.github.io/charjs/samples/mugen.html)  
+[Multi Play Host](https://unksato.github.io/charjs/samples/host.html)  
+[Multi Play Client](https://unksato.github.io/charjs/samples/client.html)  
+
 
 # How to use
 
