@@ -3552,15 +3552,14 @@ var Charjs;
         };
         PeerConnector.prototype.send = function (eventName, data) {
             if (this._connection) {
-                this._connection.send(JSON.stringify({ eventName: eventName, data: data }));
+                this._connection.send({ eventName: eventName, data: data });
             }
         };
         PeerConnector.prototype.setReciveCallback = function (eventName, func) {
             this._peerEvent[eventName] = func;
         };
-        PeerConnector.prototype.onRecive = function (data) {
+        PeerConnector.prototype.onRecive = function (event) {
             var func = null;
-            var event = JSON.parse(data);
             func = this._peerEvent[event.eventName];
             if (func)
                 func(event.data);

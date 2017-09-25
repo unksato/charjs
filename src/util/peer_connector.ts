@@ -78,7 +78,7 @@ namespace Charjs {
 
         send(eventName: string, data: any) {
             if (this._connection) {
-                this._connection.send(JSON.stringify({ eventName, data }));
+                this._connection.send({ eventName, data });
             }
         }
 
@@ -86,9 +86,9 @@ namespace Charjs {
             this._peerEvent[eventName] = func;
         }
 
-        onRecive(data: string) {
+        onRecive(event: IPeerEvent) {
             let func = null;
-            let event: IPeerEvent = JSON.parse(data)
+            // let event: IPeerEvent = JSON.parse(data)
             func = this._peerEvent[event.eventName];
             if (func) func(event.data);
         }
