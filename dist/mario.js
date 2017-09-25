@@ -3212,11 +3212,17 @@ var Charjs;
             };
             return _this;
         }
-        GameClient.GetController = function (apiKey, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
+        GameClient.GetController = function (peerId, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
             var gameClient = null;
+            if (peerId) {
+                gameClient = GameClient.GAME_MASTERS[peerId];
+                if (gameClient) {
+                    return gameClient;
+                }
+            }
             if (targetDom) {
                 gameClient = new GameClient(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
-                gameClient.createPeer(apiKey);
+                gameClient.createPeer(GameClient.apiKey);
                 gameClient.registerEvent();
                 return gameClient;
             }
@@ -3256,6 +3262,7 @@ var Charjs;
         };
         return GameClient;
     }(Charjs.AbstractGamePeer));
+    GameClient.apiKey = null;
     Charjs.GameClient = GameClient;
 })(Charjs || (Charjs = {}));
 var Charjs;
@@ -3277,11 +3284,17 @@ var Charjs;
             };
             return _this;
         }
-        GameHost.GetController = function (apiKey, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
+        GameHost.GetController = function (peerId, targetDom, charSize, frameInterval, goolCallback, gameoverCallback) {
             var gameHost = null;
+            if (peerId) {
+                gameHost = GameHost.GAME_MASTERS[peerId];
+                if (gameHost) {
+                    return gameHost;
+                }
+            }
             if (targetDom) {
                 gameHost = new GameHost(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
-                gameHost._apiKey = apiKey;
+                gameHost._apiKey = GameHost.apiKey;
                 return gameHost;
             }
             else {
@@ -3359,6 +3372,7 @@ var Charjs;
         };
         return GameHost;
     }(Charjs.AbstractGamePeer));
+    GameHost.apiKey = null;
     Charjs.GameHost = GameHost;
 })(Charjs || (Charjs = {}));
 var Charjs;

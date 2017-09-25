@@ -4,19 +4,20 @@ namespace Charjs {
     export class GameClient extends AbstractGamePeer {
 
         private _hostInitDoneDefer: MyQ.Deferred<{}> = MyQ.Deferred.defer<{}>();
+        public static apiKey = null;
 
-        public static GetController(apiKey?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
+        public static GetController(peerId?: string, targetDom?: HTMLElement, charSize?: number, frameInterval?: number, goolCallback?: { (name: string, point: number) }, gameoverCallback?: { (name: string, point: number) }): GameHost {
             let gameClient = null;
-            // if (gameId) {
-            //     gameClient = GameClient.GAME_MASTERS[gameId];
-            //     if (gameClient) {
-            //         return gameClient;
-            //     }
-            // }
+            if (peerId) {
+                gameClient = GameClient.GAME_MASTERS[peerId];
+                if (gameClient) {
+                    return gameClient;
+                }
+            }
 
             if (targetDom) {
                 gameClient = new GameClient(targetDom, charSize, frameInterval, goolCallback, gameoverCallback);
-                gameClient.createPeer(apiKey);
+                gameClient.createPeer(GameClient.apiKey);
                 gameClient.registerEvent();
                 return gameClient;
             } else {

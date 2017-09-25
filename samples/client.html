@@ -16,7 +16,8 @@
 
         window.onload = function () {
             new Charjs.Mountains(2).drawBackgroundImage(document.body);
-            client = Charjs.GameClient.GetController('28d0ebae-c7f0-45f8-83ed-1e2cac9bf17a', document.getElementById('world'), 2, undefined, function (name, point) {
+            Charjs.GameClient.apiKey = '28d0ebae-c7f0-45f8-83ed-1e2cac9bf17a';
+            client = Charjs.GameClient.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
             client.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
