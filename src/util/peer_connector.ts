@@ -42,6 +42,7 @@ namespace Charjs {
                     this._peerId = id;
                     this._peer.on('connection', (con) => {
                         this._connection = con;
+                        this._connection.open = true;
                         this._connection.on('data', (data) => {
                             this.onRecive(data);
                         })

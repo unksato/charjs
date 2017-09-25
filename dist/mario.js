@@ -3518,6 +3518,7 @@ var Charjs;
                     _this._peerId = id;
                     _this._peer.on('connection', function (con) {
                         _this._connection = con;
+                        _this._connection.open = true;
                         _this._connection.on('data', function (data) {
                             _this.onRecive(data);
                         });
