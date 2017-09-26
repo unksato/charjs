@@ -27,7 +27,7 @@ namespace Charjs {
             }
         }
 
-        public openHost(): MyQ.Promise<string> {
+        public openHost(peerId): MyQ.Promise<string> {
             let d = MyQ.Deferred.defer<string>();
             let peer = this.createPeer(this._apiKey)
 
@@ -38,7 +38,7 @@ namespace Charjs {
                 this._clientInitDoneDefer.resolve({});
             })
 
-            peer.open().then((id) => {
+            peer.open(peerId).then((id) => {
                 this._peerId = id;
                 GameHost.GAME_MASTERS[id] = this;
                 d.resolve(id);

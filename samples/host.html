@@ -20,7 +20,7 @@
             var gameId = document.getElementById('peerId').value;
             // Create Game Controller
             Charjs.GameHost.apiKey = '28d0ebae-c7f0-45f8-83ed-1e2cac9bf17a';
-            var host = Charjs.GameHost.GetController(gameId, document.getElementById('world'), 2, undefined, function (name, point) {
+            var host = Charjs.GameHost.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
 
@@ -28,7 +28,7 @@
             host.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             // Draw Background
-            host.openHost().then(function (id) {
+            host.openHost(gameId).then(function (id) {
                 // Print Game ID
                 document.getElementById("finalized_peerId").innerText = id;
                 document.getElementById("finalized_peerId").style.display = "block";

@@ -34,10 +34,14 @@ namespace Charjs {
             return this._peerId;
         }
 
-        open(): MyQ.Promise<string> {
+        open(peerId?: string): MyQ.Promise<string> {
             let d = MyQ.Deferred.defer<string>();
             if (!this._isOpened && !this._isConnected) {
-                this._peer = new Peer({ key: this.apiKey });
+                if (peerId) {
+                    this._peer = new Peer(peerId, { key: this.apiKey });
+                } else {
+                    this._peer = new Peer({ key: this.apiKey });
+                }
                 this._peer.on('open', (id) => {
                     this._peerId = id;
                     this._peer.on('connection', (con) => {

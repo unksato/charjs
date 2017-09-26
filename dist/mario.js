@@ -3301,7 +3301,7 @@ var Charjs;
                 return null;
             }
         };
-        GameHost.prototype.openHost = function () {
+        GameHost.prototype.openHost = function (peerId) {
             var _this = this;
             var d = MyQ.Deferred.defer();
             var peer = this.createPeer(this._apiKey);
@@ -3311,7 +3311,7 @@ var Charjs;
             peer.setReciveCallback(Charjs.AbstractGamePeer.CLIENT_INIT_DONE_COMMAND, function () {
                 _this._clientInitDoneDefer.resolve({});
             });
-            peer.open().then(function (id) {
+            peer.open(peerId).then(function (id) {
                 _this._peerId = id;
                 GameHost.GAME_MASTERS[id] = _this;
                 d.resolve(id);
@@ -3523,11 +3523,16 @@ var Charjs;
         PeerConnector.prototype.getPeerId = function () {
             return this._peerId;
         };
-        PeerConnector.prototype.open = function () {
+        PeerConnector.prototype.open = function (peerId) {
             var _this = this;
             var d = MyQ.Deferred.defer();
             if (!this._isOpened && !this._isConnected) {
-                this._peer = new Peer({ key: this.apiKey });
+                if (peerId) {
+                    this._peer = new Peer(peerId, { key: this.apiKey });
+                }
+                else {
+                    this._peer = new Peer({ key: this.apiKey });
+                }
                 this._peer.on('open', function (id) {
                     _this._peerId = id;
                     _this._peer.on('connection', function (con) {
