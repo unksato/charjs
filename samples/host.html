@@ -13,10 +13,14 @@
     <script type="text/javascript" src="../dist/mario.js"></script>
     <script>
         window.onload = function () {
+            new Charjs.Mountains(2).drawBackgroundImage(document.body);
+        }
 
+        function openGame(){
+            var gameId = document.getElementById('peerId').value;
             // Create Game Controller
             Charjs.GameHost.apiKey = '28d0ebae-c7f0-45f8-83ed-1e2cac9bf17a';
-            var host = Charjs.GameHost.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
+            var host = Charjs.GameHost.GetController(gameId, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
 
@@ -24,38 +28,39 @@
             host.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
 
             // Draw Background
-            new Charjs.Mountains(2).drawBackgroundImage(document.body).then(function () {
-                host.openHost().then(function (id) {
-                    // Print Game ID
-                    document.getElementById("peerid").innerText = id;
+            host.openHost().then(function (id) {
+                // Print Game ID
+                document.getElementById("finalized_peerId").innerText = id;
+                document.getElementById("finalized_peerId").style.display = "block";
+                document.getElementById("peerId").style.display = "none";
+                document.getElementById("open_button").style.display = "none";
 
-                    host.onClientConnected().then(function () {
-                        // Create Blocks
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 48, y: 200 });
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 80, y: 200 });
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 112, y: 200 });
+                host.onClientConnected().then(function () {
+                    // Create Blocks
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 48, y: 200 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 80, y: 200 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 112, y: 200 });
 
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 148, y: 100 });
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 180, y: 100 });
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 212, y: 100 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 148, y: 100 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 180, y: 100 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 212, y: 100 });
 
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 260, y: 200 });
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 292, y: 200 });
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 324, y: 200 });
-                        host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 324, y: 230 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 260, y: 200 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 292, y: 200 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 324, y: 200 });
+                    host.CreateObjectInstanceWithRemote(Charjs.NormalBlockWorld, { x: 324, y: 230 });
 
-                        host.CreateEnemyInstanceWithRemote(Charjs.KoopatroopaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
+                    host.CreateEnemyInstanceWithRemote(Charjs.KoopatroopaWorld, { x: 280, y: 300 }, Charjs.Direction.Right);
 
 
-                        var mario = host.CreatePlayerInstanceWithRemote(Charjs.MarioWorld, { x: 10, y: 0 });
-                        var keybord = new Charjs.KeyboardController();
-                        var marioProxy = new Charjs.PlayerProxy(mario, host._peer);
-                        keybord.init(marioProxy).registerCommand();
+                    var mario = host.CreatePlayerInstanceWithRemote(Charjs.MarioWorld, { x: 10, y: 0 });
+                    var keybord = new Charjs.KeyboardController();
+                    var marioProxy = new Charjs.PlayerProxy(mario, host._peer);
+                    keybord.init(marioProxy).registerCommand();
 
-                        host.initDone();
-                        host.gameStart();
-                    });
-                })
+                    host.initDone();
+                    host.gameStart();
+                });
             });
         }
     </script>
@@ -67,6 +72,35 @@
             text-shadow: 1px 1px 2px #000;
             color: #EEE;
             font-size: 16px;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 100%;
+            outline: 0;
+        }
+
+        button {
+            font-size: 12px;
+            padding: 3px 10px;
+            color: #fff;
+            border-style: none;
+            border-radius: 3px;
+            box-shadow: 1px 1px 1px 1px #666;
+            text-shadow: 1px 1px 2px #000;
+            background: #299;
+            cursor: pointer;
+        }
+
+        input {
+            color: white;
+            background-color: transparent;
+            border-style: none;
+            border-bottom: dotted;
         }
 
         div#container {
@@ -105,8 +139,10 @@
         <tr>
             <td align="right">Game ID:</td>
             <td>
-                <div id="peerid" />
-                <td>
+                <div id="finalized_peerId" style="display: none;"></div>
+                <input id="peerId" spellcheck="false">
+                <button onclick="openGame()" id="open_button">open</button>
+            </td>
         </tr>
     </table>
     <div id="container">
