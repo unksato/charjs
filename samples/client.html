@@ -9,7 +9,7 @@
     <!--
     <script type="text/javascript" src="./peerjs/0.3.14/peer.min.js"></script>
     -->
-    <script src="https://skyway.io/dist/0.3/peer.js"></script>
+    <script src="https://skyway.io/dist/0.3/peer.min.js"></script>
     <script type="text/javascript" src="../dist/mario.js"></script>
     <script>
         var client = null;
@@ -21,7 +21,6 @@
             }, function (name, point) {
             });
             client.CreateGround(Charjs.NormalGroundWorld, document.getElementById('ground'));
-
         }
         function connect() {
             if (document.getElementById('peerId').value) {
@@ -69,6 +68,9 @@
             background: #299;
             cursor: pointer;
         }
+        button:disabled {
+            background: #666;
+        }
 
         input {
             color: white;
@@ -103,7 +105,6 @@
             left: 10px;
             z-index: 100;
         }
-
         -->
     </style>
 </head>
@@ -114,7 +115,7 @@
             <td align="right">Game ID:</td>
             <td>
                 <input id="peerId" spellcheck="false" size="15">
-                <button onclick="connect()" id="connect_button">connect</button>
+                <button onclick="connect()" id="connect_button" disabled>connect</button>
             </td>
         </tr>
     </table>
