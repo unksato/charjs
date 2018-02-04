@@ -5,6 +5,8 @@ general:
 machine:
   node:
     version: v6.10.3
+  services:
+    - docker
 test:
   pre:
     - npm install -g grunt-cli
