@@ -9,14 +9,14 @@
     <!--
     <script type="text/javascript" src="./peerjs/0.3.14/peer.min.js"></script>
     -->
-    <script src="https://skyway.io/dist/0.3/peer.min.js"></script>
+    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
     <script type="text/javascript" src="../dist/mario.js"></script>
     <script>
         var client = null;
 
         window.onload = function () {
             new Charjs.Mountains(2).drawBackgroundImage(document.body);
-            Charjs.GameClient.apiKey = '28d0ebae-c7f0-45f8-83ed-1e2cac9bf17a';
+            Charjs.GameClient.apiKey = '2b1c38a3-afc6-4db6-836d-07894f463bd1';
             client = Charjs.GameClient.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
