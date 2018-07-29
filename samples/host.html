@@ -9,7 +9,7 @@
     <!--
     <script type="text/javascript" src="./peerjs/0.3.14/peer.min.js"></script>
     -->
-    <script src="https://skyway.io/dist/0.3/peer.min.js"></script>
+    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
     <script type="text/javascript" src="../dist/mario.js"></script>
     <script>
         window.onload = function () {
@@ -19,7 +19,7 @@
         function openGame(){
             var gameId = document.getElementById('peerId').value;
             // Create Game Controller
-            Charjs.GameHost.apiKey = '28d0ebae-c7f0-45f8-83ed-1e2cac9bf17a';
+            Charjs.GameHost.apiKey = '2b1c38a3-afc6-4db6-836d-07894f463bd1';
             var host = Charjs.GameHost.GetController(null, document.getElementById('world'), 2, undefined, function (name, point) {
             }, function (name, point) {
             });
